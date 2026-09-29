@@ -1,0 +1,53 @@
+# ============================================================
+# SETUP: in your new GitHub repo, click "Add file" > "Create new file",
+# name it exactly:  .github/workflows/quotes.yml
+# then paste this ENTIRE file below this header and commit.
+# ============================================================
+
+name: Publish live quotes
+
+# Priority tickers (regime + flow + premarket names) every 5 min during market
+# hours and every 15 min premarket; full 311-ticker universe every 30 min.
+# Times are UTC. CT = UTC-5, so 12-13 UTC = 7-8am CT (premarket),
+# 13-20 UTC = 8am-3pm CT (market hours). Mon-Fri only.
+on:
+  schedule:
+    - cron: '*/5 13-20 * * 1-5'
+    - cron: '*/15 12-13 * * 1-5'
+    - cron: '*/30 13-20 * * 1-5'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Fetch quotes
+        run: |
+          if [ "${{ github.event.schedule }}" = "*/30 13-20 * * 1-5" ]; then
+            python fetch_quotes.py tickers_universe.txt quotes_universe.json --no-bars
+          else
+            python fetch_quotes.py tickers_priority.txt quotes.json
+          fi
+
+      - name: Commit and push
+        run: |
+          git config user.name "quotes-bot"
+          git config user.email "quotes-bot@users.noreply.github.com"
+          git add quotes.json quotes_universe.json
+          if git diff --cached --quiet; then
+            echo "no changes"
+          else
+            git commit -m "quotes $(date -u +%Y-%m-%dT%H:%MZ)"
+            git pull --rebase --autostash origin main || true
+            git push
+          fi
