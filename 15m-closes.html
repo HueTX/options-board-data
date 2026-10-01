@@ -149,7 +149,7 @@ canvas.wspark{width:100%; height:74px; display:block; min-width:0}
     <button class="wchip fav" data-sort="fav">&#9733; Favorites</button>
   </div>
 </div>
-<div class="legend-card">Dashed line on each chart = series mean &middot; line color = bullish/bearish side &middot; horizontals = PDH (solid green) / PMH (dotted green) / PDL (solid red) / PML (dotted red)</div>
+<div class="legend-card">Signal line: green bullish / red bearish &middot; PDH &amp; PMH: labeled green horizontals &middot; PDL &amp; PML: labeled red horizontals &middot; dashed gray: series mean</div>
 
 <div class="panels">
   <section class="panel">
@@ -254,8 +254,9 @@ function sortRows(rows, side){
 }
 /* 15m mini chart: close line colored by bullish/bearish SIDE, dashed series-mean
    line, final dot, plus the four breakout levels (PDH solid green, PMH dotted
-   green, PDL solid red, PML dotted red — same convention as the detail chart).
-   The y-domain spans closes AND levels so every level line is visible. */
+   green, PDL solid red, PML dotted red — same convention as the detail chart),
+   labeled at the right edge. The y-domain stays tight on the 15m closes so the
+   line fills the chart; level lines outside today's range are clipped off-chart. */
 function drawSpark(cv, closes, levels, side){
   const dpr = Math.min(2, window.devicePixelRatio || 1);
   const W = cv.clientWidth || 200, H = cv.clientHeight || 74;
@@ -269,30 +270,35 @@ function drawSpark(cv, closes, levels, side){
     return;
   }
   const lv = levels || {};
-  const lvVals = [lv.pdh, lv.pmh, lv.pdl, lv.pml].filter(v => v != null && isFinite(v));
-  const lo = Math.min(...closes, ...lvVals), hi = Math.max(...closes, ...lvVals);
+  const lo = Math.min(...closes), hi = Math.max(...closes);
   const rng = (hi - lo) || 1;
+  const plotLeft = 2, plotRight = Math.max(42, W - 30);
   const py = v => H - 3 - ((v - lo) / rng) * (H - 6);
-  const px = i => 2 + (i / (closes.length - 1)) * (W - 4);
+  const px = i => plotLeft + (i / (closes.length - 1)) * (plotRight - plotLeft);
   const gain = cssVar("--gain"), loss = cssVar("--loss");
-  // breakout levels, drawn first so the close line sits on top
-  const levelLine = (v, color, dashed) => {
+  // Breakout levels are drawn first and labeled at the right edge. Highs are
+  // green, lows are red; prior-day levels are solid and premarket levels dash.
+  const levelLine = (v, color, dashed, label) => {
     if(v == null || !isFinite(v)) return;
-    ctx.strokeStyle = color; ctx.lineWidth = 1; ctx.globalAlpha = .55;
+    const y = py(v);
+    ctx.strokeStyle = color; ctx.lineWidth = 1; ctx.globalAlpha = .62;
     ctx.setLineDash(dashed ? [3, 3] : []);
-    ctx.beginPath(); ctx.moveTo(0, py(v)); ctx.lineTo(W, py(v)); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(plotLeft, y); ctx.lineTo(plotRight, y); ctx.stroke();
     ctx.setLineDash([]); ctx.globalAlpha = 1;
+    ctx.fillStyle = color; ctx.font = "800 8px ui-monospace, SFMono-Regular, Menlo, monospace";
+    ctx.textAlign = "right"; ctx.textBaseline = "middle";
+    ctx.fillText(label, W - 1, y);
   };
-  levelLine(lv.pdh, gain, false);
-  levelLine(lv.pmh, gain, true);
-  levelLine(lv.pdl, loss, false);
-  levelLine(lv.pml, loss, true);
+  levelLine(lv.pdh, gain, false, "PDH");
+  levelLine(lv.pmh, gain, true, "PMH");
+  levelLine(lv.pdl, loss, false, "PDL");
+  levelLine(lv.pml, loss, true, "PML");
   // series mean — dashed
   let sum = 0; for(const v of closes) sum += v;
   const mean = sum / closes.length;
   ctx.strokeStyle = cssVar("--text-dim") || "#98989f"; ctx.lineWidth = 1;
   ctx.setLineDash([5, 4]); ctx.globalAlpha = .7;
-  ctx.beginPath(); ctx.moveTo(0, py(mean)); ctx.lineTo(W, py(mean)); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(plotLeft, py(mean)); ctx.lineTo(plotRight, py(mean)); ctx.stroke();
   ctx.setLineDash([]); ctx.globalAlpha = 1;
   // 15m close line, colored by bullish/bearish side (never by trend)
   const col = side === "bear" ? loss : gain;
