@@ -149,7 +149,7 @@ canvas.wspark{width:100%; height:74px; display:block; min-width:0}
     <button class="wchip fav" data-sort="fav">&#9733; Favorites</button>
   </div>
 </div>
-<div class="legend-card">Dashed line on each chart = series mean &middot; line color = 15m trend (last close vs mean)</div>
+<div class="legend-card">Dashed line on each chart = series mean &middot; line color = bullish/bearish side &middot; horizontals = PDH (solid green) / PMH (dotted green) / PDL (solid red) / PML (dotted red)</div>
 
 <div class="panels">
   <section class="panel">
@@ -252,10 +252,11 @@ function sortRows(rows, side){
   }
   return pool.slice().sort((a, b) => prio(a, b) || alpha(a, b));
 }
-/* Watchlist-style mini chart: direction-colored 15m close line (last close vs series
-   mean), dashed mean line, final dot. Tight 15m-closes min/max domain like the
-   artifact — NO PDH/PMH/PDL/PML lines on the mini chart. */
-function drawSpark(cv, closes, levels){
+/* 15m mini chart: close line colored by bullish/bearish SIDE, dashed series-mean
+   line, final dot, plus the four breakout levels (PDH solid green, PMH dotted
+   green, PDL solid red, PML dotted red — same convention as the detail chart).
+   The y-domain spans closes AND levels so every level line is visible. */
+function drawSpark(cv, closes, levels, side){
   const dpr = Math.min(2, window.devicePixelRatio || 1);
   const W = cv.clientWidth || 200, H = cv.clientHeight || 74;
   if(!W || !H) return;
@@ -267,20 +268,34 @@ function drawSpark(cv, closes, levels){
     ctx.fillText("Chart unavailable", W / 2, H / 2);
     return;
   }
-  const lo = Math.min(...closes), hi = Math.max(...closes);
+  const lv = levels || {};
+  const lvVals = [lv.pdh, lv.pmh, lv.pdl, lv.pml].filter(v => v != null && isFinite(v));
+  const lo = Math.min(...closes, ...lvVals), hi = Math.max(...closes, ...lvVals);
   const rng = (hi - lo) || 1;
   const py = v => H - 3 - ((v - lo) / rng) * (H - 6);
   const px = i => 2 + (i / (closes.length - 1)) * (W - 4);
-  // series mean — dashed, like the artifact
+  const gain = cssVar("--gain"), loss = cssVar("--loss");
+  // breakout levels, drawn first so the close line sits on top
+  const levelLine = (v, color, dashed) => {
+    if(v == null || !isFinite(v)) return;
+    ctx.strokeStyle = color; ctx.lineWidth = 1; ctx.globalAlpha = .55;
+    ctx.setLineDash(dashed ? [3, 3] : []);
+    ctx.beginPath(); ctx.moveTo(0, py(v)); ctx.lineTo(W, py(v)); ctx.stroke();
+    ctx.setLineDash([]); ctx.globalAlpha = 1;
+  };
+  levelLine(lv.pdh, gain, false);
+  levelLine(lv.pmh, gain, true);
+  levelLine(lv.pdl, loss, false);
+  levelLine(lv.pml, loss, true);
+  // series mean — dashed
   let sum = 0; for(const v of closes) sum += v;
   const mean = sum / closes.length;
   ctx.strokeStyle = cssVar("--text-dim") || "#98989f"; ctx.lineWidth = 1;
   ctx.setLineDash([5, 4]); ctx.globalAlpha = .7;
   ctx.beginPath(); ctx.moveTo(0, py(mean)); ctx.lineTo(W, py(mean)); ctx.stroke();
   ctx.setLineDash([]); ctx.globalAlpha = 1;
-  // 15m close line, colored by 15m trend (last close vs mean)
-  const up = closes[closes.length - 1] >= mean;
-  const col = up ? cssVar("--gain") : cssVar("--loss");
+  // 15m close line, colored by bullish/bearish side (never by trend)
+  const col = side === "bear" ? loss : gain;
   ctx.strokeStyle = col; ctx.lineWidth = 2; ctx.lineJoin = "round"; ctx.lineCap = "round"; ctx.beginPath();
   closes.forEach((v, i) => i ? ctx.lineTo(px(i), py(v)) : ctx.moveTo(px(i), py(v)));
   ctx.stroke();
@@ -312,10 +327,10 @@ function rowHTML(r, side, rank){
     + `<button class="pin" aria-label="Favorite ${esc(r.ticker)}" onclick="togglePin(event,'${esc(r.ticker)}')">&#9733;</button>`
     + `</div>`;
 }
-function paintSparks(root){
+function paintSparks(root, side){
   root.querySelectorAll("canvas.wspark").forEach(cv => {
     const ch = charts[cv.dataset.sym];
-    drawSpark(cv, ch ? ch.candles15m.map(c => c.c) : [], ch ? ch.levels : null);
+    drawSpark(cv, ch ? ch.candles15m.map(c => c.c) : [], ch ? ch.levels : null, side);
   });
 }
 function applySort(){
@@ -336,7 +351,7 @@ function renderSide(side){
       : `<div class="empty">No ${side === "bull" ? "bullish" : "bearish"} confirmed closes.</div>`;
   } else {
     list.innerHTML = slice.map((r, i) => rowHTML(r, side, start + i + 1)).join("");
-    paintSparks(list);
+    paintSparks(list, side);
   }
   const pg = document.getElementById(side === "bull" ? "bullPager" : "bearPager");
   pg.innerHTML = pages <= 1 ? "" :
@@ -349,8 +364,8 @@ let rszT = null;
 window.addEventListener("resize", () => {
   clearTimeout(rszT);
   rszT = setTimeout(() => {
-    paintSparks(document.getElementById("bullList"));
-    paintSparks(document.getElementById("bearList"));
+    paintSparks(document.getElementById("bullList"), "bull");
+    paintSparks(document.getElementById("bearList"), "bear");
   }, 150);
 });
 function setHB(state, text, cls){
