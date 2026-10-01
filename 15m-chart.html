@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>15m Chart</title>
+<style>
+:root{
+  --font: "SF Pro Display", -apple-system, BlinkMacSystemFont, ui-sans-serif, system-ui, "Segoe UI", Inter, Roboto, "Helvetica Neue", Arial, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  --radius: 18px;
+}
+html[data-theme="dark"]{
+  --bg:#050506; --surface:#111114; --surface-2:#19191d;
+  --orange:#ff9f0a; --gain:#30d158; --loss:#ff453a;
+  --text:#f5f5f7; --text-dim:#98989f; --border:rgba(255,255,255,.08);
+  --grid:rgba(255,255,255,.05);
+}
+html[data-theme="light"]{
+  --bg:#f7f2e6; --surface:#fffdf6; --surface-2:#f6f0e1;
+  --orange:#c46a00; --gain:#15803d; --loss:#dc2626;
+  --text:#1c1c1e; --text-dim:#6b6b70; --border:rgba(0,0,0,.08);
+  --grid:rgba(0,0,0,.05);
+}
+*{box-sizing:border-box; margin:0; padding:0}
+body{background:var(--bg); color:var(--text); font-family:var(--font); padding:16px; max-width:900px; margin:0 auto; min-height:100vh}
+a{color:var(--orange); text-decoration:none}
+.header{display:flex; align-items:center; justify-content:space-between; margin-bottom:12px}
+.header h1{font-size:20px; font-weight:700; font-family:var(--mono)}
+.back{font-size:14px}
+.theme-btn{background:var(--surface-2); border:1px solid var(--border); color:var(--text); border-radius:10px; padding:6px 12px; font-size:13px; cursor:pointer}
+.card{background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:14px; margin-bottom:12px}
+#chart{width:100%; height:420px; display:block; touch-action:pan-x pan-y}
+.legend{display:flex; flex-wrap:wrap; gap:10px; font-size:12px; font-family:var(--mono); color:var(--text-dim)}
+.legend span{display:flex; align-items:center; gap:5px}
+.sw{width:22px; height:0; border-top:2px dashed}
+.sw.solid{border-top-style:solid}
+.verdict{font-size:14px; font-weight:600; margin-top:8px}
+.verdict.bull{color:var(--gain)} .verdict.bear{color:var(--loss)}
+.note{font-size:12px; color:var(--text-dim); text-align:center; line-height:1.5; margin-top:8px}
+.loading{text-align:center; color:var(--text-dim); padding:40px; font-size:14px}
+.err{text-align:center; color:var(--loss); padding:40px; font-size:14px}
+</style>
+</head>
+<body>
+<div class="header">
+  <a class="back" href="15m-closes.html">&larr; Closes</a>
+  <h1 id="sym">—</h1>
+  <button class="theme-btn" id="themeBtn" onclick="toggleTheme()">Light</button>
+</div>
+<div class="card">
+  <div id="loading" class="loading">Loading chart&hellip;</div>
+  <canvas id="chart" style="display:none"></canvas>
+  <div class="legend" id="legend" style="display:none; margin-top:10px"></div>
+  <div class="verdict" id="verdict"></div>
+</div>
+<div class="note">15-minute regular-session candles &middot; 5-minute premarket candles (dimmed)<br>Dashed lines: prior-day high/low &middot; Dotted lines: premarket high/low</div>
+
+<script>
+const CHARTS_URL = "https://raw.githubusercontent.com/HueTX/options-board-data/main/fifteen_min_charts.json";
+const sym = new URLSearchParams(location.search).get("t") || "";
+document.getElementById("sym").textContent = sym || "—";
+document.title = sym ? sym + " · 15m Chart" : "15m Chart";
+
+function css(v){ return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
+
+function drawChart(entry){
+  const lv = entry.levels;
+  const pre = entry.premarket || [];
+  const reg = entry.candles15m || [];
+  const all = pre.concat(reg);
+  if(!all.length){ showErr("No candle data"); return; }
+
+  const cv = document.getElementById("chart");
+  document.getElementById("loading").style.display = "none";
+  cv.style.display = "block";
+  // Force layout so clientWidth/clientHeight are real before measuring
+  void cv.offsetWidth;
+  const dpr = window.devicePixelRatio || 1;
+  const W = cv.clientWidth, H = cv.clientHeight;
+  cv.width = W * dpr; cv.height = H * dpr;
+  const ctx = cv.getContext("2d");
+  ctx.scale(dpr, dpr);
+
+  const padL = 8, padR = 64, padT = 16, padB = 28;
+  const iw = W - padL - padR, ih = H - padT - padB;
+
+  let lo = Infinity, hi = -Infinity;
+  all.forEach(c => { lo = Math.min(lo, c.l); hi = Math.max(hi, c.h); });
+  [lv.pdh, lv.pdl, lv.pmh, lv.pml].forEach(v => { if(v){ lo = Math.min(lo, v); hi = Math.max(hi, v); } });
+  const span = (hi - lo) || 1; lo -= span * 0.06; hi += span * 0.06;
+  const y = p => padT + (1 - (p - lo) / (hi - lo)) * ih;
+  const n = all.length;
+  const slot = iw / n, bw = Math.max(2, Math.min(14, slot * 0.62));
+
+  const gain = css("--gain"), loss = css("--loss"), grid = css("--grid"),
+        dim = css("--text-dim"), txt = css("--text");
+
+  // gridlines
+  ctx.strokeStyle = grid; ctx.fillStyle = dim; ctx.font = "10px " + css("--mono");
+  ctx.textAlign = "left"; ctx.lineWidth = 1;
+  for(let i = 0; i <= 4; i++){
+    const p = lo + (hi - lo) * i / 4, yy = Math.round(y(p)) + 0.5;
+    ctx.beginPath(); ctx.moveTo(padL, yy); ctx.lineTo(W - padR, yy); ctx.stroke();
+    ctx.fillText(p.toFixed(2), W - padR + 6, yy + 3);
+  }
+
+  // session separator (premarket | regular)
+  const x = i => padL + slot * (i + 0.5);
+  if(pre.length && reg.length){
+    const sx = padL + slot * pre.length;
+    ctx.strokeStyle = dim; ctx.setLineDash([3,3]);
+    ctx.beginPath(); ctx.moveTo(sx, padT); ctx.lineTo(sx, padT + ih); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = dim; ctx.textAlign = "center";
+    ctx.fillText("9:30", sx, H - 8);
+  }
+
+  // candles
+  all.forEach((c, i) => {
+    const cx = x(i), up = c.c >= c.o;
+    const col = up ? gain : loss;
+    ctx.strokeStyle = col; ctx.fillStyle = col;
+    ctx.globalAlpha = i < pre.length ? 0.45 : 1;
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(cx, y(c.h)); ctx.lineTo(cx, y(c.l)); ctx.stroke();
+    const yo = y(c.o), yc = y(c.c);
+    const top = Math.min(yo, yc), hh = Math.max(1, Math.abs(yc - yo));
+    ctx.fillRect(cx - bw / 2, top, bw, hh);
+    ctx.globalAlpha = 1;
+  });
+
+  // level lines
+  const lines = [
+    {v: lv.pdh, label: "PDH", col: gain, dash: []},
+    {v: lv.pmh, label: "PMH", col: gain, dash: [2,3]},
+    {v: lv.pdl, label: "PDL", col: loss, dash: []},
+    {v: lv.pml, label: "PML", col: loss, dash: [2,3]},
+  ];
+  ctx.font = "bold 10px " + css("--mono");
+  lines.forEach(L => {
+    if(!L.v) return;
+    const yy = Math.round(y(L.v)) + 0.5;
+    ctx.strokeStyle = L.col; ctx.setLineDash(L.dash); ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(padL, yy); ctx.lineTo(W - padR, yy); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = L.col; ctx.textAlign = "left";
+    ctx.fillText(L.label + " " + L.v.toFixed(2), W - padR + 6, yy - 4);
+  });
+
+  // x labels: first premarket, 9:30, then hourly
+  ctx.fillStyle = dim; ctx.textAlign = "center"; ctx.font = "10px " + css("--mono");
+  const seen = new Set();
+  all.forEach((c, i) => {
+    const hr = c.t.slice(0, 2) + ":00";
+    if(c.t.endsWith(":00") && !seen.has(hr) && i >= pre.length){
+      seen.add(hr);
+      ctx.fillText(c.t, x(i), H - 8);
+    }
+  });
+  if(pre.length) { ctx.textAlign = "left"; ctx.fillText(pre[0].t, padL, H - 8); }
+
+  // legend + verdict
+  const lg = document.getElementById("legend");
+  lg.style.display = "flex";
+  lg.innerHTML =
+    `<span><span class="sw solid" style="border-color:${gain}"></span>PDH ${lv.pdh ?? "—"}</span>` +
+    `<span><span class="sw" style="border-color:${gain}"></span>PMH ${lv.pmh ?? "—"}</span>` +
+    `<span><span class="sw solid" style="border-color:${loss}"></span>PDL ${lv.pdl ?? "—"}</span>` +
+    `<span><span class="sw" style="border-color:${loss}"></span>PML ${lv.pml ?? "—"}</span>`;
+  const last = reg.length ? reg[reg.length - 1] : all[all.length - 1];
+  const v = document.getElementById("verdict");
+  if(lv.pdh && lv.pmh && last.c > lv.pdh && last.c > lv.pmh){
+    v.className = "verdict bull";
+    v.textContent = `Bullish: last 15m close $${last.c.toFixed(2)} above PDH $${lv.pdh.toFixed(2)} and PMH $${lv.pmh.toFixed(2)}`;
+  } else if(lv.pdl && lv.pml && last.c < lv.pdl && last.c < lv.pml){
+    v.className = "verdict bear";
+    v.textContent = `Bearish: last 15m close $${last.c.toFixed(2)} below PDL $${lv.pdl.toFixed(2)} and PML $${lv.pml.toFixed(2)}`;
+  } else {
+    v.className = "verdict"; v.style.color = css("--text-dim");
+    v.textContent = `Last 15m close $${last.c.toFixed(2)} — no longer clearing both levels`;
+  }
+}
+function showErr(msg){
+  const l = document.getElementById("loading");
+  l.className = "err"; l.textContent = msg;
+}
+async function load(){
+  if(!sym){ showErr("No ticker specified"); return; }
+  try{
+    const r = await fetch(CHARTS_URL + "?t=" + Date.now(), {cache: "no-store"});
+    if(!r.ok) throw new Error("HTTP " + r.status);
+    const d = await r.json();
+    const entry = (d.charts || {})[sym.toUpperCase()];
+    if(!entry){ showErr(sym.toUpperCase() + " is not on the 15m closes list right now"); return; }
+    drawChart(entry);
+  }catch(e){ showErr("Chart feed unreachable — try again shortly"); }
+}
+function toggleTheme(){
+  const h = document.documentElement;
+  const next = h.getAttribute("data-theme") === "dark" ? "light" : "dark";
+  h.setAttribute("data-theme", next);
+  try{ localStorage.setItem("ofb_theme", next); }catch(e){}
+  document.getElementById("themeBtn").textContent = next === "dark" ? "Light" : "Dark";
+}
+(function init(){
+  try{
+    const t = localStorage.getItem("ofb_theme");
+    if(t){ document.documentElement.setAttribute("data-theme", t);
+      document.getElementById("themeBtn").textContent = t === "dark" ? "Light" : "Dark"; }
+  }catch(e){}
+  load();
+  window.addEventListener("resize", () => { load(); });
+})();
+</script>
+</body>
+</html>
