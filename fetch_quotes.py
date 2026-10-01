@@ -201,6 +201,21 @@ def fetch_chart(sess, sym, rng, interval, tries=3):
 
 def build_watchlist(out_file, tickers_file="watchlist_tickers.txt",
                     caps_file="watchlist_caps.json"):
+    """DEPRECATED as a builder: the 08:05 CT morning-breakout-watchlist cron is
+    now the SOLE writer of watchlist.json (true 311-ticker premarket scan).
+    Rebuilding here ranked a different 72-ticker set by closing-price proximity
+    and clobbered the real morning list on every workflow run (2026-10-01).
+    This function is kept only so the workflow's --watchlist step stays green;
+    it never writes. To restore a local rebuild, reimplement from the morning
+    scan's state file, not from this ticker subset."""
+    print("watchlist: owned by the morning-breakout-watchlist cron, not rebuilding here")
+    return
+    # --- retired implementation below (kept for reference, unreachable) ---
+    _retired_build_watchlist(out_file, tickers_file, caps_file)
+
+
+def _retired_build_watchlist(out_file, tickers_file="watchlist_tickers.txt",
+                             caps_file="watchlist_caps.json"):
     """Write watchlist.json once per trading day: PDH/PDL from the last
     completed daily bar, PMH/PML from today's premarket 1-minute bars
     (before 09:30 ET), ranked by proximity of the live price to the nearest
