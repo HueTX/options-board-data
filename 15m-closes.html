@@ -10,123 +10,169 @@
   --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
 }
 html[data-theme="dark"]{
-  --bg:#050506; --surface:#111114; --surface-2:#19191d;
-  --orange:#ff9f0a; --gold:#e0aa3e; --gain:#30d158; --loss:#ff453a;
-  --text:#f5f5f7; --text-dim:#98989f; --border:rgba(255,255,255,.08);
-  --panel-brd: rgba(255,255,255,.09); --pill-bg: rgba(255,255,255,.06);
-  --muted:#98989f; --faint:#636366;
-  --bull-tint: rgba(48,209,88,.055); --bear-tint: rgba(255,69,58,.055);
+  --bg:#0b0b0d; --card:#141416; --panel:#101013; --surface-2:#1c1c20;
+  --orange:#f5a524; --gold:#e0aa3e; --gain:#4ade80; --loss:#f87171;
+  --text:#f5f5f7; --text-dim:#a1a1aa; --border:#26262b; --faint:#71717a;
+  --pill-bg:rgba(255,255,255,.05);
+  --stale-bg:rgba(248,113,113,.07); --stale-brd:rgba(248,113,113,.35);
+  --bull-tint:rgba(74,222,128,.045); --bear-tint:rgba(248,113,113,.045);
 }
 html[data-theme="light"]{
-  --bg:#f7f2e6; --surface:#fffdf6; --surface-2:#f6f0e1;
+  --bg:#f6f4ee; --card:#fffdf8; --panel:#fffdf8; --surface-2:#efe9da;
   --orange:#c46a00; --gold:#b8860b; --gain:#15803d; --loss:#dc2626;
-  --text:#1c1c1e; --text-dim:#6b6b70; --border:rgba(0,0,0,.08);
-  --panel-brd: rgba(46,80,58,.15); --pill-bg: rgba(46,80,58,.07);
-  --muted:#6b6b70; --faint:#aeaeb2;
-  --bull-tint: rgba(21,128,61,.06); --bear-tint: rgba(220,38,38,.06);
+  --text:#1c1c1e; --text-dim:#6b6b70; --border:#e2ddd0; --faint:#a8a29e;
+  --pill-bg:rgba(0,0,0,.045);
+  --stale-bg:rgba(220,38,38,.06); --stale-brd:rgba(220,38,38,.3);
+  --bull-tint:rgba(21,128,61,.05); --bear-tint:rgba(220,38,38,.05);
 }
 *{box-sizing:border-box; margin:0; padding:0}
-body{background:var(--bg); color:var(--text); font-family:var(--font); padding:14px; max-width:1100px; margin:0 auto; min-height:100vh}
+body{background:var(--bg); color:var(--text); font-family:var(--font); padding:16px 18px 40px; max-width:1240px; margin:0 auto; min-height:100vh}
 a{color:var(--orange); text-decoration:none}
-.header{display:flex; align-items:center; justify-content:space-between; margin-bottom:10px}
-.header h1{font-size:19px; font-weight:800}
-.back{font-size:14px}
-.theme-btn{background:var(--surface-2); border:1px solid var(--border); color:var(--text); border-radius:10px; padding:6px 12px; font-size:13px; cursor:pointer}
-.hb{display:flex; align-items:center; gap:8px; font-size:13px; color:var(--text-dim); margin-bottom:4px}
-.hb-dot{width:10px; height:10px; border-radius:50%; background:var(--loss); flex:none}
-.hb-dot.amber{background:var(--orange)} .hb-dot.green{background:var(--gain)}
-.hb-time{font-family:var(--mono); font-size:12px; color:var(--text-dim); margin-bottom:12px}
-/* sort chips — same as the trading-morning watchlist */
-.wsortbar{display:flex; align-items:center; gap:10px; margin:2px 0 4px; flex-wrap:wrap}
-.wsort-label{font-size:11px; font-weight:800; letter-spacing:1.2px; color:var(--muted)}
-.wchip{font-family:var(--font); font-size:12.5px; font-weight:800; padding:7px 18px; border-radius:999px;
-  border:1px solid var(--panel-brd); background:var(--pill-bg); color:var(--text); cursor:pointer; white-space:nowrap}
-.wchip.on{border-color:var(--orange); color:var(--orange); background:transparent}
-.wchip.fav.on{border-color:var(--gold); color:var(--gold)}
-.wlegend{font-size:11px; color:var(--muted); margin:2px 0 8px}
-/* section headers */
-.fcol-title{margin:14px 0 8px; font-size:15px; font-weight:800; display:flex; align-items:center; gap:8px}
-.fcol-title .count{font-size:12.5px; color:var(--muted); font-weight:700; background:var(--pill-bg); border-radius:999px; padding:2px 10px}
-.fcol-title .upd{font-size:11.5px; color:var(--muted); font-weight:600; font-variant-numeric:tabular-nums}
-.tri-up{color:var(--gain)} .tri-dn{color:var(--loss)}
-/* watchlist table */
-.wtable{border:1px solid var(--panel-brd); border-radius:12px; overflow:hidden; min-width:0}
-.colhdr{display:grid; grid-template-columns:44px minmax(0,1.25fr) minmax(0,1fr) 34px; gap:8px; padding:8px 10px 6px;
-  font-size:10.5px; font-weight:800; letter-spacing:.08em; color:var(--muted); border-bottom:1px solid var(--border)}
-.colhdr span:nth-child(3){text-align:left}
+/* top bar */
+.topbar{display:flex; align-items:center; justify-content:space-between; margin-bottom:14px}
+.back{font-size:15px; font-weight:700; color:var(--orange)}
+.theme-switch{display:flex; align-items:center; gap:8px; background:transparent; border:1.5px solid var(--orange);
+  border-radius:999px; padding:6px 14px 6px 8px; cursor:pointer; color:var(--orange); font-family:var(--font);
+  font-size:14px; font-weight:700}
+.theme-switch .knob{width:22px; height:22px; border-radius:50%; background:var(--orange); flex:none}
+/* title */
+.title{font-size:31px; font-weight:800; letter-spacing:-.01em; margin-bottom:14px}
+.divider{border:none; border-top:1px solid var(--border); margin:14px 0}
+/* status card */
+.status-card{display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
+  background:var(--card); border:1px solid var(--border); border-radius:14px; padding:14px 18px; margin-bottom:12px}
+.st-left{display:flex; align-items:center; gap:9px; font-size:15px; font-weight:700}
+.dot{width:11px; height:11px; border-radius:50%; background:var(--loss); flex:none}
+.dot.amber{background:var(--orange)} .dot.green{background:var(--gain)}
+#hbText.live{color:var(--gain)} #hbText.stale{color:var(--loss)} #hbText.wait{color:var(--orange)}
+.st-right{font-family:var(--mono); font-size:12.5px; color:var(--text-dim)}
+/* stale banner */
+.stale-banner{display:flex; align-items:center; gap:12px; background:var(--stale-bg); border:1px solid var(--stale-brd);
+  border-radius:14px; padding:13px 18px; margin-bottom:12px; font-size:14px}
+.stale-banner strong{color:var(--loss); font-weight:800; letter-spacing:.04em}
+.stale-banner span{color:var(--text-dim)}
+/* meta + definitions */
+.meta-row{display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
+  font-size:14.5px; color:var(--text-dim); margin:2px 0}
+.meta-row strong{color:var(--text); font-weight:700}
+.defs{font-size:14.5px; color:var(--text-dim); line-height:1.55}
+.defs .bull-t{color:var(--gain); font-weight:800}
+.defs .bear-t{color:var(--loss); font-weight:800}
+/* sort + legend cards */
+.sort-card{display:flex; align-items:center; gap:14px; flex-wrap:wrap; background:var(--card);
+  border:1px solid var(--border); border-radius:14px; padding:13px 18px; margin-bottom:12px}
+.wsort-label{font-size:12px; font-weight:800; letter-spacing:1.4px; color:var(--text-dim)}
+#sortChips{display:flex; gap:10px; flex-wrap:wrap}
+.wchip{font-family:var(--font); font-size:13.5px; font-weight:700; padding:8px 20px; border-radius:999px;
+  border:1px solid var(--border); background:var(--pill-bg); color:var(--text); cursor:pointer; white-space:nowrap}
+.wchip.on{background:var(--orange); border-color:var(--orange); color:#1a1206}
+.wchip.fav.on{background:var(--gold); border-color:var(--gold); color:#1a1206}
+.legend-card{background:var(--card); border:1px solid var(--border); border-radius:14px; padding:12px 18px;
+  font-size:13px; color:var(--text-dim); margin-bottom:18px}
+/* two panels */
+.panels{display:grid; grid-template-columns:1fr 1fr; gap:18px; align-items:start}
+@media (max-width:900px){ .panels{grid-template-columns:1fr} }
+.panel{background:var(--panel); border:1px solid var(--border); border-radius:16px; overflow:hidden; min-width:0}
+.phead{display:flex; align-items:flex-start; justify-content:space-between; gap:10px; padding:16px 18px 12px}
+.ptitle{font-size:19px; font-weight:800; display:flex; align-items:center; gap:8px}
+.ptitle.bull{color:var(--gain)} .ptitle.bear{color:var(--loss)}
+.psub{font-size:13px; color:var(--text-dim); margin-top:3px}
+.pcount{font-size:15px; font-weight:800; background:var(--pill-bg); border-radius:10px; padding:5px 13px; flex:none}
+.pcount.bull{color:var(--gain)} .pcount.bear{color:var(--loss)}
+.colhdr{display:grid; grid-template-columns:46px minmax(0,1.35fr) minmax(0,1fr) 40px; gap:10px; padding:10px 18px 8px;
+  font-size:11px; font-weight:800; letter-spacing:.1em; color:var(--faint); border-top:1px solid var(--border); border-bottom:1px solid var(--border)}
 .wlist{display:flex; flex-direction:column; min-width:0}
-.wrow{display:grid; grid-template-columns:44px minmax(0,1.25fr) minmax(0,1fr) 34px; gap:8px; align-items:center;
-  padding:9px 10px; min-width:0; cursor:pointer; border-bottom:1px solid var(--border)}
+.wrow{display:grid; grid-template-columns:46px minmax(0,1.35fr) minmax(0,1fr) 40px; gap:10px; align-items:center;
+  padding:12px 18px; min-width:0; cursor:pointer; border-bottom:1px solid var(--border)}
 .wrow:last-child{border-bottom:none}
 .wrow.bull{background:var(--bull-tint)}
 .wrow.bear{background:var(--bear-tint)}
-.wrank{font-size:13px; font-weight:800; color:var(--text); font-variant-numeric:tabular-nums}
+.wrank{font-size:14px; font-weight:700; color:var(--text); font-variant-numeric:tabular-nums}
 .wtick{min-width:0}
-.wtick .line1{display:flex; align-items:center; gap:6px; min-width:0}
-.wtick .tri{font-size:11px; flex:none}
+.wtick .line1{display:flex; align-items:center; gap:7px; min-width:0}
+.wtick .tri{font-size:13px; flex:none}
 .wtick .tri.up{color:var(--gain)} .wtick .tri.dn{color:var(--loss)}
-.wtick .tk{font-weight:800; font-size:16.5px; letter-spacing:.01em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
-.wtick .tk.up{color:var(--gain)} .wtick .tk.dn{color:var(--loss)}
-.chg-pill{font-size:10.5px; font-weight:800; border-radius:6px; padding:2px 7px; white-space:nowrap;
-  border:1px solid var(--panel-brd); font-variant-numeric:tabular-nums}
-.chg-pill.up{color:var(--gain); border-color:rgba(48,209,88,.4); background:rgba(48,209,88,.10)}
-.chg-pill.dn{color:var(--loss); border-color:rgba(255,69,58,.4); background:rgba(255,69,58,.10)}
-.chg-pill.flat{color:var(--muted)}
-.st-pill{font-size:10px; font-weight:800; border-radius:6px; padding:2px 7px; white-space:nowrap;
-  color:var(--gold); border:1px solid rgba(224,170,62,.45); background:rgba(224,170,62,.12)}
-.wtick .wname{font-size:12px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:2px}
-.wtick .wcap{font-size:12px; color:var(--faint); font-variant-numeric:tabular-nums; margin-top:1px}
-canvas.wspark{width:100%; height:56px; display:block; min-width:0}
-.pin{font-family:var(--font); cursor:pointer; font-size:15px; color:var(--faint);
-  width:30px; height:30px; border-radius:50%; border:1px solid var(--panel-brd); background:transparent;
-  display:flex; align-items:center; justify-content:center; padding:0; line-height:1}
-.wrow.pinned .pin{color:var(--gold); border-color:rgba(224,170,62,.5)}
-.empty{color:var(--text-dim); font-size:13px; padding:18px; text-align:center}
-/* pager */
-.pager{display:flex; align-items:center; justify-content:center; gap:10px; margin:10px 0 4px; font-size:13px; color:var(--muted)}
-.pager button{font:inherit; font-weight:700; color:var(--text); background:var(--pill-bg); border:1px solid var(--panel-brd);
+.wtick .tk{font-weight:800; font-size:20px; letter-spacing:.01em; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.st-pill{font-size:10px; font-weight:800; letter-spacing:.05em; border-radius:6px; padding:3px 8px; white-space:nowrap;
+  color:var(--orange); border:1px solid rgba(245,165,36,.5); background:rgba(245,165,36,.12)}
+.wtick .wname{font-size:13px; color:var(--text-dim); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:3px}
+.wtick .wmeta{display:flex; align-items:center; gap:7px; font-size:13.5px; margin-top:3px; font-variant-numeric:tabular-nums}
+.wtick .wprice{color:var(--text-dim)}
+.wtick .wdot{color:var(--faint)}
+.wtick .wchg.up{color:var(--gain); font-weight:700}
+.wtick .wchg.dn{color:var(--loss); font-weight:700}
+.wtick .wchg.flat{color:var(--text-dim)}
+.wtick .wdash{color:var(--faint)}
+canvas.wspark{width:100%; height:74px; display:block; min-width:0}
+.pin{font-family:var(--font); cursor:pointer; font-size:21px; color:var(--faint); background:transparent; border:none;
+  width:36px; height:36px; display:flex; align-items:center; justify-content:center; padding:0; line-height:1}
+.wrow.pinned .pin{color:var(--gold)}
+.empty{color:var(--text-dim); font-size:13px; padding:20px; text-align:center}
+.pager{display:flex; align-items:center; justify-content:center; gap:10px; padding:12px; font-size:13px; color:var(--text-dim); border-top:1px solid var(--border)}
+.pager:empty{display:none}
+.pager button{font:inherit; font-weight:700; color:var(--text); background:var(--pill-bg); border:1px solid var(--border);
   border-radius:8px; padding:4px 14px; cursor:pointer}
 .pager button:disabled{opacity:.35; cursor:default}
-.note{font-size:12px; color:var(--text-dim); text-align:center; line-height:1.5; margin-top:14px}
+.note{font-size:12px; color:var(--text-dim); text-align:center; line-height:1.5; margin-top:16px}
 @media (max-width:560px){
-  .colhdr, .wrow{grid-template-columns:34px minmax(0,1.2fr) minmax(0,1fr) 32px}
-  .wtick .tk{font-size:15px}
+  .colhdr, .wrow{grid-template-columns:36px minmax(0,1.2fr) minmax(0,1fr) 36px; padding-left:12px; padding-right:12px}
+  .wtick .tk{font-size:17px}
+  .title{font-size:24px}
 }
 </style>
 </head>
 <body>
-<div class="header">
-  <a class="back" href="index.html">&larr; Board</a>
-  <h1>15m confirmed closes</h1>
-  <button class="theme-btn" id="themeBtn" onclick="toggleTheme()">Light</button>
+<div class="topbar">
+  <a class="back" href="index.html">&larr; Back to board</a>
+  <button class="theme-switch" id="themeBtn" onclick="toggleTheme()"><span class="knob"></span><span id="themeLabel">Dark</span></button>
 </div>
-<div class="hb"><span class="hb-dot" id="hbDot"></span><span id="hbText">Connecting&hellip;</span></div>
-<div class="hb-time" id="hbTime"></div>
-
-<div class="wsortbar" id="sortChips"><span class="wsort-label">SORT BY</span>
-  <button class="wchip on" data-sort="rank">Rank</button>
-  <button class="wchip" data-sort="cap">Market cap</button>
-  <button class="wchip" data-sort="chg">% change</button>
-  <button class="wchip" data-sort="dir">Direction</button>
-  <button class="wchip fav" data-sort="fav">&#9733; Favorites</button>
+<h1 class="title">15-Minute Confirmed Closes</h1>
+<hr class="divider">
+<div class="status-card">
+  <span class="st-left"><span class="dot amber" id="hbDot"></span><span id="hbText" class="wait">Connecting&hellip;</span></span>
+  <span class="st-right" id="hbTime"></span>
 </div>
-<div class="wlegend">Dashed line = 15m series mean &middot; line color = 15m trend (last close vs mean)</div>
-
-<div class="fcol-title"><span class="tri-up">&#9650;</span> Bullish <span class="count" id="bullCount">0</span><span class="upd" id="updBull"></span></div>
-<div class="wtable">
-  <div class="colhdr"><span>RANK</span><span>TICKER</span><span>15MIN</span><span></span></div>
-  <div class="wlist" id="bullList"><div class="empty">Loading&hellip;</div></div>
+<div class="stale-banner" id="staleBanner" hidden><strong>STALE</strong><span>These lists are older than the expected five-minute poller cadence.</span></div>
+<div class="meta-row">
+  <span>Latest completed candle: <strong id="candleLbl">&ndash;</strong></span>
+  <span>Scanned: <strong id="scanLbl">&ndash;</strong></span>
 </div>
-<div class="pager" id="bullPager"></div>
-
-<div class="fcol-title"><span class="tri-dn">&#9660;</span> Bearish <span class="count" id="bearCount">0</span><span class="upd" id="updBear"></span></div>
-<div class="wtable">
-  <div class="colhdr"><span>RANK</span><span>TICKER</span><span>15MIN</span><span></span></div>
-  <div class="wlist" id="bearList"><div class="empty">Loading&hellip;</div></div>
+<hr class="divider">
+<div class="defs"><span class="bull-t">BULLISH</span> = 15m close above either PDH (previous day high) or PMH (premarket high). <span class="bear-t">BEARISH</span> = 15m close below both PDL (previous day low) and PML (premarket low).</div>
+<hr class="divider">
+<div class="sort-card"><span class="wsort-label">SORT BY</span>
+  <div id="sortChips">
+    <button class="wchip on" data-sort="rank">Rank</button>
+    <button class="wchip" data-sort="cap">Market cap</button>
+    <button class="wchip" data-sort="chg">% change</button>
+    <button class="wchip" data-sort="dir">Direction</button>
+    <button class="wchip fav" data-sort="fav">&#9733; Favorites</button>
+  </div>
 </div>
-<div class="pager" id="bearPager"></div>
+<div class="legend-card">Dashed line on each chart = series mean &middot; line color = 15m trend (last close vs mean)</div>
 
-<div class="note">Tap a ticker for its 15-minute chart with PDH / PMH / PDL / PML levels.<br>Bullish = 15m close above either PDH or PMH &middot; Bearish = 15m close below both PDL and PML</div>
+<div class="panels">
+  <section class="panel">
+    <div class="phead">
+      <div><div class="ptitle bull"><span>&#9650;</span> 15m PDH/PMH</div><div class="psub">Close above either PDH or PMH</div></div>
+      <div class="pcount bull" id="bullCount">0</div>
+    </div>
+    <div class="colhdr"><span>RANK</span><span>TICKER</span><span>15MIN</span><span>WATCH</span></div>
+    <div class="wlist" id="bullList"><div class="empty">Loading&hellip;</div></div>
+    <div class="pager" id="bullPager"></div>
+  </section>
+  <section class="panel">
+    <div class="phead">
+      <div><div class="ptitle bear"><span>&#9660;</span> BEARISH</div><div class="psub">Below PDL and PML</div></div>
+      <div class="pcount bear" id="bearCount">0</div>
+    </div>
+    <div class="colhdr"><span>RANK</span><span>TICKER</span><span>15MIN</span><span>WATCH</span></div>
+    <div class="wlist" id="bearList"><div class="empty">Loading&hellip;</div></div>
+    <div class="pager" id="bearPager"></div>
+  </section>
+</div>
+
+<div class="note">Tap a ticker for its 15-minute chart with PDH / PMH / PDL / PML levels.</div>
 
 <script>
 const FEED = "https://raw.githubusercontent.com/HueTX/options-board-data/main/fifteen_min_closes.json";
@@ -146,20 +192,27 @@ let sortMode = "rank";   // 'rank' | 'cap' | 'chg' | 'dir' | 'fav'
 let pins = new Set();
 try { pins = new Set(JSON.parse(localStorage.getItem("ofb_pins") || "[]")); } catch(e){}
 function savePins(){ try { localStorage.setItem("ofb_pins", JSON.stringify([...pins])); } catch(e2){} }
+function setSort(mode){
+  sortMode = mode;
+  document.querySelectorAll("#sortChips .wchip").forEach(x => x.classList.toggle("on", x.dataset.sort === mode));
+  applySort();
+}
 function togglePin(ev, t){
   ev.stopPropagation();
   if(pins.has(t)) pins.delete(t); else pins.add(t);
   savePins();
-  // refresh both sides so the star state and the Favorites filter stay honest
-  renderSide("bull"); renderSide("bear");
+  // starring a ticker jumps the sort line to Favorites so the pick is visible
+  if(pins.has(t)) setSort("fav"); else { renderSide("bull"); renderSide("bear"); }
 }
 function cssVar(v){ return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
 function esc(s){ return String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
 function prioRank(t){ const i = PRIORITY.indexOf(t); return i === -1 ? 99 : i; }
 function capOf(t){ const c = CAPS[t]; return (c != null && isFinite(c)) ? c : null; }
-function fmtCap(b){
-  if(b == null) return "";
-  return "$" + (b >= 100 ? b.toFixed(0) : b.toFixed(1)) + "B";
+// last 15m close (for the price line under the ticker)
+function lastClose(t){
+  const ch = charts[t];
+  if(!ch || !ch.candles15m || !ch.candles15m.length) return null;
+  return ch.candles15m[ch.candles15m.length - 1].c;
 }
 // day % move from the first 15m open to the last 15m close
 function dayMove(t){
@@ -200,10 +253,11 @@ function sortRows(rows, side){
   return pool.slice().sort((a, b) => prio(a, b) || alpha(a, b));
 }
 /* Watchlist-style mini chart: direction-colored 15m close line (last close vs series
-   mean), dashed mean line, final dot. NO PDH/PMH/PDL/PML lines on the mini chart. */
+   mean), dashed mean line, final dot. Tight 15m-closes min/max domain like the
+   artifact — NO PDH/PMH/PDL/PML lines on the mini chart. */
 function drawSpark(cv, closes, levels){
   const dpr = Math.min(2, window.devicePixelRatio || 1);
-  const W = cv.clientWidth || 200, H = cv.clientHeight || 56;
+  const W = cv.clientWidth || 200, H = cv.clientHeight || 74;
   if(!W || !H) return;
   cv.width = W * dpr; cv.height = H * dpr;
   const ctx = cv.getContext("2d"); ctx.scale(dpr, dpr);
@@ -213,13 +267,11 @@ function drawSpark(cv, closes, levels){
     ctx.fillText("Chart unavailable", W / 2, H / 2);
     return;
   }
-  // y-domain: tight 15m-closes min/max only — the same compact sparkline
-  // treatment as the artifact (breakout levels do NOT factor into mini scaling)
   const lo = Math.min(...closes), hi = Math.max(...closes);
   const rng = (hi - lo) || 1;
   const py = v => H - 3 - ((v - lo) / rng) * (H - 6);
   const px = i => 2 + (i / (closes.length - 1)) * (W - 4);
-  // series mean — dashed, like the watchlist
+  // series mean — dashed, like the artifact
   let sum = 0; for(const v of closes) sum += v;
   const mean = sum / closes.length;
   ctx.strokeStyle = cssVar("--text-dim") || "#98989f"; ctx.lineWidth = 1;
@@ -238,25 +290,26 @@ function rowHTML(r, side, rank){
   const bull = side === "bull";
   const mv = dayMove(r.ticker);
   const chCls = mv == null ? "flat" : (mv >= 0 ? "up" : "dn");
-  const pill = mv == null ? '<span class="chg-pill flat">&mdash;</span>'
-    : `<span class="chg-pill ${chCls}">${mv >= 0 ? "+" : ""}${mv.toFixed(2)}%</span>`;
+  const chg = mv == null ? '<span class="wchg flat">&mdash;</span>'
+    : `<span class="wchg ${chCls}">${mv >= 0 ? "+" : ""}${mv.toFixed(2)}%</span>`;
   const st = r.status === "new" ? '<span class="st-pill">NEW</span>'
     : r.status === "flipped" ? '<span class="st-pill">FLIPPED</span>' : "";
-  const nm = NAMES[r.ticker] || "";
-  const cap = fmtCap(capOf(r.ticker));
+  const nm = NAMES[r.ticker] || "Security name unavailable";
+  const lc = lastClose(r.ticker);
+  const price = lc != null ? `<span class="wprice">$${lc.toFixed(2)}</span><span class="wdot">&middot;</span>` : "";
   const url = "15m-chart.html?t=" + encodeURIComponent(r.ticker);
   const isPinned = pins.has(r.ticker);
   return `<div class="wrow ${bull ? "bull" : "bear"}${isPinned ? " pinned" : ""}" onclick="location.href='${url}'">`
     + `<div class="wrank">#${rank}</div>`
     + `<div class="wtick"><div class="line1">`
     + `<span class="tri ${bull ? "up" : "dn"}">${bull ? "&#9650;" : "&#9660;"}</span>`
-    + `<span class="tk ${bull ? "up" : "dn"}">${esc(r.ticker)}</span>${pill}${st}`
+    + `<span class="tk">${esc(r.ticker)}</span>${st}`
     + `</div>`
-    + (nm ? `<div class="wname">${esc(nm)}</div>` : "")
-    + (cap ? `<div class="wcap">${cap}</div>` : "")
+    + `<div class="wname">${esc(nm)}</div>`
+    + `<div class="wmeta">${price}${chg}<span class="wdot">&middot;</span><span class="wdash">&ndash;</span></div>`
     + `</div>`
     + `<canvas class="wspark" data-sym="${esc(r.ticker)}"></canvas>`
-    + `<button class="pin" aria-label="Favorite ${esc(r.ticker)}" onclick="togglePin(event,'${esc(r.ticker)}')">${isPinned ? "★" : "☆"}</button>`
+    + `<button class="pin" aria-label="Favorite ${esc(r.ticker)}" onclick="togglePin(event,'${esc(r.ticker)}')">&#9733;</button>`
     + `</div>`;
 }
 function paintSparks(root){
@@ -269,11 +322,7 @@ function applySort(){
   page.bull = 1; page.bear = 1;
   renderSide("bull"); renderSide("bear");
 }
-document.querySelectorAll("#sortChips .wchip").forEach(b => b.addEventListener("click", () => {
-  sortMode = b.dataset.sort;
-  document.querySelectorAll("#sortChips .wchip").forEach(x => x.classList.toggle("on", x === b));
-  applySort();
-}));
+document.querySelectorAll("#sortChips .wchip").forEach(b => b.addEventListener("click", () => setSort(b.dataset.sort)));
 function renderSide(side){
   const rows = sortRows(DATA[side], side);
   const pages = Math.max(1, Math.ceil(rows.length / PAGE));
@@ -283,7 +332,7 @@ function renderSide(side){
   const list = document.getElementById(side === "bull" ? "bullList" : "bearList");
   if(!slice.length){
     list.innerHTML = sortMode === "fav"
-      ? `<div class="empty">No favorites yet &mdash; tap &#9734; on any ticker.</div>`
+      ? `<div class="empty">No favorites yet &mdash; tap &#9733; on any ticker.</div>`
       : `<div class="empty">No ${side === "bull" ? "bullish" : "bearish"} confirmed closes.</div>`;
   } else {
     list.innerHTML = slice.map((r, i) => rowHTML(r, side, start + i + 1)).join("");
@@ -304,17 +353,19 @@ window.addEventListener("resize", () => {
     paintSparks(document.getElementById("bearList"));
   }, 150);
 });
-function setHB(state, text){
+function setHB(state, text, cls){
   const d = document.getElementById("hbDot");
-  d.className = "hb-dot" + (state === "ok" ? " green" : state === "wait" ? " amber" : "");
-  document.getElementById("hbText").innerHTML = text;
+  d.className = "dot" + (state === "ok" ? " green" : state === "wait" ? " amber" : "");
+  const t = document.getElementById("hbText");
+  t.className = cls || "";
+  t.innerHTML = text;
 }
 function ctFmt(d){
-  return d.toLocaleString("en-US", {timeZone: "America/Chicago", weekday: "short", month: "short", day: "numeric",
-    hour: "numeric", minute: "2-digit", second: "2-digit", hour12: true});
+  return d.toLocaleString("en-US", {timeZone: "America/Chicago", month: "short", day: "numeric", year: "numeric",
+    hour: "numeric", minute: "2-digit", second: "2-digit", hour12: true, timeZoneName: "short"});
 }
 async function load(){
-  setHB("wait", "Connecting&hellip;");
+  setHB("wait", "Connecting&hellip;", "wait");
   try{
     const [fr, cr, mr, nr] = await Promise.all([
       fetch(FEED + "?t=" + Date.now(), {cache: "no-store"}),
@@ -333,17 +384,19 @@ async function load(){
     DATA.bear = (d.bearish || []).map(tag);
     document.getElementById("bullCount").textContent = DATA.bull.length;
     document.getElementById("bearCount").textContent = DATA.bear.length;
-    const asof = d.asOf ? ctFmt(new Date(d.asOf)) + " CT" : "";
-    const upd = asof ? "updated " + asof : "";
-    document.getElementById("updBull").textContent = upd;
-    document.getElementById("updBear").textContent = upd;
+    const asofMs = d.asOf ? new Date(d.asOf).getTime() : 0;
+    const ageMin = asofMs ? (Date.now() - asofMs) / 60000 : 999;
+    const stale = ageMin > 8;
+    document.getElementById("staleBanner").hidden = !stale;
+    setHB(stale ? "err" : "ok", stale ? "Stale" : "Live", stale ? "stale" : "live");
     document.getElementById("hbTime").textContent =
-      "Refreshed " + asof + " · " + (d.scanned || 0) + " tickers scanned" + (d.candle ? " · " + d.candle + " candle" : "");
+      asofMs ? "Last refreshed: " + ctFmt(new Date(asofMs)) : "";
+    document.getElementById("candleLbl").textContent = d.candle || "\u2013";
+    document.getElementById("scanLbl").textContent = (d.scanned || 0) + " of " + (d.scanned || 0) + " tickers";
     renderSide("bull");
     renderSide("bear");
-    setHB("ok", "Live");
   }catch(e){
-    setHB("err", "Feed unreachable — retrying&hellip;");
+    setHB("err", "Feed unreachable \u2014 retrying\u2026", "stale");
   }
 }
 function toggleTheme(){
@@ -351,14 +404,14 @@ function toggleTheme(){
   const next = h.getAttribute("data-theme") === "dark" ? "light" : "dark";
   h.setAttribute("data-theme", next);
   try{ localStorage.setItem("ofb_theme", next); }catch(e){}
-  document.getElementById("themeBtn").textContent = next === "dark" ? "Light" : "Dark";
+  document.getElementById("themeLabel").textContent = next === "dark" ? "Dark" : "Light";
   renderSide("bull"); renderSide("bear");
 }
 (function init(){
   try{
     const t = localStorage.getItem("ofb_theme");
     if(t){ document.documentElement.setAttribute("data-theme", t);
-      document.getElementById("themeBtn").textContent = t === "dark" ? "Light" : "Dark"; }
+      document.getElementById("themeLabel").textContent = t === "dark" ? "Dark" : "Light"; }
   }catch(e){}
   load();
   setInterval(load, 60000);
