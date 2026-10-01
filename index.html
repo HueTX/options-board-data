@@ -906,8 +906,8 @@ for (const u of (SNAP.universe||[])) if (u.ticker) COMPANIES.set(u.ticker, u.nam
 const Q = new Map();        // ticker -> {price, prevClose, chgPct, high, low, volume, bars, pmh, pml, ts}
 let feedAsOf = null, lastErr = null;
 let FT = JSON.parse(document.getElementById('ft-data').textContent), ftErr = null, ftLive = false;  // yesterday's ignitions sidecar {asOf, date, ignitions:[{ticker,x}]} — embedded fallback; remote follow_through.json overrides when reachable
-const FT_URL = 'follow_through.json';   // hosted next to this page (same model as snapshot.json); built from the scanner's ignition records
-const SNAPSHOT_URL = 'snapshot.json';   // optional sidecar next to this page; adopted when its marketDate is >= the embedded snapshot's
+const FT_URL = "https://raw.githubusercontent.com/HueTX/options-board-data/main/follow_through.json";   // live sidecar: yesterday's ignitions, refreshed market hours; embedded ft-data is the fallback
+const SNAPSHOT_URL = "https://raw.githubusercontent.com/HueTX/options-board-data/main/snapshot.json";   // live sidecar: premarket + flow snapshot, refreshed premarket + market hours; adopted when its marketDate is >= the embedded snapshot's
 const QUOTES_URL = "https://raw.githubusercontent.com/HueTX/options-board-data/main/quotes.json";
 const QUOTES_UNI_URL = "https://raw.githubusercontent.com/HueTX/options-board-data/main/quotes_universe.json";
 const WATCHLIST_URL = "https://raw.githubusercontent.com/HueTX/options-board-data/main/watchlist.json";
