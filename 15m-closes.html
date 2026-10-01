@@ -15,6 +15,7 @@ html[data-theme="dark"]{
   --text:#f5f5f7; --text-dim:#98989f; --border:rgba(255,255,255,.08);
   --panel-brd: rgba(255,255,255,.09); --pill-bg: rgba(255,255,255,.06);
   --muted:#98989f; --faint:#636366;
+  --bull-tint: rgba(48,209,88,.055); --bear-tint: rgba(255,69,58,.055);
 }
 html[data-theme="light"]{
   --bg:#f7f2e6; --surface:#fffdf6; --surface-2:#f6f0e1;
@@ -22,6 +23,7 @@ html[data-theme="light"]{
   --text:#1c1c1e; --text-dim:#6b6b70; --border:rgba(0,0,0,.08);
   --panel-brd: rgba(46,80,58,.15); --pill-bg: rgba(46,80,58,.07);
   --muted:#6b6b70; --faint:#aeaeb2;
+  --bull-tint: rgba(21,128,61,.06); --bear-tint: rgba(220,38,38,.06);
 }
 *{box-sizing:border-box; margin:0; padding:0}
 body{background:var(--bg); color:var(--text); font-family:var(--font); padding:14px; max-width:1100px; margin:0 auto; min-height:100vh}
@@ -34,64 +36,61 @@ a{color:var(--orange); text-decoration:none}
 .hb-dot{width:10px; height:10px; border-radius:50%; background:var(--loss); flex:none}
 .hb-dot.amber{background:var(--orange)} .hb-dot.green{background:var(--gain)}
 .hb-time{font-family:var(--mono); font-size:12px; color:var(--text-dim); margin-bottom:12px}
-/* section headers — front-page fcol-title */
-.fcol-title{margin:14px 0 8px; font-size:15px; font-weight:800; display:flex; align-items:center; gap:8px}
-.fcol-title .count{font-size:12.5px; color:var(--muted); font-weight:700; background:var(--pill-bg); border-radius:999px; padding:2px 10px}
-.fcol-title .upd{font-size:11.5px; color:var(--muted); font-weight:600; font-variant-numeric:tabular-nums}
-.tri-up{color:var(--gain)} .tri-dn{color:var(--loss)}
-/* column headers — front-page colhdr */
-.colhdr{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,2fr) 86px 34px; gap:8px; padding:0 2px 6px;
-  font-size:10.5px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--muted)}
-.colhdr span:nth-child(3){text-align:right}
-.flow-list{display:flex; flex-direction:column; gap:8px; min-width:0}
-/* runner cards — exact front-page style */
-.runner{
-  display:grid; grid-template-columns:minmax(0,1fr) minmax(0,2fr) 86px 34px; gap:8px; align-items:center;
-  border:1px solid var(--panel-brd); border-radius:12px; padding:10px 4px 10px 12px; min-width:0; cursor:pointer;
-  background:var(--pill-bg); overflow:hidden;
-}
-.runner.bull-side{box-shadow:inset 3px 0 0 var(--gain)}
-.runner.bear-side{box-shadow:inset 3px 0 0 var(--loss)}
-.r-main{min-width:0}
-.runner .tk{font-weight:800; font-size:16px; letter-spacing:.01em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
-.runner .tk.bull{color:var(--gain)} .runner .tk.bear{color:var(--loss)}
-.runner .rname{font-size:11px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:1px}
-.badges{display:flex; gap:6px; flex-wrap:wrap; margin-top:5px}
-.sig-badge{font-size:10.5px; font-weight:800; letter-spacing:.03em; border-radius:6px; padding:2px 7px; white-space:nowrap;
-  border:1px solid var(--panel-brd); color:var(--muted)}
-.sig-badge.lv.bull{color:var(--gain); border-color:rgba(48,209,88,.35); background:rgba(48,209,88,.10)}
-.sig-badge.lv.bear{color:var(--loss); border-color:rgba(255,69,58,.35); background:rgba(255,69,58,.10)}
-.sig-badge.new{color:var(--orange); border-color:rgba(255,159,10,.45); background:rgba(255,159,10,.12)}
-.sig-badge.flipped{color:var(--gold); border-color:rgba(224,170,62,.45); background:rgba(224,170,62,.12)}
-.sig-badge.sig15.bull{color:var(--gain); border-color:rgba(48,209,88,.45); background:rgba(48,209,88,.14)}
-.sig-badge.sig15.bear{color:var(--loss); border-color:rgba(255,69,58,.45); background:rgba(255,69,58,.14)}
-canvas.r-spark{width:100%; height:64px; display:block; min-width:0}
-.r-nums{text-align:right; min-width:0}
-.runner .px{font-weight:800; font-size:15.5px; font-variant-numeric:tabular-nums}
-.runner .ch{font-size:12.5px; font-weight:700; font-variant-numeric:tabular-nums}
-.runner .ch.up{color:var(--gain)} .runner .ch.dn{color:var(--loss)}
-.pin{font-family:var(--font); cursor:pointer; font-size:14px; color:var(--faint);
-  width:30px; height:30px; border-radius:50%; border:1px solid var(--panel-brd); background:transparent;
-  display:flex; align-items:center; justify-content:center; padding:0; line-height:1}
-.runner.pinned{border-color:rgba(255,159,10,.5)}
-.runner.pinned .pin{color:var(--gold); border-color:rgba(224,170,62,.5)}
-/* pager — front-page style */
-.pager{display:flex; align-items:center; justify-content:center; gap:10px; margin:10px 0 4px; font-size:13px; color:var(--muted)}
-.pager button{font:inherit; font-weight:700; color:var(--text); background:var(--pill-bg); border:1px solid var(--panel-brd);
-  border-radius:8px; padding:4px 14px; cursor:pointer}
-.pager button:disabled{opacity:.35; cursor:default}
-.empty{color:var(--text-dim); font-size:13px; padding:18px; text-align:center; border:1px dashed var(--border); border-radius:12px}
 /* sort chips — same as the trading-morning watchlist */
 .wsortbar{display:flex; align-items:center; gap:10px; margin:2px 0 4px; flex-wrap:wrap}
 .wsort-label{font-size:11px; font-weight:800; letter-spacing:1.2px; color:var(--muted)}
 .wchip{font-family:var(--font); font-size:12.5px; font-weight:800; padding:7px 18px; border-radius:999px;
   border:1px solid var(--panel-brd); background:var(--pill-bg); color:var(--text); cursor:pointer; white-space:nowrap}
 .wchip.on{border-color:var(--orange); color:var(--orange); background:transparent}
+.wchip.fav.on{border-color:var(--gold); color:var(--gold)}
 .wlegend{font-size:11px; color:var(--muted); margin:2px 0 8px}
+/* section headers */
+.fcol-title{margin:14px 0 8px; font-size:15px; font-weight:800; display:flex; align-items:center; gap:8px}
+.fcol-title .count{font-size:12.5px; color:var(--muted); font-weight:700; background:var(--pill-bg); border-radius:999px; padding:2px 10px}
+.fcol-title .upd{font-size:11.5px; color:var(--muted); font-weight:600; font-variant-numeric:tabular-nums}
+.tri-up{color:var(--gain)} .tri-dn{color:var(--loss)}
+/* watchlist table */
+.wtable{border:1px solid var(--panel-brd); border-radius:12px; overflow:hidden; min-width:0}
+.colhdr{display:grid; grid-template-columns:44px minmax(0,1.25fr) minmax(0,1fr) 34px; gap:8px; padding:8px 10px 6px;
+  font-size:10.5px; font-weight:800; letter-spacing:.08em; color:var(--muted); border-bottom:1px solid var(--border)}
+.colhdr span:nth-child(3){text-align:left}
+.wlist{display:flex; flex-direction:column; min-width:0}
+.wrow{display:grid; grid-template-columns:44px minmax(0,1.25fr) minmax(0,1fr) 34px; gap:8px; align-items:center;
+  padding:9px 10px; min-width:0; cursor:pointer; border-bottom:1px solid var(--border)}
+.wrow:last-child{border-bottom:none}
+.wrow.bull{background:var(--bull-tint)}
+.wrow.bear{background:var(--bear-tint)}
+.wrank{font-size:13px; font-weight:800; color:var(--text); font-variant-numeric:tabular-nums}
+.wtick{min-width:0}
+.wtick .line1{display:flex; align-items:center; gap:6px; min-width:0}
+.wtick .tri{font-size:11px; flex:none}
+.wtick .tri.up{color:var(--gain)} .wtick .tri.dn{color:var(--loss)}
+.wtick .tk{font-weight:800; font-size:16.5px; letter-spacing:.01em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.wtick .tk.up{color:var(--gain)} .wtick .tk.dn{color:var(--loss)}
+.chg-pill{font-size:10.5px; font-weight:800; border-radius:6px; padding:2px 7px; white-space:nowrap;
+  border:1px solid var(--panel-brd); font-variant-numeric:tabular-nums}
+.chg-pill.up{color:var(--gain); border-color:rgba(48,209,88,.4); background:rgba(48,209,88,.10)}
+.chg-pill.dn{color:var(--loss); border-color:rgba(255,69,58,.4); background:rgba(255,69,58,.10)}
+.chg-pill.flat{color:var(--muted)}
+.st-pill{font-size:10px; font-weight:800; border-radius:6px; padding:2px 7px; white-space:nowrap;
+  color:var(--gold); border:1px solid rgba(224,170,62,.45); background:rgba(224,170,62,.12)}
+.wtick .wname{font-size:12px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:2px}
+.wtick .wcap{font-size:12px; color:var(--faint); font-variant-numeric:tabular-nums; margin-top:1px}
+canvas.wspark{width:100%; height:56px; display:block; min-width:0}
+.pin{font-family:var(--font); cursor:pointer; font-size:15px; color:var(--faint);
+  width:30px; height:30px; border-radius:50%; border:1px solid var(--panel-brd); background:transparent;
+  display:flex; align-items:center; justify-content:center; padding:0; line-height:1}
+.wrow.pinned .pin{color:var(--gold); border-color:rgba(224,170,62,.5)}
+.empty{color:var(--text-dim); font-size:13px; padding:18px; text-align:center}
+/* pager */
+.pager{display:flex; align-items:center; justify-content:center; gap:10px; margin:10px 0 4px; font-size:13px; color:var(--muted)}
+.pager button{font:inherit; font-weight:700; color:var(--text); background:var(--pill-bg); border:1px solid var(--panel-brd);
+  border-radius:8px; padding:4px 14px; cursor:pointer}
+.pager button:disabled{opacity:.35; cursor:default}
 .note{font-size:12px; color:var(--text-dim); text-align:center; line-height:1.5; margin-top:14px}
 @media (max-width:560px){
-  .colhdr{grid-template-columns:minmax(0,1fr) minmax(0,1.6fr) 78px 32px}
-  .runner{grid-template-columns:minmax(0,1fr) minmax(0,1.6fr) 78px 32px}
+  .colhdr, .wrow{grid-template-columns:34px minmax(0,1.2fr) minmax(0,1fr) 32px}
+  .wtick .tk{font-size:15px}
 }
 </style>
 </head>
@@ -109,17 +108,22 @@ canvas.r-spark{width:100%; height:64px; display:block; min-width:0}
   <button class="wchip" data-sort="cap">Market cap</button>
   <button class="wchip" data-sort="chg">% change</button>
   <button class="wchip" data-sort="dir">Direction</button>
+  <button class="wchip fav" data-sort="fav">&#9733; Favorites</button>
 </div>
-<div class="wlegend">Dashed line on each chart = series mean &middot; line color = 15m trend (last close vs mean)</div>
+<div class="wlegend">Dashed line = 15m series mean &middot; line color = 15m trend (last close vs mean)</div>
 
 <div class="fcol-title"><span class="tri-up">&#9650;</span> Bullish <span class="count" id="bullCount">0</span><span class="upd" id="updBull"></span></div>
-<div class="colhdr"><span>Symbol</span><span>15min</span><span>Price</span><span></span></div>
-<div class="flow-list" id="bullList"><div class="empty">Loading&hellip;</div></div>
+<div class="wtable">
+  <div class="colhdr"><span>RANK</span><span>TICKER</span><span>15MIN</span><span></span></div>
+  <div class="wlist" id="bullList"><div class="empty">Loading&hellip;</div></div>
+</div>
 <div class="pager" id="bullPager"></div>
 
 <div class="fcol-title"><span class="tri-dn">&#9660;</span> Bearish <span class="count" id="bearCount">0</span><span class="upd" id="updBear"></span></div>
-<div class="colhdr"><span>Symbol</span><span>15min</span><span>Price</span><span></span></div>
-<div class="flow-list" id="bearList"><div class="empty">Loading&hellip;</div></div>
+<div class="wtable">
+  <div class="colhdr"><span>RANK</span><span>TICKER</span><span>15MIN</span><span></span></div>
+  <div class="wlist" id="bearList"><div class="empty">Loading&hellip;</div></div>
+</div>
 <div class="pager" id="bearPager"></div>
 
 <div class="note">Tap a ticker for its 15-minute chart with PDH / PMH / PDL / PML levels.<br>Bullish = 15m close above either PDH or PMH &middot; Bearish = 15m close below both PDL and PML</div>
@@ -128,110 +132,99 @@ canvas.r-spark{width:100%; height:64px; display:block; min-width:0}
 const FEED = "https://raw.githubusercontent.com/HueTX/options-board-data/main/fifteen_min_closes.json";
 const CHARTS = "https://raw.githubusercontent.com/HueTX/options-board-data/main/fifteen_min_charts.json";
 const CAPS_URL = "https://raw.githubusercontent.com/HueTX/options-board-data/main/market_caps.json";
+const NAMES_URL = "https://raw.githubusercontent.com/HueTX/options-board-data/main/names_cache.json";
 const PAGE = 10;
 const PRIORITY = ["SPY", "QQQ", "IWM"]; // standing rule: qualifying index ETFs always rank first
 let CAPS = {};   // ticker -> marketCapB ($billions); unknown tickers sort last under Market cap
-let sortMode = "rank";   // 'rank' | 'cap' | 'chg' | 'dir' — the four trading-morning watchlist sorts
-const NAMES = {"GUSH":"Direxion Daily S&P Oil & Gas Exp. & Prod. Bull 2X Shares","DRIP":"Direxion Daily S&P Oil & Gas Exp. & Prod. Bear 2X Shares","NRGU":"MicroSectors U.S. Big Oil 3x Leveraged ETNs","NRGD":"MicroSectors U.S. Big Oil -3x Inverse Leveraged ETNs","XLV":"Health Care Select Sector SPDR Fund","XLI":"Industrial Select Sector SPDR Fund","XLY":"Consumer Discretionary Select Sector SPDR Fund","XLB":"Materials Select Sector SPDR Fund","HYG":"iShares iBoxx $ High Yield Corporate Bond ETF","URA":"Global X Uranium ETF","ITA":"iShares U.S. Aerospace & Defense ETF","CRM":"Salesforce, Inc.","TXN":"Texas Instruments Incorporated","MU":"Micron Technology, Inc.","ANET":"Arista Networks, Inc.","WDC":"Western Digital Corporation","STX":"Seagate Technology Holdings plc","MDB":"MongoDB, Inc.","AI":"C3.ai, Inc.","COIN":"Coinbase Global, Inc.","MSTR":"Strategy Incorporated","MARA":"MARA Holdings, Inc.","LABU":"Direxion Daily S&P Biotech Bull 3X Shares","EDC":"Direxion Daily MSCI Emerging Markets Bull 3X Shares","EDZ":"Direxion Daily MSCI Emerging Markets Bear 3X Shares","XLRE":"State Street Real Estate Select Sector SPDR ETF","XLC":"State Street Communication Services Select Sector SPDR ETF","UNG":"United States Natural Gas Fund, LP","TAN":"Invesco Solar ETF","ARM":"Arm Holdings plc","NET":"Cloudflare, Inc.","UPST":"Upstart Holdings, Inc.","CLSK":"CleanSpark, Inc.","SOFI":"SoFi Technologies, Inc.","NU":"Nu Holdings Ltd.","SPOT":"Spotify Technology S.A."};
+let NAMES = {"GUSH":"Direxion Daily S&P Oil & Gas Exp. & Prod. Bull 2X Shares","DRIP":"Direxion Daily S&P Oil & Gas Exp. & Prod. Bear 2X Shares","NRGU":"MicroSectors U.S. Big Oil 3x Leveraged ETNs","NRGD":"MicroSectors U.S. Big Oil -3x Inverse Leveraged ETNs","XLV":"Health Care Select Sector SPDR Fund","XLI":"Industrial Select Sector SPDR Fund","XLY":"Consumer Discretionary Select Sector SPDR Fund","XLB":"Materials Select Sector SPDR Fund","HYG":"iShares iBoxx $ High Yield Corporate Bond ETF","URA":"Global X Uranium ETF","ITA":"iShares U.S. Aerospace & Defense ETF","CRM":"Salesforce, Inc.","TXN":"Texas Instruments Incorporated","MU":"Micron Technology, Inc.","ANET":"Arista Networks, Inc.","WDC":"Western Digital Corporation","STX":"Seagate Technology Holdings plc","MDB":"MongoDB, Inc.","AI":"C3.ai, Inc.","COIN":"Coinbase Global, Inc.","MSTR":"Strategy Incorporated","MARA":"MARA Holdings, Inc.","LABU":"Direxion Daily S&P Biotech Bull 3X Shares","EDC":"Direxion Daily MSCI Emerging Markets Bull 3X Shares","EDZ":"Direxion Daily MSCI Emerging Markets Bear 3X Shares","XLRE":"State Street Real Estate Select Sector SPDR ETF","XLC":"State Street Communication Services Select Sector SPDR ETF","UNG":"United States Natural Gas Fund, LP","TAN":"Invesco Solar ETF","ARM":"Arm Holdings plc","NET":"Cloudflare, Inc.","UPST":"Upstart Holdings, Inc.","CLSK":"CleanSpark, Inc.","SOFI":"SoFi Technologies, Inc.","NU":"Nu Holdings Ltd.","SPOT":"Spotify Technology S.A."};
 
 let charts = {};
 let DATA = {bull: [], bear: []};
 let page = {bull: 1, bear: 1};
+let sortMode = "rank";   // 'rank' | 'cap' | 'chg' | 'dir' | 'fav'
 // favorites — shared with the front page via the same localStorage key
 let pins = new Set();
 try { pins = new Set(JSON.parse(localStorage.getItem("ofb_pins") || "[]")); } catch(e){}
+function savePins(){ try { localStorage.setItem("ofb_pins", JSON.stringify([...pins])); } catch(e2){} }
 function togglePin(ev, t){
   ev.stopPropagation();
   if(pins.has(t)) pins.delete(t); else pins.add(t);
-  try { localStorage.setItem("ofb_pins", JSON.stringify([...pins])); } catch(e2){}
-  document.querySelectorAll(`.runner[data-sym="${CSS.escape(t)}"]`).forEach(card => {
-    const on = pins.has(t);
-    card.classList.toggle("pinned", on);
-    const b = card.querySelector(".pin");
-    if(b) b.textContent = on ? "★" : "☆";
-  });
+  savePins();
+  // refresh both sides so the star state and the Favorites filter stay honest
+  renderSide("bull"); renderSide("bear");
 }
 function cssVar(v){ return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
 function esc(s){ return String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
-function pctDist(px, lv){
-  if(px == null || !lv) return "";
-  const d = (px - lv) / lv * 100;
-  return (d >= 0 ? "+" : "") + d.toFixed(1) + "%";
-}
 function prioRank(t){ const i = PRIORITY.indexOf(t); return i === -1 ? 99 : i; }
 function capOf(t){ const c = CAPS[t]; return (c != null && isFinite(c)) ? c : null; }
+function fmtCap(b){
+  if(b == null) return "";
+  return "$" + (b >= 100 ? b.toFixed(0) : b.toFixed(1)) + "B";
+}
+// day % move from the first 15m open to the last 15m close
+function dayMove(t){
+  const ch = charts[t];
+  if(!ch || !ch.candles15m || ch.candles15m.length < 2) return null;
+  const first = ch.candles15m[0].o, last = ch.candles15m[ch.candles15m.length - 1].c;
+  if(!first) return null;
+  return (last - first) / first * 100;
+}
 // 15m trend for the Direction sort: last close vs the mean of today's 15m closes
-function dir15(r){
-  const ch = charts[r.ticker];
+function dir15(t){
+  const ch = charts[t];
   if(!ch || !ch.candles15m || ch.candles15m.length < 2) return null;
   const closes = ch.candles15m.map(c => c.c);
   let sum = 0; for(const v of closes) sum += v;
   return closes[closes.length - 1] >= sum / closes.length ? "up" : "down";
 }
-// the four trading-morning watchlist sorts, applied per side; SPY/QQQ/IWM priority always leads
+// the trading-morning watchlist sorts, applied per side; SPY/QQQ/IWM priority always leads
 function sortRows(rows, side){
   const bull = side === "bull";
   const alpha = (a, b) => a.ticker.localeCompare(b.ticker);
   const prio = (a, b) => prioRank(a.ticker) - prioRank(b.ticker);
-  const mvOf = r => dayMove(r);
+  const mvOf = r => dayMove(r.ticker);
+  let pool = rows;
+  if(sortMode === "fav") pool = rows.filter(r => pins.has(r.ticker));
   if(sortMode === "cap")
-    return rows.slice().sort((a, b) => prio(a, b) ||
+    return pool.slice().sort((a, b) => prio(a, b) ||
       ((capOf(b.ticker) != null ? capOf(b.ticker) : -1) - (capOf(a.ticker) != null ? capOf(a.ticker) : -1)) || alpha(a, b));
   if(sortMode === "chg")
-    return rows.slice().sort((a, b) => prio(a, b) || (bull
+    return pool.slice().sort((a, b) => prio(a, b) || (bull
       ? ((mvOf(b) != null ? mvOf(b) : -Infinity) - (mvOf(a) != null ? mvOf(a) : -Infinity))
       : ((mvOf(a) != null ? mvOf(a) : Infinity) - (mvOf(b) != null ? mvOf(b) : Infinity))) || alpha(a, b));
   if(sortMode === "dir"){
-    const drank = r => { const d = dir15(r); return d == null ? 2 : (bull ? (d === "up" ? 0 : 1) : (d === "down" ? 0 : 1)); };
-    return rows.slice().sort((a, b) => prio(a, b) || (drank(a) - drank(b)) ||
+    const drank = r => { const d = dir15(r.ticker); return d == null ? 2 : (bull ? (d === "up" ? 0 : 1) : (d === "down" ? 0 : 1)); };
+    return pool.slice().sort((a, b) => prio(a, b) || (drank(a) - drank(b)) ||
       (Math.abs(mvOf(b) || 0) - Math.abs(mvOf(a) || 0)) || alpha(a, b));
   }
-  return rows.slice().sort((a, b) => prio(a, b) || alpha(a, b));
+  return pool.slice().sort((a, b) => prio(a, b) || alpha(a, b));
 }
-/* 15m chart in the trading-morning watchlist style: direction-colored 15m close line
-   (last close vs series mean), dashed mean line, final dot — with the PDH/PMH/PDL/PML
-   level lines behind. y-domain fits price action + the relevant level pair so the
-   line keeps its shape; all four level lines still draw (canvas clips the far pair). */
-function drawSpark(cv, closes, levels, bull){
+/* Watchlist-style mini chart: direction-colored 15m close line (last close vs series
+   mean), dashed mean line, final dot. NO PDH/PMH/PDL/PML lines on the mini chart. */
+function drawSpark(cv, closes){
   const dpr = Math.min(2, window.devicePixelRatio || 1);
-  const W = cv.clientWidth || 200, H = cv.clientHeight || 64;
+  const W = cv.clientWidth || 200, H = cv.clientHeight || 56;
   if(!W || !H) return;
   cv.width = W * dpr; cv.height = H * dpr;
   const ctx = cv.getContext("2d"); ctx.scale(dpr, dpr);
   if(!closes || closes.length < 2){
-    // honest blank state, like the watchlist
     ctx.fillStyle = cssVar("--muted") || "#888"; ctx.font = "10.5px system-ui, sans-serif";
     ctx.textAlign = "center"; ctx.textBaseline = "middle";
     ctx.fillText("Chart unavailable", W / 2, H / 2);
     return;
   }
-  const lvDefs = [
-    {v: levels.pdh, up: true,  dash: []},
-    {v: levels.pmh, up: true,  dash: [4, 2]},
-    {v: levels.pdl, up: false, dash: []},
-    {v: levels.pml, up: false, dash: [4, 2]},
-  ].filter(d => d.v != null);
-  const rel = lvDefs.filter(d => d.up === bull).map(d => d.v);
-  const all = closes.concat(rel);
-  const lo = Math.min(...all), hi = Math.max(...all);
+  const lo = Math.min(...closes), hi = Math.max(...closes);
   const span = (hi - lo) || 1, pad = span * 0.12;
   const py = v => H - 4 - ((v - lo + pad) / (span + pad * 2)) * (H - 8);
   const px = i => 2 + (i / (closes.length - 1)) * (W - 4);
-  // all four level lines first (behind the price line)
-  lvDefs.forEach(d => {
-    const relevant = d.up === bull;
-    ctx.strokeStyle = d.up ? `rgba(48,209,88,${relevant ? 0.6 : 0.22})` : `rgba(255,69,58,${relevant ? 0.6 : 0.22})`;
-    ctx.lineWidth = 1; ctx.setLineDash(d.dash); ctx.beginPath();
-    ctx.moveTo(0, py(d.v)); ctx.lineTo(W, py(d.v)); ctx.stroke(); ctx.setLineDash([]);
-  });
   // series mean — dashed, like the watchlist
   let sum = 0; for(const v of closes) sum += v;
   const mean = sum / closes.length;
   ctx.strokeStyle = cssVar("--faint") || "#666"; ctx.lineWidth = 1;
-  ctx.setLineDash([5, 4]); ctx.globalAlpha = .6;
+  ctx.setLineDash([4, 4]); ctx.globalAlpha = .65;
   ctx.beginPath(); ctx.moveTo(0, py(mean)); ctx.lineTo(W, py(mean)); ctx.stroke();
   ctx.setLineDash([]); ctx.globalAlpha = 1;
-  // 15m close line, colored by 15m trend (last close vs mean) — watchlist style
+  // 15m close line, colored by 15m trend (last close vs mean)
   const up = closes[closes.length - 1] >= mean;
   const col = up ? cssVar("--gain") : cssVar("--loss");
   ctx.strokeStyle = col; ctx.lineWidth = 2; ctx.lineJoin = "round"; ctx.lineCap = "round"; ctx.beginPath();
@@ -239,59 +232,38 @@ function drawSpark(cv, closes, levels, bull){
   ctx.stroke();
   ctx.fillStyle = col; ctx.beginPath(); ctx.arc(px(closes.length - 1), py(closes[closes.length - 1]), 2.6, 0, 7); ctx.fill();
 }
-function levelsFor(r, bull){
-  const ch = charts[r.ticker];
-  const lv = (ch && ch.levels) || {};
-  return {
-    pdh: lv.pdh != null ? lv.pdh : r.pdh,
-    pmh: lv.pmh != null ? lv.pmh : r.pmh,
-    pdl: lv.pdl != null ? lv.pdl : r.pdl,
-    pml: lv.pml != null ? lv.pml : r.pml,
-  };
-}
-function dayMove(r){
-  const ch = charts[r.ticker];
-  if(!ch || !ch.candles15m || ch.candles15m.length < 2) return null;
-  const first = ch.candles15m[0].o, last = ch.candles15m[ch.candles15m.length - 1].c;
-  if(!first) return null;
-  return (last - first) / first * 100;
-}
-function cardHTML(r, side){
+function rowHTML(r, side, rank){
   const bull = side === "bull";
-  const lv = levelsFor(r, bull);
-  const px = r.close;
-  const mv = dayMove(r);
-  const chCls = mv == null ? "" : (mv >= 0 ? "up" : "dn");
-  const mvTxt = mv == null ? "" : ((mv >= 0 ? "+" : "") + mv.toFixed(2) + "%");
+  const mv = dayMove(r.ticker);
+  const chCls = mv == null ? "flat" : (mv >= 0 ? "up" : "dn");
+  const pill = mv == null ? '<span class="chg-pill flat">&mdash;</span>'
+    : `<span class="chg-pill ${chCls}">${mv >= 0 ? "+" : ""}${mv.toFixed(2)}%</span>`;
+  const st = r.status === "new" ? '<span class="st-pill">NEW</span>'
+    : r.status === "flipped" ? '<span class="st-pill">FLIPPED</span>' : "";
   const nm = NAMES[r.ticker] || "";
-  // badges: signal badge + PDH/PDL distance badges
-  const badge15 = `<span class="sig-badge sig15 ${bull ? "bull" : "bear"}">${bull ? "&#9650; 15m PDH/PMH" : "&#9660; 15m PDL+PML"}</span>`;
-  const bPDH = `<span class="sig-badge lv bull">PDH ${pctDist(px, lv.pdh)}</span>`;
-  const bPDL = `<span class="sig-badge lv bear">PDL ${pctDist(px, lv.pdl)}</span>`;
-  const st = r.status === "new" ? '<span class="sig-badge new">NEW</span>'
-    : r.status === "flipped" ? '<span class="sig-badge flipped">FLIPPED</span>' : "";
+  const cap = fmtCap(capOf(r.ticker));
   const url = "15m-chart.html?t=" + encodeURIComponent(r.ticker);
   const isPinned = pins.has(r.ticker);
-  return `<div class="runner ${bull ? "bull-side" : "bear-side"}${isPinned ? " pinned" : ""}" data-sym="${esc(r.ticker)}" onclick="location.href='${url}'">`
-    + `<div class="r-main"><div class="tk ${bull ? "bull" : "bear"}">${esc(r.ticker)}</div>`
-    + (nm ? `<div class="rname">${esc(nm)}</div>` : "")
-    + `<div class="badges">${badge15}${bPDH}${bPDL}${st}</div></div>`
-    + `<canvas class="r-spark" width="184" height="68" data-sym="${esc(r.ticker)}" data-side="${side}"></canvas>`
-    + `<div class="r-nums"><div class="px">$${px != null ? px.toFixed(2) : "&mdash;"}</div><div class="ch ${chCls}">${mvTxt}</div></div>`
+  return `<div class="wrow ${bull ? "bull" : "bear"}${isPinned ? " pinned" : ""}" onclick="location.href='${url}'">`
+    + `<div class="wrank">#${rank}</div>`
+    + `<div class="wtick"><div class="line1">`
+    + `<span class="tri ${bull ? "up" : "dn"}">${bull ? "&#9650;" : "&#9660;"}</span>`
+    + `<span class="tk ${bull ? "up" : "dn"}">${esc(r.ticker)}</span>${pill}${st}`
+    + `</div>`
+    + (nm ? `<div class="wname">${esc(nm)}</div>` : "")
+    + (cap ? `<div class="wcap">${cap}</div>` : "")
+    + `</div>`
+    + `<canvas class="wspark" data-sym="${esc(r.ticker)}"></canvas>`
     + `<button class="pin" aria-label="Favorite ${esc(r.ticker)}" onclick="togglePin(event,'${esc(r.ticker)}')">${isPinned ? "★" : "☆"}</button>`
     + `</div>`;
 }
 function paintSparks(root){
-  root.querySelectorAll("canvas.r-spark").forEach(cv => {
-    const sym = cv.dataset.sym, bull = cv.dataset.side === "bull";
-    const ch = charts[sym];
-    const r = DATA.bull.concat(DATA.bear).find(x => x.ticker === sym);
-    drawSpark(cv, ch ? ch.candles15m.map(c => c.c) : [], levelsFor(r || {}, bull), bull);
+  root.querySelectorAll("canvas.wspark").forEach(cv => {
+    const ch = charts[cv.dataset.sym];
+    drawSpark(cv, ch ? ch.candles15m.map(c => c.c) : []);
   });
 }
 function applySort(){
-  DATA.bull = sortRows(DATA.bull, "bull");
-  DATA.bear = sortRows(DATA.bear, "bear");
   page.bull = 1; page.bear = 1;
   renderSide("bull"); renderSide("bear");
 }
@@ -301,14 +273,20 @@ document.querySelectorAll("#sortChips .wchip").forEach(b => b.addEventListener("
   applySort();
 }));
 function renderSide(side){
-  const rows = DATA[side];
+  const rows = sortRows(DATA[side], side);
   const pages = Math.max(1, Math.ceil(rows.length / PAGE));
   if(page[side] > pages) page[side] = pages;
-  const slice = rows.slice((page[side] - 1) * PAGE, page[side] * PAGE);
+  const start = (page[side] - 1) * PAGE;
+  const slice = rows.slice(start, start + PAGE);
   const list = document.getElementById(side === "bull" ? "bullList" : "bearList");
-  list.innerHTML = slice.map(r => cardHTML(r, side)).join("") ||
-    `<div class="empty">No ${side === "bull" ? "bullish" : "bearish"} confirmed closes.</div>`;
-  paintSparks(list);
+  if(!slice.length){
+    list.innerHTML = sortMode === "fav"
+      ? `<div class="empty">No favorites yet &mdash; tap &#9734; on any ticker.</div>`
+      : `<div class="empty">No ${side === "bull" ? "bullish" : "bearish"} confirmed closes.</div>`;
+  } else {
+    list.innerHTML = slice.map((r, i) => rowHTML(r, side, start + i + 1)).join("");
+    paintSparks(list);
+  }
   const pg = document.getElementById(side === "bull" ? "bullPager" : "bearPager");
   pg.innerHTML = pages <= 1 ? "" :
     `<button ${page[side] <= 1 ? "disabled" : ""} onclick="goPage('${side}',-1)" aria-label="Previous page">&lsaquo;</button>`
@@ -336,20 +314,21 @@ function ctFmt(d){
 async function load(){
   setHB("wait", "Connecting&hellip;");
   try{
-    const [fr, cr, mr] = await Promise.all([
+    const [fr, cr, mr, nr] = await Promise.all([
       fetch(FEED + "?t=" + Date.now(), {cache: "no-store"}),
       fetch(CHARTS + "?t=" + Date.now(), {cache: "no-store"}).catch(() => null),
-      fetch(CAPS_URL + "?t=" + Date.now(), {cache: "no-store"}).then(r => r.ok ? r.json() : null).catch(() => null)
+      fetch(CAPS_URL + "?t=" + Date.now(), {cache: "no-store"}).then(r => r.ok ? r.json() : null).catch(() => null),
+      fetch(NAMES_URL + "?t=" + Date.now(), {cache: "no-store"}).then(r => r.ok ? r.json() : null).catch(() => null)
     ]);
     if(!fr.ok) throw new Error("HTTP " + fr.status);
     const d = await fr.json();
     if(cr && cr.ok){ const cd = await cr.json(); charts = cd.charts || {}; }
     if(mr && mr.caps) CAPS = mr.caps;
+    if(nr) NAMES = Object.assign({}, NAMES, nr);
     const nb = new Set(d.newBullish || []), nbe = new Set(d.newBearish || []), fl = new Set(d.flipped || []);
     const tag = r => ({...r, status: fl.has(r.ticker) ? "flipped" : (nb.has(r.ticker) || nbe.has(r.ticker)) ? "new" : ""});
-    // SPY/QQQ/IWM always first when they have a qualifying close (standing rule)
-    DATA.bull = sortRows((d.bullish || []).map(tag), "bull");
-    DATA.bear = sortRows((d.bearish || []).map(tag), "bear");
+    DATA.bull = (d.bullish || []).map(tag);
+    DATA.bear = (d.bearish || []).map(tag);
     document.getElementById("bullCount").textContent = DATA.bull.length;
     document.getElementById("bearCount").textContent = DATA.bear.length;
     const asof = d.asOf ? ctFmt(new Date(d.asOf)) + " CT" : "";
