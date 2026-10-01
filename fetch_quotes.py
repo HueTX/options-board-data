@@ -11,6 +11,7 @@ Usage:
     python fetch_quotes.py --watchlist watchlist.json   # morning watchlist levels, once/day
 """
 import json
+import os
 import sys
 import time
 import datetime
@@ -336,10 +337,132 @@ def _retired_build_watchlist(out_file, tickers_file="watchlist_tickers.txt",
     print("wrote %s: %d rows for %s" % (out_file, len(rows), today))
 
 
+def build_dbars(out_file, snapshot_file="snapshot.json",
+                movers_file="market_movers.json",
+                priority_file="tickers_priority.txt"):
+    """Drawer bars: 5-minute intraday bars (+ quote fields) for every ticker
+    that can open the detail drawer but is NOT in the 56-ticker quotes.json
+    feed — the current snapshot flow rows (bullish/bearish/premarket) and the
+    market-movers gainers/losers. The board ingests these into the same quote
+    map, so the drawer line chart, day range, volume and premarket H/L all
+    work for tickers like APP that quotes.json does not cover. 5m bars are
+    ~5x smaller than quotes.json's 1m bars and plenty for the drawer chart.
+    On too many failures the previous file is kept (never a blank board)."""
+    syms = []
+
+    def add_from(path, key_fn):
+        try:
+            d = json.load(open(path))
+        except Exception as e:
+            print("dbars: cannot read %s (%s)" % (path, e))
+            return
+        for s in key_fn(d) or []:
+            if s and s not in syms:
+                syms.append(s)
+
+    add_from(snapshot_file, lambda d: [r.get("ticker") for r in
+             (d.get("bullish") or []) + (d.get("bearish") or []) + (d.get("premarket") or [])])
+    add_from(movers_file, lambda d: [m.get("t") for m in
+             (d.get("gainers") or []) + (d.get("losers") or [])])
+    try:
+        pri = set(l.strip() for l in open(priority_file) if l.strip())
+    except Exception:
+        pri = set()
+    syms = [s for s in syms if s not in pri]
+    if not syms:
+        print("dbars: no tickers to fetch, keeping previous %s" % out_file)
+        return
+    sess = requests.Session()
+    sess.headers.update(UA)
+    try:
+        sess.get("https://query1.finance.yahoo.com/v8/finance/chart/SPY?interval=1m&range=1d",
+                 timeout=10)
+    except Exception:
+        pass
+    out, ok = {}, 0
+    with ThreadPoolExecutor(max_workers=8) as ex:
+        futs = {ex.submit(fetch_chart, sess, s, "1d", "5m"): s for s in syms}
+        for fut in futs:
+            s = futs[fut]
+            try:
+                j = fut.result()
+            except Exception:
+                j = None
+            if j:
+                c = compact(s, j)
+                if c and c.get("bars"):
+                    out[s] = c
+                    ok += 1
+    if ok < max(5, len(syms) // 4):
+        print("dbars: only %d/%d tickers ok, keeping previous %s" % (ok, len(syms), out_file))
+        sys.exit(1)
+    payload = {"asOf": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+               "count": ok, "bars": out}
+    tmp = out_file + ".tmp"
+    with open(tmp, "w") as f:
+        json.dump(payload, f, separators=(",", ":"))
+    os.replace(tmp, out_file)
+    print("wrote %s: %d tickers" % (out_file, ok))
+
+
+def build_regime1h(out_file):
+    """1-hour regime bars: last 107 regular-session hourly closes for
+    SPY/QQQ/IWM, built with the exact semantics of wcharts.json's h1 series
+    (Yahoo 1h bars, regular session 09:30-16:00 ET only, premarket excluded,
+    closes rounded to 2dp). The board merges these into the watchlist chart
+    map so the regime-strip sparklines plot the same 1-hour bars as the
+    trading-morning watchlist. On failure the previous file is kept."""
+    from zoneinfo import ZoneInfo
+    ET = ZoneInfo("America/New_York")
+    sess = requests.Session()
+    sess.headers.update(UA)
+    charts = {}
+    for sym in ("SPY", "QQQ", "IWM"):
+        j = fetch_chart(sess, sym, "6mo", "1h")
+        h1 = []
+        try:
+            r = j["chart"]["result"][0]
+            ts = r.get("timestamp") or []
+            q = ((r.get("indicators") or {}).get("quote") or [{}])[0] or {}
+            closes = q.get("close") or []
+            bars = []
+            for t, c in zip(ts, closes):
+                if c is None:
+                    continue
+                et = datetime.datetime.fromtimestamp(t, datetime.timezone.utc).astimezone(ET)
+                m = et.hour * 60 + et.minute
+                if et.weekday() < 5 and 570 <= m < 960:
+                    bars.append(round(float(c), 2))
+            h1 = bars[-107:]
+        except Exception as e:
+            print("regime1h: %s parse failed (%s)" % (sym, e))
+        print("regime1h: %s h1=%d" % (sym, len(h1)))
+        if len(h1) >= 20:
+            charts[sym] = {"h1": h1}
+    if len(charts) < 3:
+        print("regime1h: only %d/3 ok, keeping previous %s" % (len(charts), out_file))
+        sys.exit(1)
+    payload = {"asOf": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+               "charts": charts}
+    tmp = out_file + ".tmp"
+    with open(tmp, "w") as f:
+        json.dump(payload, f, separators=(",", ":"))
+    os.replace(tmp, out_file)
+    print("wrote %s" % out_file)
+
+
 def main():
     if "--watchlist" in sys.argv:
         rest = [a for a in sys.argv[1:] if a != "--watchlist"]
         build_watchlist(rest[0] if rest else "watchlist.json")
+        return
+    if "--dbars" in sys.argv:
+        rest = [a for a in sys.argv[1:] if a != "--dbars"]
+        build_dbars(rest[0] if rest else "dbars.json")
+        return
+    if "--regime1h" in sys.argv:
+        rest = [a for a in sys.argv[1:] if a != "--regime1h"]
+        build_regime1h(rest[0] if rest else "regime1h.json")
         return
     if "--movers" in sys.argv:
         rest = [a for a in sys.argv[1:] if a != "--movers"]
