@@ -871,11 +871,12 @@ const SNAPSHOT_URL = 'snapshot.json';   // optional sidecar next to this page; a
 const QUOTES_URL = "https://raw.githubusercontent.com/HueTX/options-board-data/main/quotes.json";
 const QUOTES_UNI_URL = "https://raw.githubusercontent.com/HueTX/options-board-data/main/quotes_universe.json";
 const WATCHLIST_URL = "https://raw.githubusercontent.com/HueTX/options-board-data/main/watchlist.json";
+const MOVERS_URL = "https://raw.githubusercontent.com/HueTX/options-board-data/main/market_movers.json";
 const FEED_OK = !/PUT-YOUR/.test(QUOTES_URL + QUOTES_UNI_URL + WATCHLIST_URL);   // replace-all safe: true once the placeholder is gone from the URLs
 // Per-feed heartbeat: last SUCCESSFUL fetch time (epoch ms). A failed fetch leaves the
 // previous timestamp alone, so the chip ages honestly toward STALE while the section
 // keeps rendering its last-good data.
-const HB = { quotes: null, universe: null, snapshot: null, watchlist: null, ignitions: null };
+const HB = { quotes: null, universe: null, snapshot: null, watchlist: null, ignitions: null, movers: null };
 let lastPollT = 0;   // epoch ms of the last successful quote poll (drives the 60s refresh countdown)
 let pollDone = false;  // true once the first poll has finished (success or failure)
 const ctFmtT = new Intl.DateTimeFormat('en-US',{timeZone:'America/Chicago',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false});
@@ -923,21 +924,22 @@ async function refreshQuotes(){
     const bust = '?t=' + Math.floor(Date.now()/15000);
     for (const [k] of DS_DEFS) DS[k] = {state:'checking', asOf:null, sub:''};
     dsPaint();
-    const [r1, r2, r4, r5, r6] = await Promise.all([
+    const [r1, r2, r4, r5, r6, r7] = await Promise.all([
       fetch(QUOTES_URL + bust).then(r => { if(!r.ok) throw new Error('quotes '+r.status); return r.json(); }),
       fetch(QUOTES_UNI_URL + bust).then(r => { if(!r.ok) throw new Error('uni '+r.status); return r.json(); }).catch(() => null),
       fetch(FT_URL + bust).then(r => { if(!r.ok) throw new Error('ft '+r.status); return r.json(); }).catch(() => null),
       fetch(WATCHLIST_URL + bust).then(r => { if(!r.ok) throw new Error('wl '+r.status); return r.json(); }).catch(() => null),
-      fetch(SNAPSHOT_URL + bust).then(r => { if(!r.ok) throw new Error('snap '+r.status); return r.json(); }).catch(() => null)
+      fetch(SNAPSHOT_URL + bust).then(r => { if(!r.ok) throw new Error('snap '+r.status); return r.json(); }).catch(() => null),
+      fetch(MOVERS_URL + bust).then(r => { if(!r.ok) throw new Error('mv '+r.status); return r.json(); }).catch(() => null)
     ]);
     const now = Date.now();
     for (const [sym, e] of Object.entries(r1.tickers || {})) ingestEntry(sym, e);
     HB.quotes = now; lastPollT = now;
-    if (r1.asOf){ const d = etDateOfMs(Date.parse(r1.asOf)); if (/^\d{4}-\d{2}-\d{2}$/.test(d)) quotesDate = d; }
+    if (r1.asOf){ const ms = Date.parse(r1.asOf); if (isFinite(ms)) quotesAsOfMs = ms; const d = etDateOfMs(ms); if (/^\d{4}-\d{2}-\d{2}$/.test(d)) quotesDate = d; }
     if (r2){
       for (const [sym, e] of Object.entries(r2.tickers || {})){ ingestEntry(sym, e); UNISET.add(sym); }
       HB.universe = now;
-      if (r2.asOf){ const d = etDateOfMs(Date.parse(r2.asOf)); if (/^\d{4}-\d{2}-\d{2}$/.test(d)) uniDate = d; }
+      if (r2.asOf){ const ms = Date.parse(r2.asOf); if (isFinite(ms)) uniAsOfMs = ms; const d = etDateOfMs(ms); if (/^\d{4}-\d{2}-\d{2}$/.test(d)) uniDate = d; }
     }
     if (r4 && Array.isArray(r4.ignitions)){ FT = r4; ftErr = null; ftLive = true; HB.ignitions = now; }
     else if (!FT.ignitions.length){ ftErr = 'ignition history unavailable'; }
@@ -949,6 +951,12 @@ async function refreshQuotes(){
       for (const u of (SNAP.universe || [])) UNISET.add(u.ticker || u);
       HB.snapshot = now;
     }
+    if (r7 && r7.asOf && (Array.isArray(r7.gainers) || Array.isArray(r7.losers))){
+      MV = r7; HB.movers = now;
+      const ms7 = Date.parse(r7.asOf); if (isFinite(ms7)) mvAsOfMs = ms7;
+      const d = etDateOfMs(ms7); if (/^\d{4}-\d{2}-\d{2}$/.test(d)) mvDate = d;
+    }
+    // live movers feed failure is non-fatal: universe-computed movers remain the fallback
     // snapshot fetch failure / older file is non-fatal: the embedded snapshot keeps the page working
     feedAsOf = now; lastErr = null; pollDone = true;
     renderAll();
@@ -1139,6 +1147,8 @@ const DS_DEFS = [
 const DS = {};
 for (const [k] of DS_DEFS) DS[k] = {state:'checking', asOf:null, sub:''};
 let quotesDate = null, uniDate = null;   // YYYY-MM-DD (ET) of the live quote feeds
+let quotesAsOfMs = null, uniAsOfMs = null;   // epoch ms of the feeds' own timestamps (freshness is measured on data age, not poll time)
+let MV = null, mvDate = null, mvAsOfMs = null;   // live market_movers.json feed {asOf, gainers:[], losers:[]}
 const ctFmtHM = new Intl.DateTimeFormat('en-US',{timeZone:'America/Chicago',hour:'numeric',minute:'2-digit',hour12:true});
 function mvCount(){ let n = 0; for (const s of UNISET){ const q = Q.get(s); if (q && q.chgPct != null) n++; } return n; }
 function dsPaint(){
@@ -1156,39 +1166,47 @@ function dsPaint(){
   if (!big || !txt) return;
   const states = DS_DEFS.map(([k]) => DS[k].state);
   const nOk = states.filter(s => s === 'ok').length;
-  const today = etDateOfMs(Date.now());
-  const dates = [SNAP.marketDate || null, quotesDate, quotesDate, uniDate, quotesDate, (WL && WL.marketDate) || null];
+  const today = nyMarketDate();
+  const dates = [SNAP.marketDate || null, quotesDate, quotesDate, mvDate || uniDate, quotesDate, (WL && WL.marketDate) || null];
   const allOk = nOk === 6 && dates.every(x => x === today);
   big.classList.remove('checking','ok','warn','bad','done');
   if (states.includes('checking')){ big.classList.add('checking'); txt.textContent = 'Verifying \u00b7 ' + nOk + '/6 matched'; }
   else if (allOk){ big.classList.add('done','ok'); txt.textContent = 'Up to date (' + fmtMonD(today) + ' \u00b7 ' + ctFmtHM.format(new Date()) + ' CT)'; }
   else if (states.includes('bad')){ big.classList.add('done','bad'); txt.textContent = 'DATA ERROR \u00b7 ' + nOk + '/6 matched'; }
-  else { big.classList.add('done','warn'); txt.textContent = 'OFFLINE \u00b7 ' + nOk + '/6 on embedded data'; }
+  else if (!HB.quotes && pollDone){ big.classList.add('done','warn'); txt.textContent = 'OFFLINE \u00b7 ' + nOk + '/6 on embedded data'; }
+  else if (!isMarketOpen()){ big.classList.add('done','warn'); txt.textContent = 'Session closed \u00b7 ' + fmtMonD(today) + ' final data'; }
+  else { big.classList.add('done','warn'); txt.textContent = 'Stale \u00b7 ' + nOk + '/6 live'; }
   big.title = DS_DEFS.map(([k], i) => DS_DEFS[i][1] + ' ' + DS[k].state).join(' \u00b7 ');
 }
 function evalHealth(){
-  const today = etDateOfMs(Date.now());
-  const qAge = HB.quotes ? Date.now() - HB.quotes : Infinity;
+  const today = nyMarketDate();
+  const qAge = quotesAsOfMs ? Date.now() - quotesAsOfMs : Infinity;
   const qFresh = quotesDate === today;
+  const qLive = qFresh && qAge < 1800000;   // today's data, published within 30 min — anything older is stale, never live
   if (!HB.quotes) DS.prices = pollDone ? {state:'warn', asOf:null, sub:'offline'} : {state:'checking', asOf:null, sub:''};
-  else if (qFresh && qAge < 1800000) DS.prices = {state:'ok', asOf:HB.quotes, sub:''};
-  else if (qFresh) DS.prices = {state:'warn', asOf:HB.quotes, sub:''};
-  else DS.prices = {state:'bad', asOf:HB.quotes, sub:''};
-  const rOk = qFresh && ['SPY','QQQ','IWM'].every(s => { const q = Q.get(s); return q && q.price != null; });
+  else if (qLive) DS.prices = {state:'ok', asOf:quotesAsOfMs, sub:''};
+  else DS.prices = {state:'warn', asOf:quotesAsOfMs || HB.quotes, sub:''};
+  const rOk = qLive && ['SPY','QQQ','IWM'].every(s => { const q = Q.get(s); return q && q.price != null; });
   if (!HB.quotes) DS.regime = pollDone ? {state:'warn', asOf:null, sub:'offline'} : {state:'checking', asOf:null, sub:''};
-  else DS.regime = rOk ? {state:'ok', asOf:HB.quotes, sub:''} : {state:'bad', asOf:HB.quotes, sub:''};
-  const mOk = uniDate === today && mvCount() > 0;
-  if (!HB.universe) DS.movers = pollDone ? {state:'warn', asOf:null, sub:'offline'} : {state:'checking', asOf:null, sub:''};
-  else DS.movers = mOk ? {state:'ok', asOf:HB.universe, sub:''} : {state:'bad', asOf:HB.universe, sub:''};
+  else DS.regime = rOk ? {state:'ok', asOf:quotesAsOfMs, sub:''} : {state:'warn', asOf:quotesAsOfMs || HB.quotes, sub:''};
+  const uAge = uniAsOfMs ? Date.now() - uniAsOfMs : Infinity;
+  const mvAge = mvAsOfMs ? Date.now() - mvAsOfMs : Infinity;
+  const mvFeedOk = mvDate === today && mvAge < 3600000 && MV && ((MV.gainers||[]).length + (MV.losers||[]).length > 0);
+  const mLive = uniDate === today && uAge < 3600000 && mvCount() > 0;
+  if (HB.movers) DS.movers = mvFeedOk ? {state:'ok', asOf:mvAsOfMs, sub:''} : {state:'warn', asOf:mvAsOfMs || HB.movers, sub:''};
+  else if (!HB.universe) DS.movers = pollDone ? {state:'warn', asOf:null, sub:'offline'} : {state:'checking', asOf:null, sub:''};
+  else DS.movers = mLive ? {state:'ok', asOf:uniAsOfMs, sub:''} : {state:'warn', asOf:uniAsOfMs || HB.universe, sub:''};
   // Zero signals is a valid evaluated result, not an error — the chip tracks feed state.
   if (!HB.quotes) DS.closes = pollDone ? {state:'warn', asOf:null, sub:'offline'} : {state:'checking', asOf:null, sub:''};
-  else DS.closes = qFresh ? {state:'ok', asOf:HB.quotes, sub:''} : {state:'bad', asOf:HB.quotes, sub:''};
+  else DS.closes = qLive ? {state:'ok', asOf:quotesAsOfMs, sub:''} : {state:'warn', asOf:quotesAsOfMs || HB.quotes, sub:''};
+  const snapAge = SNAP_TS ? Date.now() - SNAP_TS : Infinity;
   if (!SNAP.marketDate) DS.flow = {state:'bad', asOf:null, sub:''};
-  else if (SNAP.marketDate === today) DS.flow = {state:'ok', asOf:SNAP_TS, sub:''};
-  else DS.flow = {state:'warn', asOf:SNAP_TS, sub:SNAP.marketDate};
+  else if (SNAP.marketDate === today && snapAge < 1800000) DS.flow = {state:'ok', asOf:SNAP_TS, sub:''};
+  else DS.flow = {state:'warn', asOf:SNAP_TS || null, sub:''};
   const wlD = (WL && WL.marketDate) || null;
+  const wlTs = WL && WL.builtAt ? Date.parse(WL.builtAt) : NaN;
   if (!wlD) DS.plan = {state:'bad', asOf:null, sub:''};
-  else if (wlD === today) DS.plan = {state:'ok', asOf:null, sub:''};
+  else if (wlD === today) DS.plan = {state:'ok', asOf:isFinite(wlTs) ? wlTs : null, sub:''};
   else DS.plan = {state:'warn', asOf:null, sub:wlD};
   dsPaint();
 }
@@ -1710,24 +1728,33 @@ function renderMovers(){
     $('moversMeta').textContent = '';
     return;
   }
-  const list = mvUniverse();
-  if (!list.length){
-    const msg = '<div class="empty">No universe quotes yet — movers appear on the next refresh.</div>';
-    $('topMovers').innerHTML = msg; $('bigLosers').innerHTML = msg;
-    $('gainPager').innerHTML = ''; $('lossPager').innerHTML = '';
-    $('moversMeta').textContent = '311 · waiting for quotes';
-    return;
-  }
   const mvCap = m => (m.mc != null ? m.mc : -1);
-  let gain, loss;
-  if (mvSort === 'cap'){ gain = [...list].sort((a,b) => mvCap(b) - mvCap(a)); loss = [...list].sort((a,b) => mvCap(b) - mvCap(a)); }
-  else { gain = [...list].sort((a,b) => b.chgPct - a.chgPct); loss = [...list].sort((a,b) => a.chgPct - b.chgPct); }
+  let gain, loss, mvSrc;
+  if (MV && Array.isArray(MV.gainers) && Array.isArray(MV.losers) && (MV.gainers.length || MV.losers.length)){
+    // live market_movers.json feed: pre-ranked gainers/losers across the 311-ticker universe
+    mvSrc = 'feed';
+    const norm = r => ({t: r.t, price: r.price, chgPct: r.chgPct, mc: r.mc != null ? r.mc : null});
+    gain = MV.gainers.map(norm); loss = MV.losers.map(norm);
+    if (mvSort === 'cap'){ gain = [...gain].sort((a,b) => mvCap(b) - mvCap(a)); loss = [...loss].sort((a,b) => mvCap(b) - mvCap(a)); }
+  } else {
+    mvSrc = 'universe';
+    const list = mvUniverse();
+    if (!list.length){
+      const msg = '<div class="empty">No universe quotes yet — movers appear on the next refresh.</div>';
+      $('topMovers').innerHTML = msg; $('bigLosers').innerHTML = msg;
+      $('gainPager').innerHTML = ''; $('lossPager').innerHTML = '';
+      $('moversMeta').textContent = '311 · waiting for quotes';
+      return;
+    }
+    if (mvSort === 'cap'){ gain = [...list].sort((a,b) => mvCap(b) - mvCap(a)); loss = [...list].sort((a,b) => mvCap(b) - mvCap(a)); }
+    else { gain = [...list].sort((a,b) => b.chgPct - a.chgPct); loss = [...list].sort((a,b) => a.chgPct - b.chgPct); }
+  }
   $('topMovers').innerHTML = page(gain, 'gain').map(chip).join('') || '<div class="empty">No gainers.</div>';
   $('bigLosers').innerHTML = page(loss, 'loss').map(chip).join('') || '<div class="empty">No losers.</div>';
   $('gainPager').innerHTML = mvPagerHTML('gain', gain.length);
   $('lossPager').innerHTML = mvPagerHTML('loss', loss.length);
-  const asof = uniDate ? ' · as of ' + fmtMonD(uniDate) : '';
-  $('moversMeta').textContent = '311 · ' + gain.length + ' gainers · ' + loss.length + ' losers' + (mvSort === 'cap' ? ' · by market cap' : '') + asof;
+  const asof = (mvSrc === 'feed' && mvDate) ? ' · as of ' + fmtMonD(mvDate) : (uniDate ? ' · as of ' + fmtMonD(uniDate) : '');
+  $('moversMeta').textContent = '311 · ' + gain.length + ' gainers · ' + loss.length + ' losers' + (mvSort === 'cap' ? ' · by market cap' : '') + (mvSrc === 'feed' ? ' · live' : '') + asof;
 }
 
 $('mvSortSel').addEventListener('change', e => {
@@ -1845,18 +1872,19 @@ function renderIgnitions(){
 }
 
 /* ================= DATE VERIFICATION ================= */
-// The NYSE market date in America/New_York (rolls back to Friday on weekends).
+// The NYSE market date in America/New_York: the trading day whose data the board
+// should expect. Rolls back to the previous trading day overnight (before the
+// 8 AM ET premarket publish window the feeds run on) and to Friday on weekends,
+// so the board never demands a date whose data can't exist yet.
 function nyMarketDate(){
-  const parts = new Intl.DateTimeFormat('en-CA', {timeZone: 'America/New_York', weekday: 'short', year: 'numeric', month: '2-digit', day: '2-digit'}).formatToParts(new Date());
+  const parts = new Intl.DateTimeFormat('en-CA', {timeZone: 'America/New_York', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', hour12: false}).formatToParts(new Date());
   const get = t => (parts.find(p => p.type === t) || {}).value;
-  const wd = get('weekday');
-  const ymd = get('year') + '-' + get('month') + '-' + get('day');
-  if (wd === 'Sat' || wd === 'Sun'){
-    const d = new Date(ymd + 'T12:00:00Z');
-    d.setUTCDate(d.getUTCDate() - (wd === 'Sat' ? 1 : 2));
-    return d.toISOString().slice(0, 10);
-  }
-  return ymd;
+  const d = new Date(Date.UTC(+get('year'), +get('month') - 1, +get('day'), 12));
+  if ((parseInt(get('hour'), 10) % 24) < 8) d.setUTCDate(d.getUTCDate() - 1);  // pre-dawn: still last trading day
+  const wd = d.getUTCDay();
+  if (wd === 0) d.setUTCDate(d.getUTCDate() - 2);       // Sunday -> Friday
+  else if (wd === 6) d.setUTCDate(d.getUTCDate() - 1);  // Saturday -> Friday
+  return d.toISOString().slice(0, 10);
 }
 function etDateOfMs(ms){   // epoch ms -> YYYY-MM-DD in America/New_York
   const fmt = new Intl.DateTimeFormat('en-CA', {timeZone: 'America/New_York', year: 'numeric', month: '2-digit', day: '2-digit'});
