@@ -426,12 +426,15 @@ def build_regime1h(out_file):
             q = ((r.get("indicators") or {}).get("quote") or [{}])[0] or {}
             closes = q.get("close") or []
             bars = []
+            now_ts = time.time()
             for t, c in zip(ts, closes):
                 if c is None:
                     continue
                 et = datetime.datetime.fromtimestamp(t, datetime.timezone.utc).astimezone(ET)
                 m = et.hour * 60 + et.minute
-                if et.weekday() < 5 and 570 <= m < 960:
+                # Match the artifact watchlist parser: only completed hourly
+                # candles whose start is inside the 09:30–16:00 ET session.
+                if et.weekday() < 5 and 570 <= m < 960 and t + 3600 <= now_ts:
                     bars.append(round(float(c), 2))
             h1 = bars[-107:]
         except Exception as e:
