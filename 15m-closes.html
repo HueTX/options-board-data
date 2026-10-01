@@ -149,7 +149,7 @@ canvas.wspark{width:100%; height:74px; display:block; min-width:0}
     <button class="wchip fav" data-sort="fav">&#9733; Favorites</button>
   </div>
 </div>
-<div class="legend-card">Signal line: green bullish / red bearish &middot; PDH &amp; PMH: labeled green horizontals &middot; PDL &amp; PML: labeled red horizontals &middot; dashed gray: series mean</div>
+<div class="legend-card">Candles: green closed up / red closed down &middot; PDH &amp; PMH: labeled green horizontals &middot; PDL &amp; PML: labeled red horizontals &middot; dashed gray: series mean</div>
 
 <div class="panels">
   <section class="panel">
@@ -252,29 +252,28 @@ function sortRows(rows, side){
   }
   return pool.slice().sort((a, b) => prio(a, b) || alpha(a, b));
 }
-/* 15m mini chart: close line colored by bullish/bearish SIDE, dashed series-mean
-   line, final dot, plus the four breakout levels (PDH solid green, PMH dotted
+/* 15m mini chart: candlesticks (green = closed up, red = closed down), dashed
+   series-mean line, plus the four breakout levels (PDH solid green, PMH dotted
    green, PDL solid red, PML dotted red — same convention as the detail chart),
-   labeled at the right edge. The y-domain stays tight on the 15m closes so the
-   line fills the chart; level lines outside today's range are clipped off-chart. */
-function drawSpark(cv, closes, levels, side){
+   labeled at the right edge. The y-domain spans the candle highs/lows so wicks
+   never clip; level lines outside today's range are clipped off-chart. */
+function drawSpark(cv, candles, levels, side){
   const dpr = Math.min(2, window.devicePixelRatio || 1);
   const W = cv.clientWidth || 200, H = cv.clientHeight || 74;
   if(!W || !H) return;
   cv.width = W * dpr; cv.height = H * dpr;
   const ctx = cv.getContext("2d"); ctx.scale(dpr, dpr);
-  if(!closes || closes.length < 2){
+  if(!candles || candles.length < 2){
     ctx.fillStyle = cssVar("--muted") || "#888"; ctx.font = "10.5px system-ui, sans-serif";
     ctx.textAlign = "center"; ctx.textBaseline = "middle";
     ctx.fillText("Chart unavailable", W / 2, H / 2);
     return;
   }
   const lv = levels || {};
-  const lo = Math.min(...closes), hi = Math.max(...closes);
+  const lo = Math.min(...candles.map(c => c.l)), hi = Math.max(...candles.map(c => c.h));
   const rng = (hi - lo) || 1;
   const plotLeft = 2, plotRight = Math.max(42, W - 30);
   const py = v => H - 3 - ((v - lo) / rng) * (H - 6);
-  const px = i => plotLeft + (i / (closes.length - 1)) * (plotRight - plotLeft);
   const gain = cssVar("--gain"), loss = cssVar("--loss");
   // Breakout levels are drawn first and labeled at the right edge. Highs are
   // green, lows are red; prior-day levels are solid and premarket levels dash.
@@ -293,19 +292,27 @@ function drawSpark(cv, closes, levels, side){
   levelLine(lv.pmh, gain, true, "PMH");
   levelLine(lv.pdl, loss, false, "PDL");
   levelLine(lv.pml, loss, true, "PML");
-  // series mean — dashed
-  let sum = 0; for(const v of closes) sum += v;
-  const mean = sum / closes.length;
+  // series mean of closes — dashed
+  let sum = 0; for(const c of candles) sum += c.c;
+  const mean = sum / candles.length;
   ctx.strokeStyle = cssVar("--text-dim") || "#98989f"; ctx.lineWidth = 1;
   ctx.setLineDash([5, 4]); ctx.globalAlpha = .7;
   ctx.beginPath(); ctx.moveTo(plotLeft, py(mean)); ctx.lineTo(plotRight, py(mean)); ctx.stroke();
   ctx.setLineDash([]); ctx.globalAlpha = 1;
-  // 15m close line, colored by bullish/bearish side (never by trend)
-  const col = side === "bear" ? loss : gain;
-  ctx.strokeStyle = col; ctx.lineWidth = 2; ctx.lineJoin = "round"; ctx.lineCap = "round"; ctx.beginPath();
-  closes.forEach((v, i) => i ? ctx.lineTo(px(i), py(v)) : ctx.moveTo(px(i), py(v)));
-  ctx.stroke();
-  ctx.fillStyle = col; ctx.beginPath(); ctx.arc(px(closes.length - 1), py(closes[closes.length - 1]), 2.6, 0, 7); ctx.fill();
+  // 15m candlesticks: green when the candle closed up, red when it closed down
+  const n = candles.length;
+  const slotW = (plotRight - plotLeft) / n;
+  const bodyW = Math.max(2, Math.min(7, slotW * 0.62));
+  candles.forEach((c, i) => {
+    const x = plotLeft + slotW * (i + 0.5);
+    const col = c.c >= c.o ? gain : loss;
+    ctx.strokeStyle = col; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(x, py(c.h)); ctx.lineTo(x, py(c.l)); ctx.stroke();
+    const yO = py(c.o), yC = py(c.c);
+    const top = Math.min(yO, yC), hgt = Math.max(1.6, Math.abs(yC - yO));
+    ctx.fillStyle = col;
+    ctx.fillRect(x - bodyW / 2, top, bodyW, hgt);
+  });
 }
 function rowHTML(r, side, rank){
   const bull = side === "bull";
@@ -336,7 +343,7 @@ function rowHTML(r, side, rank){
 function paintSparks(root, side){
   root.querySelectorAll("canvas.wspark").forEach(cv => {
     const ch = charts[cv.dataset.sym];
-    drawSpark(cv, ch ? ch.candles15m.map(c => c.c) : [], ch ? ch.levels : null, side);
+    drawSpark(cv, ch ? ch.candles15m : [], ch ? ch.levels : null, side);
   });
 }
 function applySort(){
