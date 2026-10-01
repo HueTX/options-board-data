@@ -122,7 +122,7 @@ canvas.r-spark{width:100%; height:64px; display:block; min-width:0}
 <div class="flow-list" id="bearList"><div class="empty">Loading&hellip;</div></div>
 <div class="pager" id="bearPager"></div>
 
-<div class="note">Tap a ticker for its 15-minute chart with PDH / PMH / PDL / PML levels.<br>Bullish = 15m close above both PDH and PMH &middot; Bearish = 15m close below both PDL and PML</div>
+<div class="note">Tap a ticker for its 15-minute chart with PDH / PMH / PDL / PML levels.<br>Bullish = 15m close above either PDH or PMH &middot; Bearish = 15m close below both PDL and PML</div>
 
 <script>
 const FEED = "https://raw.githubusercontent.com/HueTX/options-board-data/main/fifteen_min_closes.json";
@@ -264,8 +264,8 @@ function cardHTML(r, side){
   const chCls = mv == null ? "" : (mv >= 0 ? "up" : "dn");
   const mvTxt = mv == null ? "" : ((mv >= 0 ? "+" : "") + mv.toFixed(2) + "%");
   const nm = NAMES[r.ticker] || "";
-  // badges mirror the front page: signal badge + BOTH PDH and PDL distance badges
-  const badge15 = `<span class="sig-badge sig15 ${bull ? "bull" : "bear"}">${bull ? "&#9650; 15m PDH+PMH" : "&#9660; 15m PDL+PML"}</span>`;
+  // badges: signal badge + PDH/PDL distance badges
+  const badge15 = `<span class="sig-badge sig15 ${bull ? "bull" : "bear"}">${bull ? "&#9650; 15m PDH/PMH" : "&#9660; 15m PDL+PML"}</span>`;
   const bPDH = `<span class="sig-badge lv bull">PDH ${pctDist(px, lv.pdh)}</span>`;
   const bPDL = `<span class="sig-badge lv bear">PDL ${pctDist(px, lv.pdl)}</span>`;
   const st = r.status === "new" ? '<span class="sig-badge new">NEW</span>'
