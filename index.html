@@ -224,13 +224,13 @@ section.collapsed .sec-body{display:none}
 .movers-col.bear h3{color:var(--loss)}
 .mv-chips{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;min-width:0}
 .mv-chip{
-  display:flex;align-items:center;justify-content:center;gap:6px;
-  font-family:var(--font);font-size:12.5px;padding:9px 4px;border-radius:999px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+  font-family:var(--font);font-size:12.5px;padding:8px 4px;border-radius:14px;
   border:1px solid var(--panel-brd);background:var(--pill-bg);color:var(--text);cursor:pointer;
-  white-space:nowrap;overflow:hidden;min-width:0;
+  min-width:0;
 }
-.mv-chip b{font-weight:800;overflow:hidden;text-overflow:ellipsis}
-.mv-chip span{font-weight:700;font-variant-numeric:tabular-nums;flex:none}
+.mv-chip b{font-weight:800;font-size:13px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mv-chip .mv-sub{display:flex;align-items:baseline;gap:6px;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
 /* ============ 15M SIGNALS ============ */
 .capbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 14px}
 .seg-label{font-size:12.5px;color:var(--muted);font-weight:600}
@@ -1841,7 +1841,7 @@ function mvPagerHTML(key, total){
          `<button data-mvpg="${key}|1" ${mvPage[key] >= pages ? 'disabled' : ''} aria-label="Next page">›</button>`;
 }
 function renderMovers(){
-  const chip = m => `<button class="mv-chip" data-sym="${esc(m.t)}" title="${esc(m.t)} · ${fmtPx(m.price)}"><b>${esc(m.t)}</b><span class="${m.chgPct >= 0 ? 'up' : 'dn'}">${fmtPct(m.chgPct)}</span><span class="mv-cap">${m.mc != null ? fmtCapB(m.mc/1e9) : 'cap n/a'}</span></button>`;
+  const chip = m => `<button class="mv-chip" data-sym="${esc(m.t)}" title="${esc(m.t)} · ${fmtPx(m.price)}"><b>${esc(m.t)}</b><span class="mv-sub"><span class="${m.chgPct >= 0 ? 'up' : 'dn'}">${fmtPct(m.chgPct)}</span><span class="mv-cap">${m.mc != null ? fmtCapB(m.mc/1e9) : 'cap n/a'}</span></span></button>`;
   const skel = '<span class="skel" style="width:100%;height:34px;border-radius:999px">&nbsp;</span>'.repeat(8);
   const page = (list, key) => {
     const pages = Math.max(1, Math.ceil(list.length / MV_PAGE));
