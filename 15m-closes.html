@@ -201,7 +201,7 @@ function sortRows(rows, side){
 }
 /* Watchlist-style mini chart: direction-colored 15m close line (last close vs series
    mean), dashed mean line, final dot. NO PDH/PMH/PDL/PML lines on the mini chart. */
-function drawSpark(cv, closes){
+function drawSpark(cv, closes, levels){
   const dpr = Math.min(2, window.devicePixelRatio || 1);
   const W = cv.clientWidth || 200, H = cv.clientHeight || 56;
   if(!W || !H) return;
@@ -213,15 +213,21 @@ function drawSpark(cv, closes){
     ctx.fillText("Chart unavailable", W / 2, H / 2);
     return;
   }
-  const lo = Math.min(...closes), hi = Math.max(...closes);
-  const span = (hi - lo) || 1, pad = span * 0.12;
-  const py = v => H - 4 - ((v - lo + pad) / (span + pad * 2)) * (H - 8);
+  // y-domain: 15m closes PLUS the breakout levels, no extra padding — the same
+  // compact treatment as the watchlist (level lines themselves are not drawn)
+  let lo = Math.min(...closes), hi = Math.max(...closes);
+  if(levels) ["pdh","pdl","pmh","pml"].forEach(k => {
+    const v = levels[k];
+    if(v != null && isFinite(v)){ lo = Math.min(lo, v); hi = Math.max(hi, v); }
+  });
+  const rng = (hi - lo) || 1;
+  const py = v => H - 4 - ((v - lo) / rng) * (H - 8);
   const px = i => 2 + (i / (closes.length - 1)) * (W - 4);
   // series mean — dashed, like the watchlist
   let sum = 0; for(const v of closes) sum += v;
   const mean = sum / closes.length;
   ctx.strokeStyle = cssVar("--text-dim") || "#98989f"; ctx.lineWidth = 1;
-  ctx.setLineDash([5, 4]); ctx.globalAlpha = .8;
+  ctx.setLineDash([5, 4]); ctx.globalAlpha = .7;
   ctx.beginPath(); ctx.moveTo(0, py(mean)); ctx.lineTo(W, py(mean)); ctx.stroke();
   ctx.setLineDash([]); ctx.globalAlpha = 1;
   // 15m close line, colored by 15m trend (last close vs mean)
@@ -260,7 +266,7 @@ function rowHTML(r, side, rank){
 function paintSparks(root){
   root.querySelectorAll("canvas.wspark").forEach(cv => {
     const ch = charts[cv.dataset.sym];
-    drawSpark(cv, ch ? ch.candles15m.map(c => c.c) : []);
+    drawSpark(cv, ch ? ch.candles15m.map(c => c.c) : [], ch ? ch.levels : null);
   });
 }
 function applySort(){
