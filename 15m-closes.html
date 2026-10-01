@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>15-Minute Confirmed Closes</title>
+<style>
+:root{
+  --font: "SF Pro Display", -apple-system, BlinkMacSystemFont, ui-sans-serif, system-ui, "Segoe UI", Inter, Roboto, "Helvetica Neue", Arial, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  --radius: 18px;
+}
+html[data-theme="dark"]{
+  --bg:#050506; --surface:#111114; --surface-2:#19191d;
+  --orange:#ff9f0a; --gain:#30d158; --loss:#ff453a;
+  --text:#f5f5f7; --text-dim:#98989f; --border:rgba(255,255,255,.08);
+  --amber:#ff9f0a;
+}
+html[data-theme="light"]{
+  --bg:#f7f2e6; --surface:#fffdf6; --surface-2:#f6f0e1;
+  --orange:#c46a00; --gain:#15803d; --loss:#dc2626;
+  --text:#1c1c1e; --text-dim:#6b6b70; --border:rgba(0,0,0,.08);
+  --amber:#c46a00;
+}
+*{box-sizing:border-box; margin:0; padding:0}
+body{background:var(--bg); color:var(--text); font-family:var(--font); padding:16px; max-width:900px; margin:0 auto; min-height:100vh}
+a{color:var(--orange); text-decoration:none}
+.header{display:flex; align-items:center; justify-content:space-between; margin-bottom:12px}
+.header h1{font-size:22px; font-weight:700}
+.back{font-size:14px}
+.theme-btn{background:var(--surface-2); border:1px solid var(--border); color:var(--text); border-radius:10px; padding:6px 12px; font-size:13px; cursor:pointer}
+/* Heartbeat */
+.hb-card{background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:14px 16px; margin-bottom:14px; display:flex; align-items:center; gap:12px}
+.hb-dot{width:14px; height:14px; border-radius:50%; flex-shrink:0; transition:background .3s}
+.hb-dot.red{background:var(--loss); box-shadow:0 0 8px var(--loss)}
+.hb-dot.amber{background:var(--amber); box-shadow:0 0 8px var(--amber); animation:pulse 1s infinite}
+.hb-dot.green{background:var(--gain); box-shadow:0 0 8px var(--gain)}
+@keyframes pulse{50%{opacity:.5}}
+.hb-info{flex:1}
+.hb-status{font-size:13px; font-weight:600; text-transform:uppercase; letter-spacing:.5px}
+.hb-refresh{font-size:13px; color:var(--text-dim); margin-top:2px; font-family:var(--mono)}
+/* Columns */
+.cols{display:grid; grid-template-columns:1fr 1fr; gap:14px}
+@media(max-width:560px){.cols{grid-template-columns:1fr}}
+.panel{background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden}
+.panel-head{padding:12px 16px; font-weight:700; font-size:15px; display:flex; justify-content:space-between; align-items:center}
+.panel-head.bull{color:var(--gain); border-bottom:2px solid var(--gain)}
+.panel-head.bear{color:var(--loss); border-bottom:2px solid var(--loss)}
+.count{background:var(--surface-2); border-radius:20px; padding:2px 10px; font-size:13px; font-family:var(--mono)}
+.rows{max-height:60vh; overflow-y:auto}
+.row{display:flex; justify-content:space-between; align-items:center; padding:10px 16px; border-bottom:1px solid var(--border); font-size:14px}
+.row:last-child{border-bottom:none}
+.ticker{font-weight:700; font-family:var(--mono); font-size:15px}
+.badge{font-size:10px; font-weight:700; text-transform:uppercase; padding:2px 8px; border-radius:10px; margin-left:8px}
+.badge.new{background:rgba(48,209,88,.15); color:var(--gain)}
+.badge.flipped{background:rgba(255,159,10,.15); color:var(--amber)}
+.meta{text-align:right; font-family:var(--mono); font-size:12px; color:var(--text-dim)}
+.meta .close{font-size:14px; color:var(--text); font-weight:600}
+.empty{padding:24px 16px; text-align:center; color:var(--text-dim); font-size:14px}
+.note{margin-top:14px; font-size:12px; color:var(--text-dim); text-align:center; line-height:1.5}
+.candle-tag{font-family:var(--mono); font-size:12px; color:var(--text-dim); margin-bottom:12px; text-align:center}
+</style>
+</head>
+<body>
+<div class="header">
+  <a class="back" href="index.html">&larr; Board</a>
+  <h1>15-Minute Confirmed Closes</h1>
+  <button class="theme-btn" id="themeBtn" onclick="toggleTheme()">Light</button>
+</div>
+
+<div class="hb-card">
+  <div class="hb-dot red" id="hbDot"></div>
+  <div class="hb-info">
+    <div class="hb-status" id="hbStatus">Not connected</div>
+    <div class="hb-refresh" id="hbRefresh">Waiting for first poll&hellip;</div>
+  </div>
+</div>
+
+<div class="candle-tag" id="candleTag"></div>
+
+<div class="cols">
+  <div class="panel">
+    <div class="panel-head bull">Bullish <span class="count" id="bullCount">0</span></div>
+    <div class="rows" id="bullRows"><div class="empty">No bullish closes</div></div>
+  </div>
+  <div class="panel">
+    <div class="panel-head bear">Bearish <span class="count" id="bearCount">0</span></div>
+    <div class="rows" id="bearRows"><div class="empty">No bearish closes</div></div>
+  </div>
+</div>
+
+<div class="note">
+  Bullish: 15m close above <b>both</b> premarket high and prior-day high.<br>
+  Bearish: 15m close below <b>both</b> premarket low and prior-day low.<br>
+  Re-polled every 5 minutes during market hours. Tickers drop off or flip sides as closes change.
+</div>
+
+<script>
+const FEED = "https://raw.githubusercontent.com/HueTX/options-board-data/main/fifteen_min_closes.json";
+const dot = document.getElementById("hbDot");
+const statusEl = document.getElementById("hbStatus");
+const refreshEl = document.getElementById("hbRefresh");
+const candleTag = document.getElementById("candleTag");
+
+function setHB(state, msg){
+  dot.className = "hb-dot " + state;
+  statusEl.textContent = state === "green" ? "Refreshed" : state === "amber" ? "Connecting" : "Not connected";
+  if(msg) refreshEl.innerHTML = msg;
+}
+function fmtTime(iso){
+  try{
+    const d = new Date(iso);
+    return d.toLocaleString("en-US",{timeZone:"America/Chicago",weekday:"short",month:"short",day:"numeric",hour:"numeric",minute:"2-digit",second:"2-digit",hour12:true}) + " CT";
+  }catch(e){ return iso; }
+}
+function rowHTML(r, side){
+  const badge = r.status === "new" ? '<span class="badge new">new</span>'
+    : r.status === "flipped" ? '<span class="badge flipped">flipped</span>' : "";
+  const lv = side === "bull"
+    ? `PDH ${r.pdh} &middot; PMH ${r.pmh}`
+    : `PDL ${r.pdl} &middot; PML ${r.pml}`;
+  return `<div class="row"><div><span class="ticker">${r.ticker}</span>${badge}</div>`
+    + `<div class="meta"><div class="close">$${r.close}</div><div>${lv}</div></div></div>`;
+}
+async function poll(){
+  setHB("amber");
+  try{
+    const res = await fetch(FEED + "?t=" + Date.now(), {cache:"no-store"});
+    if(!res.ok) throw new Error("HTTP " + res.status);
+    const d = await res.json();
+    const bull = d.bullish || [], bear = d.bearish || [];
+    document.getElementById("bullCount").textContent = bull.length;
+    document.getElementById("bearCount").textContent = bear.length;
+    document.getElementById("bullRows").innerHTML = bull.length ? bull.map(r=>rowHTML(r,"bull")).join("") : '<div class="empty">No bullish closes</div>';
+    document.getElementById("bearRows").innerHTML = bear.length ? bear.map(r=>rowHTML(r,"bear")).join("") : '<div class="empty">No bearish closes</div>';
+    candleTag.textContent = d.candle ? ("Latest completed 15m candle: " + d.candle + "  ·  Scanned " + (d.scanned||0) + " tickers") : "";
+    const when = d.asOf ? fmtTime(d.asOf) : "unknown";
+    const mo = d.marketOpen === false ? " (market closed)" : "";
+    setHB("green", "Last refresh: " + when + mo);
+  }catch(e){
+    setHB("red", "Feed unreachable &mdash; showing last good data");
+  }
+}
+function toggleTheme(){
+  const h = document.documentElement;
+  const next = h.getAttribute("data-theme") === "dark" ? "light" : "dark";
+  h.setAttribute("data-theme", next);
+  try{ localStorage.setItem("ofb_theme", next); }catch(e){}
+  document.getElementById("themeBtn").textContent = next === "dark" ? "Light" : "Dark";
+}
+(function init(){
+  try{
+    const t = localStorage.getItem("ofb_theme");
+    if(t){ document.documentElement.setAttribute("data-theme", t);
+      document.getElementById("themeBtn").textContent = t === "dark" ? "Light" : "Dark"; }
+  }catch(e){}
+  poll();
+  setInterval(poll, 60000); // 1-minute heartbeat
+})();
+</script>
+</body>
+</html>
