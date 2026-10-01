@@ -54,7 +54,7 @@ a{color:var(--orange); text-decoration:none}
   <div class="legend" id="legend" style="display:none; margin-top:10px"></div>
   <div class="verdict" id="verdict"></div>
 </div>
-<div class="note">15-minute regular-session candles &middot; 5-minute premarket candles (dimmed)<br>Dashed lines: prior-day high/low &middot; Dotted lines: premarket high/low</div>
+<div class="note">15-minute regular-session candles from today's 9:30 ET open &middot; completed candles only<br>Dashed lines: prior-day high/low &middot; Dotted lines: premarket high/low</div>
 
 <script>
 const CHARTS_URL = "https://raw.githubusercontent.com/HueTX/options-board-data/main/fifteen_min_charts.json";
@@ -66,9 +66,8 @@ function css(v){ return getComputedStyle(document.documentElement).getPropertyVa
 
 function drawChart(entry){
   const lv = entry.levels;
-  const pre = entry.premarket || [];
   const reg = entry.candles15m || [];
-  const all = pre.concat(reg);
+  const all = reg;
   if(!all.length){ showErr("No candle data"); return; }
 
   const cv = document.getElementById("chart");
@@ -105,29 +104,19 @@ function drawChart(entry){
     ctx.fillText(p.toFixed(2), W - padR + 6, yy + 3);
   }
 
-  // session separator (premarket | regular)
+  // x position of candle i
   const x = i => padL + slot * (i + 0.5);
-  if(pre.length && reg.length){
-    const sx = padL + slot * pre.length;
-    ctx.strokeStyle = dim; ctx.setLineDash([3,3]);
-    ctx.beginPath(); ctx.moveTo(sx, padT); ctx.lineTo(sx, padT + ih); ctx.stroke();
-    ctx.setLineDash([]);
-    ctx.fillStyle = dim; ctx.textAlign = "center";
-    ctx.fillText("9:30", sx, H - 8);
-  }
 
-  // candles
+  // candles (current regular session only)
   all.forEach((c, i) => {
     const cx = x(i), up = c.c >= c.o;
     const col = up ? gain : loss;
     ctx.strokeStyle = col; ctx.fillStyle = col;
-    ctx.globalAlpha = i < pre.length ? 0.45 : 1;
     ctx.lineWidth = 1;
     ctx.beginPath(); ctx.moveTo(cx, y(c.h)); ctx.lineTo(cx, y(c.l)); ctx.stroke();
     const yo = y(c.o), yc = y(c.c);
     const top = Math.min(yo, yc), hh = Math.max(1, Math.abs(yc - yo));
     ctx.fillRect(cx - bw / 2, top, bw, hh);
-    ctx.globalAlpha = 1;
   });
 
   // level lines
@@ -148,17 +137,17 @@ function drawChart(entry){
     ctx.fillText(L.label + " " + L.v.toFixed(2), W - padR + 6, yy - 4);
   });
 
-  // x labels: first premarket, 9:30, then hourly
-  ctx.fillStyle = dim; ctx.textAlign = "center"; ctx.font = "10px " + css("--mono");
+  // x labels: session open, then hourly
+  ctx.fillStyle = dim; ctx.font = "10px " + css("--mono");
   const seen = new Set();
   all.forEach((c, i) => {
+    if(i === 0){ ctx.textAlign = "left"; ctx.fillText(c.t, padL, H - 8); ctx.textAlign = "center"; return; }
     const hr = c.t.slice(0, 2) + ":00";
-    if(c.t.endsWith(":00") && !seen.has(hr) && i >= pre.length){
+    if(c.t.endsWith(":00") && !seen.has(hr)){
       seen.add(hr);
       ctx.fillText(c.t, x(i), H - 8);
     }
   });
-  if(pre.length) { ctx.textAlign = "left"; ctx.fillText(pre[0].t, padL, H - 8); }
 
   // legend + verdict
   const lg = document.getElementById("legend");
@@ -168,17 +157,20 @@ function drawChart(entry){
     `<span><span class="sw" style="border-color:${gain}"></span>PMH ${lv.pmh ?? "—"}</span>` +
     `<span><span class="sw solid" style="border-color:${loss}"></span>PDL ${lv.pdl ?? "—"}</span>` +
     `<span><span class="sw" style="border-color:${loss}"></span>PML ${lv.pml ?? "—"}</span>`;
-  const last = reg.length ? reg[reg.length - 1] : all[all.length - 1];
+  const last = reg[reg.length - 1];
   const v = document.getElementById("verdict");
-  if(lv.pdh && lv.pmh && last.c > lv.pdh && last.c > lv.pmh){
+  const abovePDH = lv.pdh && last.c > lv.pdh, abovePMH = lv.pmh && last.c > lv.pmh;
+  const belowPDL = lv.pdl && last.c < lv.pdl, belowPML = lv.pml && last.c < lv.pml;
+  if(abovePDH || abovePMH){
+    const cleared = [abovePDH && `PDH $${lv.pdh.toFixed(2)}`, abovePMH && `PMH $${lv.pmh.toFixed(2)}`].filter(Boolean).join(" and ");
     v.className = "verdict bull";
-    v.textContent = `Bullish: last 15m close $${last.c.toFixed(2)} above PDH $${lv.pdh.toFixed(2)} and PMH $${lv.pmh.toFixed(2)}`;
-  } else if(lv.pdl && lv.pml && last.c < lv.pdl && last.c < lv.pml){
+    v.textContent = `Bullish: last 15m close $${last.c.toFixed(2)} above ${cleared}`;
+  } else if(belowPDL && belowPML){
     v.className = "verdict bear";
     v.textContent = `Bearish: last 15m close $${last.c.toFixed(2)} below PDL $${lv.pdl.toFixed(2)} and PML $${lv.pml.toFixed(2)}`;
   } else {
     v.className = "verdict"; v.style.color = css("--text-dim");
-    v.textContent = `Last 15m close $${last.c.toFixed(2)} — no longer clearing both levels`;
+    v.textContent = `Last 15m close $${last.c.toFixed(2)} — not clearing a level`;
   }
 }
 function showErr(msg){
