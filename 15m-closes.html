@@ -220,8 +220,8 @@ function drawSpark(cv, closes){
   // series mean — dashed, like the watchlist
   let sum = 0; for(const v of closes) sum += v;
   const mean = sum / closes.length;
-  ctx.strokeStyle = cssVar("--faint") || "#666"; ctx.lineWidth = 1;
-  ctx.setLineDash([4, 4]); ctx.globalAlpha = .65;
+  ctx.strokeStyle = cssVar("--text-dim") || "#98989f"; ctx.lineWidth = 1;
+  ctx.setLineDash([5, 4]); ctx.globalAlpha = .8;
   ctx.beginPath(); ctx.moveTo(0, py(mean)); ctx.lineTo(W, py(mean)); ctx.stroke();
   ctx.setLineDash([]); ctx.globalAlpha = 1;
   // 15m close line, colored by 15m trend (last close vs mean)
