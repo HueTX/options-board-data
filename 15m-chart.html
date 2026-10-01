@@ -54,7 +54,7 @@ a{color:var(--orange); text-decoration:none}
   <div class="legend" id="legend" style="display:none; margin-top:10px"></div>
   <div class="verdict" id="verdict"></div>
 </div>
-<div class="note">15-minute regular-session candles from today's 9:30 ET open &middot; completed candles only<br>Dashed lines: prior-day high/low &middot; Dotted lines: premarket high/low</div>
+<div class="note">15-minute close line from today's 9:30 ET open &middot; completed candles only<br>Dashed lines: prior-day high/low &middot; Dotted lines: premarket high/low &middot; Gray dashed: session mean</div>
 
 <script>
 const CHARTS_URL = "https://raw.githubusercontent.com/HueTX/options-board-data/main/fifteen_min_charts.json";
@@ -90,7 +90,6 @@ function drawChart(entry){
   const span = (hi - lo) || 1; lo -= span * 0.06; hi += span * 0.06;
   const y = p => padT + (1 - (p - lo) / (hi - lo)) * ih;
   const n = all.length;
-  const slot = iw / n, bw = Math.max(2, Math.min(14, slot * 0.62));
 
   const gain = css("--gain"), loss = css("--loss"), grid = css("--grid"),
         dim = css("--text-dim"), txt = css("--text");
@@ -104,20 +103,30 @@ function drawChart(entry){
     ctx.fillText(p.toFixed(2), W - padR + 6, yy + 3);
   }
 
-  // x position of candle i
-  const x = i => padL + slot * (i + 0.5);
+  // watchlist-style line chart: 15m close line, dashed session-mean line, final dot
+  const closes = all.map(c => c.c);
+  let mSum = 0; closes.forEach(v => mSum += v);
+  const mean = mSum / closes.length;
+  const trendUp = closes[closes.length - 1] >= mean;
+  const lineCol = trendUp ? gain : loss;
 
-  // candles (current regular session only)
-  all.forEach((c, i) => {
-    const cx = x(i), up = c.c >= c.o;
-    const col = up ? gain : loss;
-    ctx.strokeStyle = col; ctx.fillStyle = col;
-    ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.moveTo(cx, y(c.h)); ctx.lineTo(cx, y(c.l)); ctx.stroke();
-    const yo = y(c.o), yc = y(c.c);
-    const top = Math.min(yo, yc), hh = Math.max(1, Math.abs(yc - yo));
-    ctx.fillRect(cx - bw / 2, top, bw, hh);
-  });
+  // x position of point i
+  const x = i => padL + (n === 1 ? iw / 2 : (i / (n - 1)) * iw);
+
+  // series mean — dashed, like the watchlist
+  ctx.strokeStyle = dim; ctx.lineWidth = 1;
+  ctx.setLineDash([5, 4]); ctx.globalAlpha = .7;
+  ctx.beginPath(); ctx.moveTo(padL, Math.round(y(mean)) + 0.5); ctx.lineTo(W - padR, Math.round(y(mean)) + 0.5); ctx.stroke();
+  ctx.setLineDash([]); ctx.globalAlpha = 1;
+
+  // 15m close line, colored by trend (last close vs mean)
+  ctx.strokeStyle = lineCol; ctx.lineWidth = 2.5; ctx.lineJoin = "round"; ctx.lineCap = "round";
+  ctx.beginPath();
+  closes.forEach((v, i) => i ? ctx.lineTo(x(i), y(v)) : ctx.moveTo(x(i), y(v)));
+  ctx.stroke();
+  // final dot
+  ctx.fillStyle = lineCol;
+  ctx.beginPath(); ctx.arc(x(n - 1), y(closes[n - 1]), 4, 0, 7); ctx.fill();
 
   // level lines
   const lines = [
