@@ -402,6 +402,15 @@ canvas.r-spark.hide{display:none}
 /* ============ DRAWER ============ */
 .drawer-veil{position:fixed;inset:0;background:rgba(0,0,0,.45);opacity:0;pointer-events:none;transition:opacity .25s;z-index:60}
 .drawer-veil.open{opacity:1;pointer-events:auto}
+/* Back-to-top: hidden near the top, fades in after meaningful scroll, smooth-scrolls home. */
+#toTop{position:fixed;right:18px;bottom:calc(18px + env(safe-area-inset-bottom, 0px));width:44px;height:44px;
+  border-radius:50%;border:1px solid var(--panel-brd);background:var(--surface-2);color:var(--text);
+  font-size:20px;line-height:1;cursor:pointer;z-index:55;opacity:0;pointer-events:none;transform:translateY(10px);
+  transition:opacity .25s ease,transform .25s ease;box-shadow:var(--shadow)}
+#toTop.show{opacity:1;pointer-events:auto;transform:none}
+#toTop:hover{border-color:var(--orange);color:var(--orange)}
+#toTop:focus-visible{outline:2px solid var(--orange);outline-offset:2px}
+@media (max-width:640px){#toTop{right:14px;bottom:calc(14px + env(safe-area-inset-bottom, 0px));width:42px;height:42px}}
 .drawer{
   position:fixed;top:0;right:0;bottom:0;width:min(430px,100vw);z-index:61;
   background:var(--surface);border-left:1px solid var(--panel-brd);
@@ -776,6 +785,7 @@ footer.appfoot{margin:26px 0 0;font-size:12.5px;color:var(--faint);text-align:ce
 </div>
 
 <div class="drawer-veil" id="drawerVeil"></div>
+<button id="toTop" type="button" aria-label="Back to top" title="Back to top">&#8593;</button>
 <aside class="drawer" id="drawer" aria-hidden="true">
   <div class="d-head">
     <div class="tt"><h2 id="dSym">&mdash;</h2><div class="nm" id="dName"></div></div>
@@ -896,6 +906,8 @@ const QUOTES_UNI_URL = "https://raw.githubusercontent.com/HueTX/options-board-da
 const WATCHLIST_URL = "https://raw.githubusercontent.com/HueTX/options-board-data/main/watchlist.json";
 const WCHARTS_URL = "https://raw.githubusercontent.com/HueTX/options-board-data/main/wcharts.json";   // live 1H/4H trend series for the watchlist; merged into WCHARTS when its marketDate is >= the current rows'
 const MOVERS_URL = "https://raw.githubusercontent.com/HueTX/options-board-data/main/market_movers.json";
+const DBARS_URL = "https://raw.githubusercontent.com/HueTX/options-board-data/main/dbars.json";   // 5m drawer bars for flow/mover tickers outside the 56-ticker quotes feed
+const REGIME1H_URL = "https://raw.githubusercontent.com/HueTX/options-board-data/main/regime1h.json"; // 1H regime bars, same h1 semantics as the watchlist charts
 const FEED_OK = !/PUT-YOUR/.test(QUOTES_URL + QUOTES_UNI_URL + WATCHLIST_URL);   // replace-all safe: true once the placeholder is gone from the URLs
 // Per-feed heartbeat: last SUCCESSFUL fetch time (epoch ms). A failed fetch leaves the
 // previous timestamp alone, so the chip ages honestly toward STALE while the section
@@ -953,14 +965,16 @@ async function refreshQuotes(){
     const bust = '?t=' + Math.floor(Date.now()/15000);
     for (const [k] of DS_DEFS) DS[k] = {state:'checking', asOf:null, sub:''};
     dsPaint();
-    const [r1, r2, r4, r5, r6, r7, r8] = await Promise.all([
+    const [r1, r2, r4, r5, r6, r7, r8, r9, r10] = await Promise.all([
       fetch(QUOTES_URL + bust).then(r => { if(!r.ok) throw new Error('quotes '+r.status); return r.json(); }),
       fetch(QUOTES_UNI_URL + bust).then(r => { if(!r.ok) throw new Error('uni '+r.status); return r.json(); }).catch(() => null),
       fetch(FT_URL + bust).then(r => { if(!r.ok) throw new Error('ft '+r.status); return r.json(); }).catch(() => null),
       fetch(WATCHLIST_URL + bust).then(r => { if(!r.ok) throw new Error('wl '+r.status); return r.json(); }).catch(() => null),
       fetch(SNAPSHOT_URL + bust).then(r => { if(!r.ok) throw new Error('snap '+r.status); return r.json(); }).catch(() => null),
       fetch(MOVERS_URL + bust).then(r => { if(!r.ok) throw new Error('mv '+r.status); return r.json(); }).catch(() => null),
-      fetch(WCHARTS_URL + bust).then(r => { if(!r.ok) throw new Error('wc '+r.status); return r.json(); }).catch(() => null)
+      fetch(WCHARTS_URL + bust).then(r => { if(!r.ok) throw new Error('wc '+r.status); return r.json(); }).catch(() => null),
+      fetch(DBARS_URL + bust).then(r => { if(!r.ok) throw new Error('db '+r.status); return r.json(); }).catch(() => null),
+      fetch(REGIME1H_URL + bust).then(r => { if(!r.ok) throw new Error('r1h '+r.status); return r.json(); }).catch(() => null)
     ]);
     const now = Date.now();
     PRISET.clear(); for (const sym of Object.keys(r1.tickers || {})) PRISET.add(sym);
@@ -993,6 +1007,19 @@ async function refreshQuotes(){
       MV = r7; HB.movers = now;
       const ms7 = Date.parse(r7.asOf); if (isFinite(ms7)) mvAsOfMs = ms7;
       const d = etDateOfMs(ms7); if (/^\d{4}-\d{2}-\d{2}$/.test(d)) mvDate = d;
+    }
+    if (r9 && r9.bars && typeof r9.bars === 'object'){
+      // 5m drawer bars for flow/mover tickers outside the priority 56: ingested
+      // into the same quote map (priority entries never overwritten), so the
+      // drawer chart, day range, volume and premarket H/L work for them too.
+      for (const [sym, e] of Object.entries(r9.bars)){
+        if (!PRISET.has(sym)) ingestEntry(sym, e);
+      }
+    }
+    if (r10 && r10.charts && typeof r10.charts === 'object'){
+      // 1H regime bars (same h1 semantics as the watchlist charts): the regime
+      // strip plots the identical 1-hour history as the trading watchlist.
+      Object.assign(WCHARTS, r10.charts);
     }
     // live movers feed failure is non-fatal: universe-computed movers remain the fallback
     // snapshot fetch failure / older file is non-fatal: the embedded snapshot keeps the page working
@@ -1281,6 +1308,29 @@ function fmtAge(ms){
 }
 
 /* ================= STRIP: regime / session ================= */
+function hourlyCloses(bars){
+  // Aggregate intraday bars into regular-session hourly closes (ET), matching
+  // the watchlist h1 semantics: the last close of each 09:30-16:00 ET hour.
+  const out = []; let curH = -1, last = null;
+  for (const b of (bars || [])){
+    const m = etDayMin(b[0]);
+    if (m < 570 || m >= 960) continue;
+    const h = Math.floor((m - 570) / 60);
+    if (h !== curH){ if (last != null) out.push(last); curH = h; }
+    last = b[4];
+  }
+  if (last != null) out.push(last);
+  return out;
+}
+function regimeSeries(sym){
+  // Same 1-hour history as the trading-morning watchlist: the published h1
+  // series when available, else today's intraday bars aggregated to hourly
+  // closes (identical semantics) so the strip never goes blank.
+  const h1 = watchTrendSeries(WCHARTS[sym], 'h1');
+  if (h1.length > 1) return h1;
+  const q = Q.get(sym);
+  return (q && q.bars) ? hourlyCloses(q.bars) : [];
+}
 function renderRegime(){
   const el = $('stripQuotes');
   const waiting = !Q.size;
@@ -1288,13 +1338,14 @@ function renderRegime(){
     const q = Q.get(s);
     if (!q || q.price == null) return `<article class="sq" data-sym="${s}"><span class="q-sym">${s}</span>${waiting?'<span class="skel" style="width:52px">&nbsp;</span>':'<span class="q-na">—</span>'}</article>`;
     const cls = q.chgPct >= 0 ? 'up' : 'dn';
-    const hasBars = q.bars && q.bars.length > 1;
-    return `<article class="sq" data-sym="${s}"><span class="q-sym">${s}</span>${hasBars?'<canvas class="q-spark" width="84" height="40"></canvas>':''}<span class="q-px">${fmtPx(q.price)}</span><span class="q-ch ${cls}">${fmtPct(q.chgPct)}</span></article>`;
+    return `<article class="sq" data-sym="${s}"><span class="q-sym">${s}</span>${regimeSeries(s).length > 1?'<canvas class="q-spark" width="84" height="40"></canvas>':''}<span class="q-px">${fmtPx(q.price)}</span><span class="q-ch ${cls}">${fmtPct(q.chgPct)}</span></article>`;
   }).join('');
   el.querySelectorAll('.sq').forEach(a => {
     const cv = a.querySelector('canvas.q-spark'); if (!cv) return;
-    const q = Q.get(a.dataset.sym);
-    if (q && q.bars && q.bars.length > 1) drawSpark(cv, q.bars.slice(-160), (q.chgPct||0) >= 0);
+    const series = regimeSeries(a.dataset.sym);
+    // drawWChart + wTrendOf: the exact watchlist 1H rendering (line + dashed
+    // series-mean, direction from last close vs mean).
+    if (series.length > 1) drawWChart(cv, series, wTrendOf(series) === 'up');
   });
 }
 function renderSession(){
@@ -2314,6 +2365,14 @@ $('pmGrid').addEventListener('click', e => {
 });
 $('drawerX').addEventListener('click', closeDrawer);
 $('drawerVeil').addEventListener('click', closeDrawer);
+/* Back-to-top: appears after meaningful scroll, smooth-scrolls to the top. */
+(function(){
+  const btn = $('toTop');
+  const onScroll = () => btn.classList.toggle('show', (window.scrollY || document.documentElement.scrollTop) > 600);
+  addEventListener('scroll', onScroll, {passive:true});
+  onScroll();
+  btn.addEventListener('click', () => window.scrollTo({top:0, behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'}));
+})();
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
 document.addEventListener('click', e => {
   const mpg = e.target.closest('[data-mvpg]');
