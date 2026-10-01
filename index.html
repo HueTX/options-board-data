@@ -36,6 +36,7 @@ html[data-theme="dark"]{
   --pool-bear: linear-gradient(180deg, rgba(255,69,58,.08), transparent 75%);
   --strip-bg: rgba(5,5,6,.80);
   --pm-flat: rgba(148,163,184,.10);
+  --link:#5e9bff;
 }
 html[data-theme="light"]{
   --bg:#f7f2e6;
@@ -62,6 +63,7 @@ html[data-theme="light"]{
   --pool-bear: linear-gradient(180deg, rgba(220,38,38,.08), transparent 75%);
   --strip-bg: rgba(247,242,230,.82);
   --pm-flat: rgba(100,116,139,.12);
+  --link:#1d4ed8;
 }
 /* ============ BASE ============ */
 *{box-sizing:border-box}
@@ -315,6 +317,20 @@ section.collapsed .sec-body{display:none}
 .sig-badge.new{color:var(--orange);border-color:rgba(255,159,10,.45);background:rgba(255,159,10,.12)}
 .sig-badge.flow{color:var(--gold);border-color:rgba(224,170,62,.45);background:rgba(224,170,62,.12)}
 .sig-badge.flow.x5{color:var(--orange);border-color:rgba(255,159,10,.55);background:rgba(255,159,10,.16)}
+.sig-badge.sig15.bull{color:var(--gain);border-color:rgba(48,209,88,.45);background:rgba(48,209,88,.14)}
+.sig-badge.sig15.bear{color:var(--loss);border-color:rgba(255,69,58,.45);background:rgba(255,69,58,.14)}
+.sig-badge.noq{color:var(--orange);border-color:rgba(255,159,10,.5);background:rgba(255,159,10,.10)}
+.runner.g0{box-shadow:inset 3px 0 0 var(--gain)}
+.runner.g1{box-shadow:inset 3px 0 0 var(--orange)}
+.runner.g2{box-shadow:inset 3px 0 0 var(--gold)}
+.runner.g3{box-shadow:inset 3px 0 0 var(--loss)}
+.sc-cmove{font-size:11.5px;font-weight:700;color:var(--muted);margin-top:2px}
+.empty .retry{font:inherit;font-weight:700;color:var(--text);background:var(--pill-bg);border:1px solid var(--panel-brd);border-radius:8px;padding:4px 12px;cursor:pointer}
+.sec-card.heat-neutral{border-style:dashed}
+.mv-cap{font-size:10px;color:var(--muted);font-weight:600}
+.wlegend{font-size:11px;color:var(--muted);margin:2px 0 8px}
+.cpbar{display:inline-block;width:90px;height:8px;border-radius:99px;background:var(--panel-brd);overflow:hidden;vertical-align:middle}
+.cpbar span{display:block;height:100%;background:var(--gain)}
 canvas.r-spark{width:92px;height:34px;display:block}
 canvas.r-spark.hide{display:none}
 .r-nums{text-align:right;min-width:0}
@@ -571,6 +587,8 @@ footer.appfoot{margin:26px 0 0;font-size:12.5px;color:var(--faint);text-align:ce
       <div class="sec-body">
         <div class="fpills" id="mvFilters" role="group" aria-label="Movers filter">
           <button class="fpill on" data-mvf="u311">311</button>
+          <button class="fpill" data-mvf="rest">Rest of market</button>
+          <button class="fpill" data-mvf="all">All</button>
           <label class="seg-label" style="display:inline-flex;align-items:center;gap:8px;margin-left:auto">Sort
             <select id="mvSortSel" aria-label="Movers sort">
               <option value="chg">% Change</option>
@@ -587,7 +605,7 @@ footer.appfoot{margin:26px 0 0;font-size:12.5px;color:var(--faint);text-align:ce
 
     <section class="panel tint-amber" id="secSignals">
       <div class="sec-head" data-sec="secSignals">
-        <div class="titles"><h2>15m confirmed closes <span class="final-pill">FINAL</span></h2><p class="sub">Checking completed candles&hellip;</p><span class="upd" id="updSignals"></span></div>
+        <div class="titles"><h2>15m confirmed closes <span class="final-pill" id="sigPill">—</span></h2><p class="sub" id="sigSub">Checking completed candles&hellip;</p><span class="upd" id="updSignals"></span></div>
         <button class="chev" aria-label="Collapse">&#8964;</button>
       </div>
       <div class="sec-body">
@@ -626,6 +644,8 @@ footer.appfoot{margin:26px 0 0;font-size:12.5px;color:var(--faint);text-align:ce
       <div class="sec-body">
         <div class="legend">
           <span class="k"><span class="dot" style="background:var(--gain)"></span>Above 15min PDH and PMH</span>
+          <span class="k"><span class="dot" style="background:var(--orange)"></span>Ignited</span>
+          <span class="k"><span class="dot" style="background:var(--gold)"></span>Unusual flow ≥2x</span>
           <span class="k"><span class="dot" style="background:var(--loss)"></span>Below 15min PDL and PML</span>
         </div>
         <div class="fpills" id="flowFilters">
@@ -679,9 +699,9 @@ footer.appfoot{margin:26px 0 0;font-size:12.5px;color:var(--faint);text-align:ce
           <label class="seg-label" style="display:inline-flex;align-items:center;gap:8px">Sort
             <select id="pmSortSel" aria-label="Premarket sort">
               <option value="gap">Biggest gap</option>
-              <option value="flow">Most flow</option>
               <option value="cap">Largest cap</option>
-              <option value="prior">Prior-day move</option>
+              <option value="strength">Strength (standout)</option>
+              <option value="flow">Most flow</option>
             </select>
           </label>
         </div>
@@ -717,7 +737,9 @@ footer.appfoot{margin:26px 0 0;font-size:12.5px;color:var(--faint);text-align:ce
           <button class="wchip on" data-wsort="rank">Rank</button>
           <button class="wchip" data-wsort="cap">Market cap</button>
           <button class="wchip" data-wsort="chg">% change</button>
+          <button class="wchip" data-wsort="dir">Direction</button>
         </div>
+        <div class="wlegend">Dashed line on each chart = series mean · ▲ up / ▼ down from 4H trend, then 1H, then today's move</div>
         <div class="whead" aria-hidden="true">
           <span></span><span></span><span>1H</span><span>4H</span><span class="wh-sess">Sessions</span><span class="wh-watch">Watch</span>
         </div>
@@ -741,10 +763,10 @@ footer.appfoot{margin:26px 0 0;font-size:12.5px;color:var(--faint);text-align:ce
       </div>
       <div class="sec-body">
         <ol class="mflow">
-          <li><b>Mark the levels.</b> PDH/PDL from yesterday, PMH/PML from this morning&rsquo;s premarket. The trade only exists around these lines.</li>
-          <li><b>Wait for the 15-minute close.</b> No trade on a wick &mdash; the candle must <b>close</b> through PDH&nbsp;+&nbsp;PMH (bullish) or PDL&nbsp;+&nbsp;PML (bearish). That close is the BREAK tag.</li>
-          <li><b>Drop to the 2-minute and hunt the flag.</b> Enter only on the first 2-minute candle closing beyond the flag&rsquo;s line.</li>
-          <li><b>Manage it mechanically.</b> Stop at the flag low, exit on a close back inside. Max 3 trades a day &mdash; halt after 2 losses.</li>
+          <li><b>Watchlist — where to look.</b> The 22 ranked morning setups are your hunting ground; start every session here.</li>
+          <li><b>15-minute closes — when it's happening.</b> A confirmed close through PDH&nbsp;+&nbsp;PMH (bullish) or PDL&nbsp;+&nbsp;PML (bearish) is the timing trigger — nothing counts on a wick.</li>
+          <li><b>Flow — whether to believe it.</b> Unusual options flow (≥2x average) behind the move is what separates a real breakout from noise.</li>
+          <li><b>Market movers — the safety net.</b> Catches anything hot outside your 22 names so no big move slips past.</li>
         </ol>
       </div>
     </section>
@@ -859,6 +881,7 @@ function seedWatchlist(){
 }
 seedWatchlist();
 const UNISET = new Set((SNAP.universe||[]).map(x => x.ticker || x));  // full watch universe; universe feed adds its tickers on each poll
+const PRISET = new Set();  // the 56 priority names from quotes.json; "rest of market" = UNISET minus these
 const COMPANIES = new Map();
 for (const u of (SNAP.universe||[])) if (u.ticker) COMPANIES.set(u.ticker, u.name || NAMES.get(u.ticker) || '');
 
@@ -912,11 +935,16 @@ function ingestEntry(sym, e){
   if (rec.pmh == null && PM_EMBED[sym] && PM_EMBED[sym].pmh != null){ rec.pmh = PM_EMBED[sym].pmh; rec.pml = PM_EMBED[sym].pml; }
   Q.set(sym, rec);
 }
-// Live display values: prefer the latest quote when we have one, otherwise the
-// row's own snapshot/file value. Sections re-render on every 60s tick, so prices
-// stay live while quotes flow and degrade honestly to the file data when they don't.
-function livePrice(t){ const q = Q.get(t); return (q && q.price != null) ? q.price : null; }
-function liveChg(t){ const q = Q.get(t); return (q && q.chgPct != null) ? q.chgPct : null; }
+// Live display values: a quote only counts as live when it is fresh AND stamped on
+// the current market date. A carried-forward prior-session quote (e.g. MRNA from
+// yesterday) must never masquerade as today's price — sections fall back to the
+// row's own snapshot/file value instead.
+function quoteFresh(q){
+  if (!q || q.price == null || !q.ts) return false;
+  return etDateOfMs(q.ts*1000) === nyMarketDate();
+}
+function livePrice(t){ const q = Q.get(t); return quoteFresh(q) ? q.price : null; }
+function liveChg(t){ const q = Q.get(t); return (quoteFresh(q) && q.chgPct != null) ? q.chgPct : null; }
 
 /* ================= FEED ================= */
 async function refreshQuotes(){
@@ -935,6 +963,7 @@ async function refreshQuotes(){
       fetch(WCHARTS_URL + bust).then(r => { if(!r.ok) throw new Error('wc '+r.status); return r.json(); }).catch(() => null)
     ]);
     const now = Date.now();
+    PRISET.clear(); for (const sym of Object.keys(r1.tickers || {})) PRISET.add(sym);
     for (const [sym, e] of Object.entries(r1.tickers || {})) ingestEntry(sym, e);
     HB.quotes = now; lastPollT = now;
     if (r1.asOf){ const ms = Date.parse(r1.asOf); if (isFinite(ms)) quotesAsOfMs = ms; const d = etDateOfMs(ms); if (/^\d{4}-\d{2}-\d{2}$/.test(d)) quotesDate = d; }
@@ -1073,7 +1102,7 @@ function signalFor(sym, now){
         : (c[0] < c[1] && c[1] < c[2]);
     }
   }
-  return {side, close: last.c, t: last.t, fading};
+  return {side, close: last.c, open: last.o, t: last.t, fading};
 }
 function quoteAgeMs(){
   let best = null;
@@ -1319,11 +1348,15 @@ function sigCard(s, sig){
   const chgCls = (chg == null || !isFinite(chg)) ? 'na' : (chg > 0 ? 'up' : chg < 0 ? 'dn' : 'na');
   const cap = CAPS.get(s);
   const capTxt = (cap == null || !isFinite(cap)) ? 'Cap unavailable' : fmtCapB(cap);
+  const cmv = (sig.open != null && sig.open) ? (sig.close - sig.open) / sig.open * 100 : null;
+  const cmvTxt = (cmv == null || !isFinite(cmv)) ? 'candle move —'
+    : `candle ${(cmv >= 0 ? '+' : '') + cmv.toFixed(2)}%`;
   return `<div class="sig-card ${bull?'bull':'bear'}" data-sym="${esc(s)}">
     <div class="sc-row1"><span class="tk">${esc(s)}</span><span class="pct ${chgCls}">${esc(chgTxt)}</span></div>
     <div class="sc-row2">${sig.fading ? '<span class="badge fading">FADING</span>' : '<span></span>'}<span class="cap">${esc(capTxt)}</span></div>
     <div class="tag">${bull ? 'PDH + PMH' : 'PDL + PML'}</div>
     <div class="pxline"><span class="pxv">${fmtPx(sig.close)}</span><span class="tm">${etFmtShort.format(new Date(sig.t*1000))} ET</span></div>
+    <div class="sc-cmove">${esc(cmvTxt)}</div>
   </div>`;
 }
 const PRI15 = ["SPY","QQQ","IWM","AAPL","MSFT","GOOGL","AMZN","NVDA","META","TSLA"];
@@ -1331,6 +1364,19 @@ const sigPage = { bull: 1, bear: 1 };
 const SIG_PAGE = 5;
 function priTier(s){ const i = PRI15.indexOf(s); return i === -1 ? 999 : i; }
 function renderSignals(){
+  const bullGrid = $('bullSigGrid'), bearGrid = $('bearSigGrid');
+  if (!pollDone){
+    const l = '<div class="empty">Loading quotes&hellip;</div>';
+    if (bullGrid) bullGrid.innerHTML = l;
+    if (bearGrid) bearGrid.innerHTML = l;
+    return;
+  }
+  if (Q.size === 0){
+    const e = '<div class="empty">Quote data unavailable. <button class="retry" onclick="refreshQuotes()">Retry</button></div>';
+    if (bullGrid) bullGrid.innerHTML = e;
+    if (bearGrid) bearGrid.innerHTML = e;
+    return;
+  }
   const bull = [], bear = [];
   for (const s of ALL_NAMES){
     if (!LEVELS.has(s) || !Q.has(s)) continue;
@@ -1379,6 +1425,23 @@ function renderSignals(){
   $('bearSigPager').innerHTML = pager('bear', bear);
   $('bullSigCount').textContent = bull.length;
   $('bearSigCount').textContent = bear.length;
+  // Live header: "N active · M checked", countdown during hours, FINAL only after close.
+  const pill = $('sigPill'), sub = $('sigSub');
+  if (pill && sub){
+    const open = isMarketOpen();
+    const checked = ALL_NAMES.filter(s => LEVELS.has(s) && Q.has(s) && capPass(s)).length;
+    let txt = `${bull.length + bear.length} active · ${checked} checked`;
+    if (open){
+      pill.textContent = 'LIVE';
+      const step = 15*60*1000, next = Math.ceil((Date.now()+1000)/step)*step;
+      const secs = Math.max(0, Math.round((next - Date.now())/1000));
+      txt += ` · next candle ${Math.floor(secs/60)}:${String(secs%60).padStart(2,'0')}`;
+    } else {
+      pill.textContent = 'FINAL';
+      txt += ' · session closed';
+    }
+    sub.textContent = txt;
+  }
 }
 
 /* ================= FLOW ================= */
@@ -1388,18 +1451,30 @@ const FLOW_PAGE = 10;
 function passFilter(r){
   if (flowFilter === 'calls') return (r.callVolume||0) > (r.putVolume||0);
   if (flowFilter === 'puts') return (r.putVolume||0) > (r.callVolume||0);
-  if (flowFilter === 'ignited') return SNAP_FRESH && r.ignited === true;
-  if (flowFilter === 'breakouts') return r.breakout === 'above' || r.breakout === 'below';
+  if (flowFilter === 'ignited') return flowVerified() && r.ignited === true;
+  if (flowFilter === 'breakouts') return sigSideOf(r.ticker) != null;
   return true;
 }
-// Signal-group ordering applied before the selected sort:
-// breakout-above > ignited > unusual (>=2x) > breakout-below > standard
+// Strict flow verification: the snapshot must be <=35 minutes old AND every flow
+// row must carry finite volume data. Ignited / unusual labels only mean something
+// on verified flow — anything older is grouped as standard.
+function flowVerified(){
+  if (!isFinite(SNAP_TS) || Date.now() - SNAP_TS > 35*60*1000) return false;
+  const rows = (SNAP.bullish||[]).concat(SNAP.bearish||[]);
+  if (!rows.length) return false;
+  return rows.every(r => isFinite(r.volume) && isFinite(r.relativeVolume));
+}
+function sigSideOf(t){ const s = signalFor(t); return s ? s.side : null; }
+// Signal-group ordering applied before the selected sort, from the LIVE 15m
+// breakout-signal map (not the snapshot's flags):
+// above-breakout > ignited > unusual (>=2x) > below-breakout > standard
 function flowGroup(r){
-  if (!SNAP_FRESH) return 4;
-  if (r.breakout === 'above') return 0;
+  if (!flowVerified()) return 4;
+  const side = sigSideOf(r.ticker);
+  if (side === 'bull') return 0;
   if (r.ignited === true) return 1;
   if ((r.relativeVolume || 0) >= 2) return 2;
-  if (r.breakout === 'below') return 3;
+  if (side === 'bear') return 3;
   return 4;
 }
 // Momentum score: |% change| weighted by capped relative volume —
@@ -1408,7 +1483,7 @@ function momScore(r){
   const rv = Math.min(r.relativeVolume || 0, 5);
   return Math.abs(r.changePct || 0) * (0.6 + 0.4 * rv / 5);
 }
-function flowSortFn(a, b){
+function flowSortFn(a, b, dir){
   if (flowSortMode === 'mom') return momScore(b) - momScore(a);
   if (flowSortMode === 'unus') return (b.relativeVolume || 0) - (a.relativeVolume || 0);
   if (flowSortMode === 'tvol') return (b.volume || 0) - (a.volume || 0);
@@ -1416,8 +1491,10 @@ function flowSortFn(a, b){
     const ca = CAPS.get(a.ticker), cb = CAPS.get(b.ticker);
     return ((cb != null ? cb : -1) - (ca != null ? ca : -1)) || (a.ticker < b.ticker ? -1 : a.ticker > b.ticker ? 1 : 0);
   }
+  // 'chg': directional — bullish biggest gain first, bearish biggest loss first
   const echg = r => { const l = liveChg(r.ticker); return l != null ? l : (r.changePct || 0); };
-  return Math.abs(echg(b)) - Math.abs(echg(a));   // 'chg': live-aware
+  const ea = echg(a), eb = echg(b);
+  return dir === 'bear' ? ea - eb : eb - ea;
 }
 function pctDist(px, lvl){
   const d = (px - lvl) / lvl * 100;
@@ -1435,23 +1512,30 @@ function lvlBadge(r){
   return b;
 }
 function flowBadge(r){
-  if (!SNAP_FRESH || r.relativeVolume == null || r.relativeVolume < 2) return '';
+  if (!flowVerified() || r.relativeVolume == null || r.relativeVolume < 2) return '';
   return `<span class="sig-badge flow${r.relativeVolume >= 5 ? ' x5' : ''}" title="${r.relativeVolume.toFixed(1)}x avg options volume">↑ Flow</span>`;
+}
+function sig15Badge(r, sig){
+  if (!sig || !sig.side) return '';
+  const bull = sig.side === 'bull';
+  return `<span class="sig-badge sig15 ${bull ? 'bull' : 'bear'}">${bull ? '▲ 15m close above PDH+PMH' : '▼ 15m close below PDL+PML'}</span>`;
 }
 function runnerRow(r, prevSig){
   const q = Q.get(r.ticker);
   const sig = q ? signalFor(r.ticker) : null;
   const isNew = !!(sig && sig.side && prevSig && prevSig.get(r.ticker) == null);
   const pinned = pins.has(r.ticker);
+  const g = flowGroup(r);
   const px = livePrice(r.ticker) != null ? livePrice(r.ticker) : r.price;
   const chg = liveChg(r.ticker) != null ? liveChg(r.ticker) : r.changePct;
   const chCls = chg >= 0 ? 'up' : 'dn';
   const sideCls = r.side === 'bull' ? 'bull' : 'bear';
   const hasBars = !!(q && q.bars && q.bars.length > 1);
   const cname = r.name || COMPANIES.get(r.ticker) || NAMES.get(r.ticker) || '';
-  return `<div class="runner${pinned?' pinned':''}" data-sym="${esc(r.ticker)}">
+  const noQuote = !quoteFresh(q);
+  return `<div class="runner g${g}${pinned?' pinned':''}" data-sym="${esc(r.ticker)}">
     <div class="r-main"><div class="tk ${sideCls}">${esc(r.ticker)}</div>${cname ? `<div class="rname">${esc(cname)}</div>` : ''}
-      <div class="badges">${lvlBadge(r)}${isNew?'<span class="sig-badge new">• New</span>':''}${flowBadge(r)}</div></div>
+      <div class="badges">${sig15Badge(r, sig)}${lvlBadge(r)}${isNew?'<span class="sig-badge new">• New</span>':''}${flowBadge(r)}${noQuote?'<span class="sig-badge noq">QUOTE UNAVAILABLE</span>':''}</div></div>
     <canvas class="r-spark${hasBars?'':' hide'}" width="184" height="68" data-sym="${esc(r.ticker)}"></canvas>
     <div class="r-nums"><div class="px">${fmtPx(px)}</div><div class="ch ${chCls}">${fmtPct(chg)}</div></div>
     <button class="pin" data-pin="${esc(r.ticker)}" aria-label="Pin ${esc(r.ticker)}">${pinned?'★':'☆'}</button>
@@ -1474,10 +1558,10 @@ function pagerHTML(key, total){
 function renderFlow(prevSig){
   const prev = prevSig || new Map(SIGSTATE);
   // pins live in the dedicated strip now — they never reorder these lists
-  const prep = rows => rows.filter(passFilter)
-    .sort((a, b) => (flowGroup(a) - flowGroup(b)) || flowSortFn(a, b));
-  const bull = prep(SNAP.bullish || []);
-  const bear = prep(SNAP.bearish || []);
+  const prep = (rows, dir) => rows.filter(passFilter)
+    .sort((a, b) => (flowGroup(a) - flowGroup(b)) || flowSortFn(a, b, dir));
+  const bull = prep(SNAP.bullish || [], 'bull');
+  const bear = prep(SNAP.bearish || [], 'bear');
   const page = (list, key) => {
     const pages = Math.max(1, Math.ceil(list.length / FLOW_PAGE));
     if (flowPage[key] > pages) flowPage[key] = pages;
@@ -1497,13 +1581,13 @@ function renderFlow(prevSig){
 }
 
 /* ================= PREMARKET ================= */
-let pmBreakout = false, pmMega = false, pmFav = false, pmSort = 'gap'; // pmSort: 'gap' | 'flow' | 'cap' | 'prior'
+let pmBreakout = false, pmMega = false, pmFav = false, pmSort = 'gap'; // pmSort: 'gap' | 'cap' | 'strength' | 'flow'
 let pmPage = 1;
 const PM_PAGE = 5;
 const ctFmtShort = new Intl.DateTimeFormat('en-US',{timeZone:'America/Chicago',hour:'numeric',minute:'2-digit',hour12:true});
 function pmCapLabel(mcb){
   if (mcb == null || !isFinite(mcb)) return '';
-  return (mcb > 10 ? 'Large' : mcb >= 2 ? 'Mid' : 'Small') + ' cap';
+  return '$' + mcb.toFixed(1) + 'B cap';
 }
 // Breakout state with level priority PMH -> PDH -> PML -> PDL (live levels first,
 // snapshot prior-day levels next, snapshot position flag as the last fallback).
@@ -1511,10 +1595,10 @@ function pmBreakoutOf(r){
   const q = Q.get(r.ticker);
   const pmh = q && q.pmh != null ? q.pmh : null;
   const pml = q && q.pml != null ? q.pml : null;
-  if (pmh != null && r.price != null && r.price > pmh) return {state: 'up', label: 'Breaking out (PMH)'};
-  if (r.priorHigh != null && r.price != null && r.price > r.priorHigh) return {state: 'up', label: 'Breaking out (PDH)'};
-  if (pml != null && r.price != null && r.price < pml) return {state: 'dn', label: 'Breaking down (PML)'};
-  if (r.priorLow != null && r.price != null && r.price < r.priorLow) return {state: 'dn', label: 'Breaking down (PDL)'};
+  if (pmh != null && r.price != null && r.price > pmh) return {state: 'up', label: 'Breaking out of PMH'};
+  if (r.priorHigh != null && r.price != null && r.price > r.priorHigh) return {state: 'up', label: 'Breaking out of PDH'};
+  if (pml != null && r.price != null && r.price < pml) return {state: 'dn', label: 'Breaking down through PML'};
+  if (r.priorLow != null && r.price != null && r.price < r.priorLow) return {state: 'dn', label: 'Breaking down through PDL'};
   if (r.position === 'above') return {state: 'up', label: 'Breaking out'};
   if (r.position === 'below') return {state: 'dn', label: 'Breaking down'};
   return {state: 'flat', label: `Inside ${r.priorDay || ''} range`};
@@ -1525,8 +1609,14 @@ function pmBoRank(r){
   return st === 'up' ? 0 : st === 'dn' ? 1 : 2;
 }
 // STRENGTH badge: |gap %| x relativeVolume — how much gap is backed by unusual flow
-function pmStrength(r){ return Math.abs(r.gap || 0) * (r.relativeVolume || 0); }
-function pmStrengthTier(s){ return s >= 20 ? 'hot' : s >= 8 ? 'warm' : 'mild'; }
+function pmStrength(r){
+  // 0–100 composite standout score: gap 40 + flow 35 + breakout-proximity 25
+  const gap = Math.min(40, Math.abs(r.gap || 0) * 4);       // a 10% gap maxes the gap slice
+  const flow = Math.min(35, (r.relativeVolume || 0) * 7);   // 5x flow maxes the flow slice
+  const prox = pmBreakoutOf(r).state === 'flat' ? 0 : 25;   // breaking out/down takes the full 25
+  return Math.round((gap + flow + prox) * 10) / 10;
+}
+function pmStrengthTier(s){ return s >= 70 ? 'hot' : s >= 40 ? 'warm' : 'mild'; }
 function pmCard(r){
   const bo = pmBreakoutOf(r);
   const badge = bo.state === 'up' ? `<span class="pm-badge up">${esc(bo.label)}</span>`
@@ -1548,7 +1638,7 @@ function pmCard(r){
   return `<div class="pm-card${pinned ? ' pinned' : ''}" data-sym="${esc(r.ticker)}">` +
     `<div class="pm-top"><span class="pm-tk">${esc(r.ticker)}</span>` +
     `<button class="pin" data-pin="${esc(r.ticker)}" aria-label="Pin ${esc(r.ticker)}">${pinned ? '★' : '☆'}</button></div>` +
-    `<div>${badge}<span class="pm-badge str ${tier}" title="|gap %| x relativeVolume">STRENGTH ${st.toFixed(1)}</span></div>` +
+    `<div>${badge}<span class="pm-badge str ${tier}" title="0–100 standout: gap 40 + flow 35 + breakout 25">STRENGTH ${st.toFixed(0)}</span></div>` +
     `<div class="pm-gap ${gapCls}">${fmtPct(r.gap)}</div>` +
     `<div class="pm-mid">${fmtPx(px)} · ${rel != null ? rel.toFixed(1) + 'x flow' : 'flow —'}</div>` +
     (cap ? `<div class="pm-cap">${cap}</div>` : '') +
@@ -1556,10 +1646,10 @@ function pmCard(r){
     range + '</div>';
 }
 const PM_SORTS = {
-  gap:   {label: 'Biggest gap',   fn: (a,b) => Math.abs(b.gap || 0) - Math.abs(a.gap || 0)},
-  flow:  {label: 'Most flow',     fn: (a,b) => (b.relativeVolume || 0) - (a.relativeVolume || 0)},
-  cap:   {label: 'Largest cap',    fn: (a,b) => (b.marketCapB || 0) - (a.marketCapB || 0)},
-  prior: {label: 'Prior-day move', fn: (a,b) => Math.abs(b.priorChange || 0) - Math.abs(a.priorChange || 0)},
+  gap:      {label: 'Biggest gap',       fn: (a,b) => (((a.gap||0) >= 0 ? 0 : 1) - ((b.gap||0) >= 0 ? 0 : 1)) || (Math.abs(b.gap||0) - Math.abs(a.gap||0))},
+  cap:      {label: 'Largest cap',       fn: (a,b) => (b.marketCapB || 0) - (a.marketCapB || 0)},
+  strength: {label: 'Strength (standout)', fn: (a,b) => pmStrength(b) - pmStrength(a)},
+  flow:     {label: 'Most flow',         fn: (a,b) => (b.relativeVolume || 0) - (a.relativeVolume || 0)},
 };
 function pmPagerHTML(total){
   const pages = Math.max(1, Math.ceil(total / PM_PAGE));
@@ -1584,8 +1674,9 @@ function renderPremarket(){
   pills.querySelector('[data-pm="mega"]').classList.toggle('on', pmMega);
   if ($('pmSortSel')) $('pmSortSel').value = pmSort;
   const list = rows.filter(r => {
+    if (!isFinite(r.relativeVolume) || r.relativeVolume <= 0) return false;  // flow data required
     if (pmBreakout && pmBreakoutOf(r).state === 'flat') return false;   // real breakout state, not the raw flag
-    if (pmFav && !watchStars.has(r.ticker)) return false;              // favorites only
+    if (pmFav && !pins.has(r.ticker)) return false;                     // favorites only (same pins as the rest of the board)
     if (pmMega && !((r.marketCapB || 0) > 50)) return false;
     return true;
   });
@@ -1637,34 +1728,39 @@ function pctFor(t){
   return r && r.changePct != null && isFinite(r.changePct) ? r.changePct : null;
 }
 function renderSectors(){
-  // unusual-flow set (same >= 2x definition the flow section uses)
-  const unusual = new Set();
-  for (const r of (SNAP.bullish || []).concat(SNAP.bearish || [])) if ((r.relativeVolume || 0) >= 2) unusual.add(r.ticker);
-  const agg = new Map(); // sector -> {sum, n, runners}
-  for (const s of UNISET){
-    const sec = SECTORMAP.get(s);
-    if (!sec) continue;   // unmapped tickers stay excluded, never guessed
-    const pct = pctFor(s);
-    if (pct == null) continue;
-    let a = agg.get(sec);
-    if (!a) agg.set(sec, a = {sum: 0, n: 0, runners: 0});
-    a.sum += pct; a.n++;
-    if (unusual.has(s)) a.runners++;
+  // Sector heat is computed from the live options-flow rows only (not the whole
+  // 311 universe): each flow ticker maps to a GICS sector and contributes its
+  // live % change.
+  const cards = [];
+  {
+    const agg = new Map(); // sector -> [{t, pct, rv}]
+    for (const r of (SNAP.bullish || []).concat(SNAP.bearish || [])){
+      const s = r.ticker; if (!s) continue;
+      const sec = SECTORS.get(s) || SECTORMAP.get(s);
+      if (!sec) continue;   // unmapped tickers stay excluded, never guessed
+      const pct = liveChg(s) != null ? liveChg(s) : (r.changePct != null && isFinite(r.changePct) ? r.changePct : null);
+      if (pct == null) continue;
+      if (!agg.has(sec)) agg.set(sec, []);
+      agg.get(sec).push({t: s, pct, rv: r.relativeVolume || 0});
+    }
+    for (const [sec, rows] of agg){
+      const mean = rows.reduce((a, x) => a + x.pct, 0) / rows.length;
+      cards.push({sec, mean, n: rows.length, runners: rows.filter(x => x.rv >= 2).length, rows});
+    }
   }
+  cards.sort((x, y) => y.mean - x.mean);
+  // heat semantics: best = top-3 positive sectors; building = mean >= +1%;
+  // leaving = mean <= -1%; anything between is neutral
+  const bestSet = new Set(cards.filter(c => c.mean > 0).slice(0, 3).map(c => c.sec));
   const grid = $('sectorGrid');
   if (secView){
-    // Top-15 leaders drill-down for one sector, ranked by % move
+    // Top-15 drill-down for one sector, ranked by % move in the sector's direction:
+    // strongest gains first when the sector is up, deepest losses first when down.
+    const c = cards.find(x => x.sec === secView);
     grid.className = '';
-    const rows = [];
-    for (const s of UNISET){
-      if (SECTORMAP.get(s) !== secView) continue;
-      const pct = pctFor(s);
-      if (pct == null) continue;
-      rows.push({t: s, pct});
-    }
-    rows.sort((a,b) => Math.abs(b.pct) - Math.abs(a.pct));
+    const rows = c ? [...c.rows].sort((a, b) => c.mean >= 0 ? b.pct - a.pct : a.pct - b.pct) : [];
     const top = rows.slice(0, 15);
-    $('secSub').textContent = `${secView} · top ${top.length} of ${rows.length} mapped tickers by % move`;
+    $('secSub').textContent = `${secView} · top ${top.length} of ${rows.length} flow names by % move`;
     grid.innerHTML = `<div class="sec-detail-head"><button class="pill-solid" id="secBack">&larr; All sectors</button>` +
       `<h3>${esc(secView)} — Top 15 leaders</h3></div>` +
       `<div class="lead-list">` + (top.map((r, i) =>
@@ -1677,27 +1773,22 @@ function renderSectors(){
     return;
   }
   grid.className = 'sec-grid';
-  const cards = [...agg.entries()].map(([sec, a]) => ({sec, mean: a.n ? a.sum / a.n : 0, n: a.n, runners: a.runners}));
-  cards.sort((x, y) => y.mean - x.mean);
-  // heat semantics: best = top sector by mean move; building = mean >= +1%;
-  // leaving = mean <= -1%; mixed = everything in between
-  const bestSec = cards.length ? cards[0].sec : null;
-  $('secSub').textContent = cards.length ? `GICS sectors + ETF / Fund · flow as of ${etFmtShort.format(SNAP_D)} ET` : 'GICS sectors + ETF / Fund';
+  $('secSub').textContent = cards.length ? `GICS sectors · flow rows as of ${etFmtShort.format(SNAP_D)} ET` : 'GICS sectors';
   $('sectorGrid').innerHTML = cards.map(c => {
     const cls = c.mean >= 1 ? 'g' : c.mean <= -1 ? 'r' : 'o';
-    const heat = c.sec === bestSec ? 'best' : c.mean >= 1 ? 'building' : c.mean <= -1 ? 'leaving' : 'mixed';
-    const status = heat === 'best' ? 'Best' : heat === 'building' ? 'Building' : heat === 'leaving' ? 'Leaving' : 'Mixed';
+    const heat = bestSet.has(c.sec) ? 'best' : c.mean >= 1 ? 'building' : c.mean <= -1 ? 'leaving' : 'neutral';
+    const status = heat === 'best' ? 'Best' : heat === 'building' ? 'Building' : heat === 'leaving' ? 'Leaving' : 'Neutral';
     const runTxt = c.runners === 1 ? '1 runner' : `${c.runners} runners`;
     return `<div class="sec-card ${cls} heat-${heat}" data-sec="${esc(c.sec)}" title="Top 15 leaders"><div class="sec-top"><span class="sec-name">${esc(c.sec)}</span>` +
       `<span class="sec-pct">${fmtPct(c.mean)}</span></div>` +
-      `<div class="sec-status">${status}</div><span class="sec-run">${runTxt}</span></div>`;
+      `<div class="sec-status">${status}</div><span class="sec-run">${c.n} names · ${runTxt}</span></div>`;
   }).join('') || '<div class="empty">No sector data yet.</div>';
 }
 
 /* ================= MOVERS ================= */
 const MV_PAGE = 5;
 let mvPage = {gain: 1, loss: 1};
-let mvFilter = 'u311';   // 'u311' = tracked 311 universe (default) | 'rest' = rest of market | 'all' = merged
+let mvFilter = 'u311';   // 'u311' = tracked 311 universe (default) | 'rest' = rest of market (universe ex-priority) | 'all' = merged
 let mvSort = 'chg';      // 'chg' = % change (default) | 'cap' = market cap, within each side
 function mvMcOf(s){ const c = CAPS.get(s); return c != null ? c * 1e9 : null; }  // marketCapB -> dollars
 function mvUniverse(){
@@ -1705,6 +1796,34 @@ function mvUniverse(){
   const arr = [];
   for (const s of UNISET){ const q = Q.get(s); if (q && q.chgPct != null) arr.push({t: s, price: q.price, chgPct: q.chgPct, mc: mvMcOf(s)}); }
   return arr;
+}
+function splitMv(list, src, label){
+  return {gain: [...list].sort((a,b) => b.chgPct - a.chgPct), loss: [...list].sort((a,b) => a.chgPct - b.chgPct), src, label};
+}
+function mvScopeRows(){
+  // Three scopes, all from real data:
+  // 311 = tracked universe (pre-ranked live feed when available, else universe quotes);
+  // Rest of market = tracked universe outside the 56 priority names;
+  // All = universe merged with the pre-ranked movers feed, deduped.
+  if (mvFilter === 'rest'){
+    const list = [];
+    for (const s of UNISET){ if (PRISET.has(s)) continue; const q = Q.get(s); if (q && q.chgPct != null) list.push({t: s, price: q.price, chgPct: q.chgPct, mc: mvMcOf(s)}); }
+    return splitMv(list, 'universe', 'Rest of market');
+  }
+  if (mvFilter === 'all'){
+    const seen = new Map();
+    for (const s of UNISET){ const q = Q.get(s); if (q && q.chgPct != null) seen.set(s, {t: s, price: q.price, chgPct: q.chgPct, mc: mvMcOf(s)}); }
+    for (const m of ((MV && MV.gainers) || []).concat((MV && MV.losers) || [])){
+      const tk = m && (m.t || m.ticker);
+      if (tk && m.chgPct != null && !seen.has(tk)) seen.set(tk, {t: tk, price: m.price, chgPct: m.chgPct, mc: m.mc != null ? m.mc : mvMcOf(tk)});
+    }
+    return splitMv([...seen.values()], 'merged', 'All');
+  }
+  if (MV && Array.isArray(MV.gainers) && Array.isArray(MV.losers) && (MV.gainers.length || MV.losers.length)){
+    const norm = r => { const tk = r.t || r.ticker; return {t: tk, price: r.price, chgPct: r.chgPct, mc: r.mc != null ? r.mc : mvMcOf(tk)}; };
+    return {gain: MV.gainers.map(norm), loss: MV.losers.map(norm), src: 'feed', label: '311'};
+  }
+  return splitMv(mvUniverse(), 'universe', '311');
 }
 function paintMvFilters(){
   $('mvFilters').querySelectorAll('.fpill').forEach(x => {
@@ -1722,7 +1841,7 @@ function mvPagerHTML(key, total){
          `<button data-mvpg="${key}|1" ${mvPage[key] >= pages ? 'disabled' : ''} aria-label="Next page">›</button>`;
 }
 function renderMovers(){
-  const chip = m => `<button class="mv-chip" data-sym="${esc(m.t)}" title="${esc(m.t)} · ${fmtPx(m.price)}"><b>${esc(m.t)}</b><span class="${m.chgPct >= 0 ? 'up' : 'dn'}">${fmtPct(m.chgPct)}</span></button>`;
+  const chip = m => `<button class="mv-chip" data-sym="${esc(m.t)}" title="${esc(m.t)} · ${fmtPx(m.price)}"><b>${esc(m.t)}</b><span class="${m.chgPct >= 0 ? 'up' : 'dn'}">${fmtPct(m.chgPct)}</span><span class="mv-cap">${m.mc != null ? fmtCapB(m.mc/1e9) : 'cap n/a'}</span></button>`;
   const skel = '<span class="skel" style="width:100%;height:34px;border-radius:999px">&nbsp;</span>'.repeat(8);
   const page = (list, key) => {
     const pages = Math.max(1, Math.ceil(list.length / MV_PAGE));
@@ -1738,32 +1857,22 @@ function renderMovers(){
     return;
   }
   const mvCap = m => (m.mc != null ? m.mc : -1);
-  let gain, loss, mvSrc;
-  if (MV && Array.isArray(MV.gainers) && Array.isArray(MV.losers) && (MV.gainers.length || MV.losers.length)){
-    // live market_movers.json feed: pre-ranked gainers/losers across the 311-ticker universe
-    mvSrc = 'feed';
-    const norm = r => ({t: r.t, price: r.price, chgPct: r.chgPct, mc: r.mc != null ? r.mc : null});
-    gain = MV.gainers.map(norm); loss = MV.losers.map(norm);
-    if (mvSort === 'cap'){ gain = [...gain].sort((a,b) => mvCap(b) - mvCap(a)); loss = [...loss].sort((a,b) => mvCap(b) - mvCap(a)); }
-  } else {
-    mvSrc = 'universe';
-    const list = mvUniverse();
-    if (!list.length){
-      const msg = '<div class="empty">No universe quotes yet — movers appear on the next refresh.</div>';
-      $('topMovers').innerHTML = msg; $('bigLosers').innerHTML = msg;
-      $('gainPager').innerHTML = ''; $('lossPager').innerHTML = '';
-      $('moversMeta').textContent = '311 · waiting for quotes';
-      return;
-    }
-    if (mvSort === 'cap'){ gain = [...list].sort((a,b) => mvCap(b) - mvCap(a)); loss = [...list].sort((a,b) => mvCap(b) - mvCap(a)); }
-    else { gain = [...list].sort((a,b) => b.chgPct - a.chgPct); loss = [...list].sort((a,b) => a.chgPct - b.chgPct); }
+  const scope = mvScopeRows();
+  let gain = scope.gain, loss = scope.loss;
+  if (!gain.length && !loss.length){
+    const msg = '<div class="empty">No universe quotes yet — movers appear on the next refresh.</div>';
+    $('topMovers').innerHTML = msg; $('bigLosers').innerHTML = msg;
+    $('gainPager').innerHTML = ''; $('lossPager').innerHTML = '';
+    $('moversMeta').textContent = scope.label + ' · waiting for quotes';
+    return;
   }
+  if (mvSort === 'cap'){ gain = [...gain].sort((a,b) => mvCap(b) - mvCap(a)); loss = [...loss].sort((a,b) => mvCap(b) - mvCap(a)); }
   $('topMovers').innerHTML = page(gain, 'gain').map(chip).join('') || '<div class="empty">No gainers.</div>';
   $('bigLosers').innerHTML = page(loss, 'loss').map(chip).join('') || '<div class="empty">No losers.</div>';
   $('gainPager').innerHTML = mvPagerHTML('gain', gain.length);
   $('lossPager').innerHTML = mvPagerHTML('loss', loss.length);
-  const asof = (mvSrc === 'feed' && mvDate) ? ' · as of ' + fmtMonD(mvDate) : (uniDate ? ' · as of ' + fmtMonD(uniDate) : '');
-  $('moversMeta').textContent = '311 · ' + gain.length + ' gainers · ' + loss.length + ' losers' + (mvSort === 'cap' ? ' · by market cap' : '') + (mvSrc === 'feed' ? ' · live' : '') + asof;
+  const asof = (scope.src === 'feed' && mvDate) ? ' · as of ' + fmtMonD(mvDate) : (uniDate ? ' · as of ' + fmtMonD(uniDate) : '');
+  $('moversMeta').textContent = scope.label + ' · ' + gain.length + ' gainers · ' + loss.length + ' losers' + (mvSort === 'cap' ? ' · by market cap' : '') + (scope.src === 'feed' ? ' · live' : '') + asof;
 }
 
 $('mvSortSel').addEventListener('change', e => {
@@ -1809,16 +1918,33 @@ function openDrawer(sym){
   const rows = (SNAP.bullish||[]).concat(SNAP.bearish||[], SNAP.premarket||[]);
   const r = rows.find(x => x.ticker === sym) || {};
   $('dSym').textContent = sym;
-  $('dName').textContent = r.name || COMPANIES.get(sym) || NAMES.get(sym) || '';
-  const px = q.price != null ? q.price : r.price;
-  const chg = q.chgPct != null ? q.chgPct : r.changePct;
+  $('dName').innerHTML = esc(r.name || COMPANIES.get(sym) || NAMES.get(sym) || '') +
+    ` <a href="https://www.tradingview.com/symbols/${esc(sym)}/" target="_blank" rel="noopener" style="font-size:11px;font-weight:700;color:var(--link)">TradingView ↗</a>`;
+  const px = livePrice(sym) != null ? livePrice(sym) : r.price;
+  const chg = liveChg(sym) != null ? liveChg(sym) : r.changePct;
   $('dPrice').textContent = fmtPx(px);
   const dc = $('dChg'); dc.textContent = fmtPct(chg); dc.className = (chg||0) >= 0 ? 'up' : 'dn';
   const st = (k, v) => `<div class="d-stat"><div class="k">${k}</div><div class="v">${v}</div></div>`;
+  const sector = SECTORS.get(sym) || SECTORMAP.get(sym);
+  let cpBar = '—';
+  if (isFinite(r.callVolume) && isFinite(r.putVolume) && (r.callVolume + r.putVolume) > 0){
+    const cp = r.callVolume / (r.callVolume + r.putVolume) * 100;
+    cpBar = `<span class="cpbar"><span style="width:${cp.toFixed(1)}%"></span></span> ${fmtVol(r.callVolume)} / ${fmtVol(r.putVolume)}`;
+  }
+  let why = '—';
+  if (r.ticker){
+    const bits = [];
+    if (flowVerified()) bits.push(['Above 15m breakout', 'Ignited', 'Unusual flow ≥2x', 'Below 15m breakout', 'Standard'][flowGroup(r)]);
+    if (r.relativeVolume != null && isFinite(r.relativeVolume)) bits.push(r.relativeVolume.toFixed(1) + 'x flow');
+    if (bits.length) why = esc(bits.join(' · '));
+  }
   $('dStats').innerHTML =
     st('Day range', (q.low != null ? fmtPx(q.low) : '—') + ' – ' + (q.high != null ? fmtPx(q.high) : '—')) +
     st('Volume', fmtVol(q.volume != null ? q.volume : r.volume)) +
     st('Opt vol vs avg', r.relativeVolume != null ? r.relativeVolume.toFixed(1) + 'x' : '—') +
+    st('Call / put vol', cpBar) +
+    st('Why it\'s ranked here', why) +
+    st('Sector', sector ? esc(sector) : '—') +
     st('Prev high (PDH)', lv && lv.pdh ? fmtPx(lv.pdh) : '—') +
     st('Prev low (PDL)', lv && lv.pdl ? fmtPx(lv.pdl) : '—') +
     st('Premarket H/L', (q.pmh != null ? fmtPx(q.pmh) : '—') + ' / ' + (q.pml != null ? fmtPx(q.pml) : '—'));
@@ -1938,6 +2064,20 @@ function wTrendOf(series){
   let s = 0; for (const v of series) s += v;
   return series[series.length - 1] >= s / series.length ? 'up' : 'down';
 }
+// Watchlist direction with fallbacks: 4H trend, then 1H trend, then the sign of
+// today's move (live % change, else the row's own changePct). Never defaults
+// blindly to 'up' when data is missing.
+function watchDirOf(w){
+  const ch = WCHARTS[w.ticker] || {};
+  const s4 = watchTrendSeries(ch, 'h4');
+  if (s4.length >= 2) return wTrendOf(s4);
+  const s1 = watchTrendSeries(ch, 'h1');
+  if (s1.length >= 2) return wTrendOf(s1);
+  const lc = liveChg(w.ticker);
+  const c = lc != null ? lc : w.changePct;
+  if (c != null && isFinite(c)) return c >= 0 ? 'up' : 'down';
+  return 'up';
+}
 function drawWChart(cv, series, up){
   if (!cv || !series || series.length < 2) return;
   const dpr = Math.min(2, window.devicePixelRatio || 1);
@@ -1946,13 +2086,14 @@ function drawWChart(cv, series, up){
   cv.width = W * dpr; cv.height = H * dpr;
   const ctx = cv.getContext('2d'); ctx.scale(dpr, dpr);
   const n = series.length;
-  let lo = series[0], hi = series[0];
-  for (const v of series){ if (v < lo) lo = v; if (v > hi) hi = v; }
+  let lo = series[0], hi = series[0], sum = 0;
+  for (const v of series){ if (v < lo) lo = v; if (v > hi) hi = v; sum += v; }
+  const mean = sum / n;
   const px = i => 2 + (i / (n - 1)) * (W - 4);
   const py = v => (H - 4) - ((v - lo) / ((hi - lo) || 1)) * (H - 10);
   ctx.strokeStyle = cssVar('--faint') || '#666'; ctx.lineWidth = 1;
   ctx.setLineDash([5, 4]); ctx.globalAlpha = .6;
-  ctx.beginPath(); ctx.moveTo(0, py(series[0])); ctx.lineTo(W, py(series[0])); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(0, py(mean)); ctx.lineTo(W, py(mean)); ctx.stroke();
   ctx.setLineDash([]); ctx.globalAlpha = 1;
   ctx.strokeStyle = up ? (cssVar('--gain') || '#22c55e') : (cssVar('--loss') || '#ef4444');
   ctx.lineWidth = 1.6; ctx.lineJoin = 'round'; ctx.lineCap = 'round';
@@ -1965,14 +2106,24 @@ function paintWatchCharts(root){
     const parts = (cv.dataset.wc || '').split('|');
     const ch = WCHARTS[parts[0]];
     const series = watchTrendSeries(ch, parts[1]);
-    if (series.length < 2){ cv.style.visibility = 'hidden'; return; }
-    cv.style.visibility = '';
+    if (series.length < 2){
+      // honest blank state: draw "Chart unavailable" instead of hiding the canvas
+      const dpr = Math.min(2, window.devicePixelRatio || 1);
+      const W = cv.clientWidth || 170, H = cv.clientHeight || 76;
+      if (W && H){
+        cv.width = W * dpr; cv.height = H * dpr;
+        const ctx = cv.getContext('2d'); ctx.scale(dpr, dpr);
+        ctx.fillStyle = cssVar('--muted') || '#888'; ctx.font = '10.5px system-ui, sans-serif';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText('Chart unavailable', W / 2, H / 2);
+      }
+      return;
+    }
     drawWChart(cv, series, wTrendOf(series) === 'up');
   });
 }
 function watchCard(w){
-  const ch = WCHARTS[w.ticker] || {};
-  const t4 = wTrendOf(watchTrendSeries(ch, 'h4'));
+  const t4 = watchDirOf(w);
   const tri = t4 === 'up' ? '▲' : '▼';
   const lp = livePrice(w.ticker), lc = liveChg(w.ticker);
   const chg = lc != null ? lc : w.changePct;
@@ -1996,14 +2147,16 @@ function watchCard(w){
     (name ? '<div class="wr-name">' + esc(name) + '</div>' : '') +
     '<div class="wr-sub">' + (pxTxt ? '<span class="wr-px">' + esc(pxTxt) + '</span><span class="sep">·</span>' : '') + '<span class="chg ' + chgCls + '">' + esc(chgTxt) + '</span><span class="sep">·</span>' +
     '<span class="cap">' + fmtCapB(w.marketCapB) + '</span></div></div>' +
-    '<div class="wr-c1"><canvas class="wchart" data-wc="' + esc(w.ticker) + '|h1"></canvas></div>' +
-    '<div class="wr-c2"><canvas class="wchart" data-wc="' + esc(w.ticker) + '|h4"></canvas></div>' +
+    '<div class="wr-c1"><canvas class="wchart" data-wc="' + esc(w.ticker) + '|h1" title="1H closes · dashed line = series mean"></canvas></div>' +
+    '<div class="wr-c2"><canvas class="wchart" data-wc="' + esc(w.ticker) + '|h4" title="4H closes · dashed line = series mean"></canvas></div>' +
     '<div class="wr-sess"><div class="wr-lvline"><span class="lvk">PDH</span>' +
     '<span class="lvv pdh ' + t4 + '">' + (w.pdh != null ? '$' + w.pdh.toFixed(2) : '—') + '</span>' +
-    '<span class="arr">←</span><span class="lvk">PMH</span>' +
+    '<span class="arr">' + (t4 === 'up' ? '←' : '→') + '</span><span class="lvk">PMH</span>' +
     '<span class="lvv pmh">' + (w.pmh != null ? '$' + w.pmh.toFixed(2) : '—') + '</span></div>' +
-    '<div class="sessbar"><span style="width:' + dom.toFixed(1) + '%;background:' + tcol + '"></span>' +
-    '<span style="width:' + (100 - dom).toFixed(1) + '%;background:var(--orange)"></span></div></div>' +
+    '<div class="sessbar">' + (t4 === 'up'
+      ? '<span style="width:' + dom.toFixed(1) + '%;background:' + tcol + '"></span><span style="width:' + (100 - dom).toFixed(1) + '%;background:var(--orange)"></span>'
+      : '<span style="width:' + (100 - dom).toFixed(1) + '%;background:var(--orange)"></span><span style="width:' + dom.toFixed(1) + '%;background:' + tcol + '"></span>') +
+    '</div></div>' +
     '<div class="wr-watch"><button class="wr-star' + (starred ? ' on' : '') + '" data-wstar="' + esc(w.ticker) + '" aria-label="Watch ' + esc(w.ticker) + '">' + (starred ? '★' : '☆') + '</button></div></div>';
 }
 function renderWatchlist(){
@@ -2014,6 +2167,8 @@ function renderWatchlist(){
     (((b.marketCapB != null && isFinite(b.marketCapB)) ? b.marketCapB : -1) - ((a.marketCapB != null && isFinite(a.marketCapB)) ? a.marketCapB : -1)) || (a.rank - b.rank));
   else if (watchSort === 'chg') list.sort((a, b) =>
     (((liveChg(b.ticker) != null ? liveChg(b.ticker) : (b.changePct != null && isFinite(b.changePct) ? b.changePct : -Infinity))) - ((liveChg(a.ticker) != null ? liveChg(a.ticker) : (a.changePct != null && isFinite(a.changePct) ? a.changePct : -Infinity)))) || (a.rank - b.rank));
+  else if (watchSort === 'dir') list.sort((a, b) =>
+    ((watchDirOf(a) === 'up' ? 0 : 1) - (watchDirOf(b) === 'up' ? 0 : 1)) || (a.rank - b.rank));
   else list.sort((a, b) => a.rank - b.rank);
   if ($('watchSub')) $('watchSub').textContent = rows.length ?
     (rows.length + ' ranked setups · ' + fmtMonD(WL.marketDate) + (WL.marketDate === nyMarketDate() ? " · today's scan" : '')) : '';
