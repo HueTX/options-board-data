@@ -1316,17 +1316,22 @@ function fmtAge(ms){
 
 /* ================= STRIP: regime / session ================= */
 function hourlyCloses(bars){
-  // Aggregate intraday bars into regular-session hourly closes (ET), matching
-  // the watchlist h1 semantics: the last close of each 09:30-16:00 ET hour.
-  const out = []; let curH = -1, last = null;
+  // Aggregate intraday bars into completed regular-session hourly closes (ET),
+  // matching the watchlist h1 semantics. The still-forming hour is excluded.
+  const out = []; let curH = -1, curStart = 0, last = null;
+  const nowSec = Date.now() / 1000;
   for (const b of (bars || [])){
     const m = etDayMin(b[0]);
     if (m < 570 || m >= 960) continue;
     const h = Math.floor((m - 570) / 60);
-    if (h !== curH){ if (last != null) out.push(last); curH = h; }
+    if (h !== curH){
+      if (last != null && curStart + 3600 <= nowSec) out.push(last);
+      curH = h;
+      curStart = Number(b[0]);
+    }
     last = b[4];
   }
-  if (last != null) out.push(last);
+  if (last != null && curStart + 3600 <= nowSec) out.push(last);
   return out;
 }
 function regimeSeries(sym){
