@@ -30,17 +30,16 @@ a{color:var(--orange); text-decoration:none}
 .header h1{font-size:19px; font-weight:800}
 .back{font-size:14px}
 .theme-btn{background:var(--surface-2); border:1px solid var(--border); color:var(--text); border-radius:10px; padding:6px 12px; font-size:13px; cursor:pointer}
-/* heartbeat */
 .hb{display:flex; align-items:center; gap:8px; font-size:13px; color:var(--text-dim); margin-bottom:4px}
 .hb-dot{width:10px; height:10px; border-radius:50%; background:var(--loss); flex:none}
 .hb-dot.amber{background:var(--orange)} .hb-dot.green{background:var(--gain)}
 .hb-time{font-family:var(--mono); font-size:12px; color:var(--text-dim); margin-bottom:12px}
-/* section headers — match front page fcol-title */
+/* section headers — front-page fcol-title */
 .fcol-title{margin:14px 0 8px; font-size:15px; font-weight:800; display:flex; align-items:center; gap:8px}
 .fcol-title .count{font-size:12.5px; color:var(--muted); font-weight:700; background:var(--pill-bg); border-radius:999px; padding:2px 10px}
 .fcol-title .upd{font-size:11.5px; color:var(--muted); font-weight:600; font-variant-numeric:tabular-nums}
 .tri-up{color:var(--gain)} .tri-dn{color:var(--loss)}
-/* column headers — match front page colhdr */
+/* column headers — front-page colhdr */
 .colhdr{display:grid; grid-template-columns:minmax(0,1fr) 92px 86px 34px; gap:8px; padding:0 2px 6px;
   font-size:10.5px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--muted)}
 .colhdr span:nth-child(3){text-align:right}
@@ -75,6 +74,11 @@ canvas.r-spark.hide{display:none}
 .pin{font-family:var(--font); cursor:pointer; font-size:14px; color:var(--faint);
   width:30px; height:30px; border-radius:50%; border:1px solid var(--panel-brd); background:transparent;
   display:flex; align-items:center; justify-content:center; padding:0; line-height:1}
+/* pager — front-page style */
+.pager{display:flex; align-items:center; justify-content:center; gap:10px; margin:10px 0 4px; font-size:13px; color:var(--muted)}
+.pager button{font:inherit; font-weight:700; color:var(--text); background:var(--pill-bg); border:1px solid var(--panel-brd);
+  border-radius:8px; padding:4px 14px; cursor:pointer}
+.pager button:disabled{opacity:.35; cursor:default}
 .empty{color:var(--text-dim); font-size:13px; padding:18px; text-align:center; border:1px dashed var(--border); border-radius:12px}
 .note{font-size:12px; color:var(--text-dim); text-align:center; line-height:1.5; margin-top:14px}
 @media (max-width:560px){
@@ -96,19 +100,25 @@ canvas.r-spark.hide{display:none}
 <div class="fcol-title"><span class="tri-up">&#9650;</span> Bullish <span class="count" id="bullCount">0</span><span class="upd" id="updBull"></span></div>
 <div class="colhdr"><span>Symbol</span><span>1D range</span><span>Price</span><span></span></div>
 <div class="flow-list" id="bullList"><div class="empty">Loading&hellip;</div></div>
+<div class="pager" id="bullPager"></div>
 
 <div class="fcol-title"><span class="tri-dn">&#9660;</span> Bearish <span class="count" id="bearCount">0</span><span class="upd" id="updBear"></span></div>
 <div class="colhdr"><span>Symbol</span><span>1D range</span><span>Price</span><span></span></div>
 <div class="flow-list" id="bearList"><div class="empty">Loading&hellip;</div></div>
+<div class="pager" id="bearPager"></div>
 
 <div class="note">Tap a ticker for its 15-minute chart with PDH / PMH / PDL / PML levels.<br>Bullish = 15m close above both PDH and PMH &middot; Bearish = 15m close below both PDL and PML</div>
 
 <script>
 const FEED = "https://raw.githubusercontent.com/HueTX/options-board-data/main/fifteen_min_closes.json";
 const CHARTS = "https://raw.githubusercontent.com/HueTX/options-board-data/main/fifteen_min_charts.json";
+const PAGE = 10;
+const PRIORITY = ["SPY", "QQQ", "IWM"]; // standing rule: qualifying index ETFs always rank first
 const NAMES = {"GUSH":"Direxion Daily S&P Oil & Gas Exp. & Prod. Bull 2X Shares","DRIP":"Direxion Daily S&P Oil & Gas Exp. & Prod. Bear 2X Shares","NRGU":"MicroSectors U.S. Big Oil 3x Leveraged ETNs","NRGD":"MicroSectors U.S. Big Oil -3x Inverse Leveraged ETNs","XLV":"Health Care Select Sector SPDR Fund","XLI":"Industrial Select Sector SPDR Fund","XLY":"Consumer Discretionary Select Sector SPDR Fund","XLB":"Materials Select Sector SPDR Fund","HYG":"iShares iBoxx $ High Yield Corporate Bond ETF","URA":"Global X Uranium ETF","ITA":"iShares U.S. Aerospace & Defense ETF","CRM":"Salesforce, Inc.","TXN":"Texas Instruments Incorporated","MU":"Micron Technology, Inc.","ANET":"Arista Networks, Inc.","WDC":"Western Digital Corporation","STX":"Seagate Technology Holdings plc","MDB":"MongoDB, Inc.","AI":"C3.ai, Inc.","COIN":"Coinbase Global, Inc.","MSTR":"Strategy Incorporated","MARA":"MARA Holdings, Inc.","LABU":"Direxion Daily S&P Biotech Bull 3X Shares","EDC":"Direxion Daily MSCI Emerging Markets Bull 3X Shares","EDZ":"Direxion Daily MSCI Emerging Markets Bear 3X Shares","XLRE":"State Street Real Estate Select Sector SPDR ETF","XLC":"State Street Communication Services Select Sector SPDR ETF","UNG":"United States Natural Gas Fund, LP","TAN":"Invesco Solar ETF","ARM":"Arm Holdings plc","NET":"Cloudflare, Inc.","UPST":"Upstart Holdings, Inc.","CLSK":"CleanSpark, Inc.","SOFI":"SoFi Technologies, Inc.","NU":"Nu Holdings Ltd.","SPOT":"Spotify Technology S.A."};
 
 let charts = {};
+let DATA = {bull: [], bear: []};
+let page = {bull: 1, bear: 1};
 function cssVar(v){ return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
 function esc(s){ return String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
 function pctDist(px, lv){
@@ -116,52 +126,105 @@ function pctDist(px, lv){
   const d = (px - lv) / lv * 100;
   return (d >= 0 ? "+" : "") + d.toFixed(1) + "%";
 }
-function drawSpark(cv, closes, up){
+function prioRank(t){ const i = PRIORITY.indexOf(t); return i === -1 ? 99 : i; }
+function sortRows(rows){
+  return rows.slice().sort((a, b) => (prioRank(a.ticker) - prioRank(b.ticker)) || a.ticker.localeCompare(b.ticker));
+}
+/* 15m line chart with level lines — drawn from the same candles that triggered the signal */
+function drawSpark(cv, closes, levels, bull){
   if(!closes || closes.length < 2) return;
   const dpr = Math.min(2, window.devicePixelRatio || 1);
   const W = cv.clientWidth || 92, H = cv.clientHeight || 34;
+  if(!W || !H) return;
   cv.width = W * dpr; cv.height = H * dpr;
   const ctx = cv.getContext("2d"); ctx.scale(dpr, dpr);
-  const lo = Math.min(...closes), hi = Math.max(...closes);
-  const col = up ? cssVar("--gain") : cssVar("--loss");
-  const n = closes.length, px = i => (i / (n - 1)) * W, py = v => H - 3 - ((v - lo) / ((hi - lo) || 1)) * (H - 8);
+  const lv = bull ? [levels.pdh, levels.pmh] : [levels.pdl, levels.pml];
+  const all = closes.concat(lv.filter(v => v != null));
+  const lo = Math.min(...all), hi = Math.max(...all);
+  const py = v => H - 3 - ((v - lo) / ((hi - lo) || 1)) * (H - 6);
+  const px = i => (i / (closes.length - 1)) * W;
+  // level lines first (behind the price line)
+  lv.forEach(v => {
+    if(v == null) return;
+    ctx.strokeStyle = bull ? "rgba(48,209,88,.45)" : "rgba(255,69,58,.45)";
+    ctx.lineWidth = 1; ctx.setLineDash([3, 2]); ctx.beginPath();
+    ctx.moveTo(0, py(v)); ctx.lineTo(W, py(v)); ctx.stroke(); ctx.setLineDash([]);
+  });
+  // 15m close line
+  const col = bull ? cssVar("--gain") : cssVar("--loss");
   ctx.strokeStyle = col; ctx.lineWidth = 1.5; ctx.lineJoin = "round"; ctx.beginPath();
   closes.forEach((v, i) => i ? ctx.lineTo(px(i), py(v)) : ctx.moveTo(px(i), py(v)));
   ctx.stroke();
-  ctx.fillStyle = col; ctx.beginPath(); ctx.arc(px(n - 1), py(closes[n - 1]), 2.2, 0, 7); ctx.fill();
+  ctx.fillStyle = col; ctx.beginPath(); ctx.arc(px(closes.length - 1), py(closes[closes.length - 1]), 2.2, 0, 7); ctx.fill();
+}
+function levelsFor(r, bull){
+  const ch = charts[r.ticker];
+  const lv = (ch && ch.levels) || {};
+  return {
+    pdh: lv.pdh != null ? lv.pdh : r.pdh,
+    pmh: lv.pmh != null ? lv.pmh : r.pmh,
+    pdl: lv.pdl != null ? lv.pdl : r.pdl,
+    pml: lv.pml != null ? lv.pml : r.pml,
+  };
+}
+function dayMove(r){
+  const ch = charts[r.ticker];
+  if(!ch || !ch.candles15m || ch.candles15m.length < 2) return null;
+  const first = ch.candles15m[0].o, last = ch.candles15m[ch.candles15m.length - 1].c;
+  if(!first) return null;
+  return (last - first) / first * 100;
 }
 function cardHTML(r, side){
   const bull = side === "bull";
+  const lv = levelsFor(r, bull);
   const ch = charts[r.ticker];
-  const candles = ch ? ch.candles15m.map(c => c.c) : [];
+  const closes = ch ? ch.candles15m.map(c => c.c) : [];
   const px = r.close;
-  const chg = null; // day % change not in 15m feed; price shown is the 15m close
+  const mv = dayMove(r);
+  const chCls = mv == null ? "" : (mv >= 0 ? "up" : "dn");
+  const mvTxt = mv == null ? "" : ((mv >= 0 ? "+" : "") + mv.toFixed(2) + "%");
   const nm = NAMES[r.ticker] || "";
+  // badges mirror the front page: signal badge + BOTH PDH and PDL distance badges
   const badge15 = `<span class="sig-badge sig15 ${bull ? "bull" : "bear"}">${bull ? "&#9650; 15m PDH+PMH" : "&#9660; 15m PDL+PML"}</span>`;
-  const lv1 = bull
-    ? `<span class="sig-badge lv bull">PDH ${pctDist(px, r.pdh)}</span>`
-    : `<span class="sig-badge lv bear">PDL ${pctDist(px, r.pdl)}</span>`;
-  const lv2 = bull
-    ? `<span class="sig-badge lv bull">PMH ${pctDist(px, r.pmh)}</span>`
-    : `<span class="sig-badge lv bear">PML ${pctDist(px, r.pml)}</span>`;
+  const bPDH = `<span class="sig-badge lv bull">PDH ${pctDist(px, lv.pdh)}</span>`;
+  const bPDL = `<span class="sig-badge lv bear">PDL ${pctDist(px, lv.pdl)}</span>`;
   const st = r.status === "new" ? '<span class="sig-badge new">NEW</span>'
     : r.status === "flipped" ? '<span class="sig-badge flipped">FLIPPED</span>' : "";
-  return `<div class="runner ${bull ? "bull-side" : "bear-side"}" data-sym="${esc(r.ticker)}" onclick="location.href='15m-chart.html?t=${esc(r.ticker)}'">`
+  const url = "15m-chart.html?t=" + encodeURIComponent(r.ticker);
+  return `<div class="runner ${bull ? "bull-side" : "bear-side"}" data-sym="${esc(r.ticker)}" onclick="location.href='${url}'">`
     + `<div class="r-main"><div class="tk ${bull ? "bull" : "bear"}">${esc(r.ticker)}</div>`
     + (nm ? `<div class="rname">${esc(nm)}</div>` : "")
-    + `<div class="badges">${badge15}${lv1}${lv2}${st}</div></div>`
-    + `<canvas class="r-spark${candles.length > 1 ? "" : " hide"}" width="184" height="68" data-sym="${esc(r.ticker)}"></canvas>`
-    + `<div class="r-nums"><div class="px">$${px != null ? px.toFixed(2) : "&mdash;"}</div><div class="ch">${esc(r.candle || "")}</div></div>`
-    + `<button class="pin" aria-label="Chart" onclick="event.stopPropagation();location.href='15m-chart.html?t=${esc(r.ticker)}'">&#9657;</button>`
+    + `<div class="badges">${badge15}${bPDH}${bPDL}${st}</div></div>`
+    + `<canvas class="r-spark${closes.length > 1 ? "" : " hide"}" width="184" height="68" data-sym="${esc(r.ticker)}" data-side="${side}"></canvas>`
+    + `<div class="r-nums"><div class="px">$${px != null ? px.toFixed(2) : "&mdash;"}</div><div class="ch ${chCls}">${mvTxt}</div></div>`
+    + `<button class="pin" aria-label="Chart for ${esc(r.ticker)}" onclick="event.stopPropagation();location.href='${url}'">&#9734;</button>`
     + `</div>`;
 }
-function paintSparks(){
-  document.querySelectorAll("canvas.r-spark").forEach(cv => {
-    const ch = charts[cv.dataset.sym];
-    if(ch && ch.candles15m.length > 1)
-      drawSpark(cv, ch.candles15m.map(c => c.c), cv.closest(".runner").classList.contains("bull-side"));
+function paintSparks(root){
+  root.querySelectorAll("canvas.r-spark:not(.hide)").forEach(cv => {
+    const sym = cv.dataset.sym, bull = cv.dataset.side === "bull";
+    const ch = charts[sym];
+    if(!ch || ch.candles15m.length < 2) return;
+    const r = DATA.bull.concat(DATA.bear).find(x => x.ticker === sym);
+    drawSpark(cv, ch.candles15m.map(c => c.c), levelsFor(r || {}, bull), bull);
   });
 }
+function renderSide(side){
+  const rows = DATA[side];
+  const pages = Math.max(1, Math.ceil(rows.length / PAGE));
+  if(page[side] > pages) page[side] = pages;
+  const slice = rows.slice((page[side] - 1) * PAGE, page[side] * PAGE);
+  const list = document.getElementById(side === "bull" ? "bullList" : "bearList");
+  list.innerHTML = slice.map(r => cardHTML(r, side)).join("") ||
+    `<div class="empty">No ${side === "bull" ? "bullish" : "bearish"} confirmed closes.</div>`;
+  paintSparks(list);
+  const pg = document.getElementById(side === "bull" ? "bullPager" : "bearPager");
+  pg.innerHTML = pages <= 1 ? "" :
+    `<button ${page[side] <= 1 ? "disabled" : ""} onclick="goPage('${side}',-1)" aria-label="Previous page">&lsaquo;</button>`
+    + `<span>${page[side]} / ${pages}</span>`
+    + `<button ${page[side] >= pages ? "disabled" : ""} onclick="goPage('${side}',1)" aria-label="Next page">&rsaquo;</button>`;
+}
+function goPage(side, d){ page[side] += d; renderSide(side); }
 function setHB(state, text){
   const d = document.getElementById("hbDot");
   d.className = "hb-dot" + (state === "ok" ? " green" : state === "wait" ? " amber" : "");
@@ -181,19 +244,21 @@ async function load(){
     if(!fr.ok) throw new Error("HTTP " + fr.status);
     const d = await fr.json();
     if(cr && cr.ok){ const cd = await cr.json(); charts = cd.charts || {}; }
-    const bull = d.bullish || [], bear = d.bearish || [];
     const nb = new Set(d.newBullish || []), nbe = new Set(d.newBearish || []), fl = new Set(d.flipped || []);
     const tag = r => ({...r, status: fl.has(r.ticker) ? "flipped" : (nb.has(r.ticker) || nbe.has(r.ticker)) ? "new" : ""});
-    document.getElementById("bullList").innerHTML = bull.map(r => cardHTML(tag(r), "bull")).join("") || '<div class="empty">No bullish confirmed closes.</div>';
-    document.getElementById("bearList").innerHTML = bear.map(r => cardHTML(tag(r), "bear")).join("") || '<div class="empty">No bearish confirmed closes.</div>';
-    document.getElementById("bullCount").textContent = bull.length;
-    document.getElementById("bearCount").textContent = bear.length;
-    const upd = d.candle ? " &middot; " + esc(d.candle) + " candle" : "";
+    // SPY/QQQ/IWM always first when they have a qualifying close (standing rule)
+    DATA.bull = sortRows((d.bullish || []).map(tag));
+    DATA.bear = sortRows((d.bearish || []).map(tag));
+    document.getElementById("bullCount").textContent = DATA.bull.length;
+    document.getElementById("bearCount").textContent = DATA.bear.length;
     const asof = d.asOf ? ctFmt(new Date(d.asOf)) + " CT" : "";
-    document.getElementById("updBull").innerHTML = upd;
-    document.getElementById("updBear").innerHTML = upd;
-    document.getElementById("hbTime").textContent = "Refreshed " + asof + " · " + (d.scanned || 0) + " tickers scanned";
-    paintSparks();
+    const upd = asof ? "updated " + asof : "";
+    document.getElementById("updBull").textContent = upd;
+    document.getElementById("updBear").textContent = upd;
+    document.getElementById("hbTime").textContent =
+      "Refreshed " + asof + " · " + (d.scanned || 0) + " tickers scanned" + (d.candle ? " · " + d.candle + " candle" : "");
+    renderSide("bull");
+    renderSide("bear");
     setHB("ok", "Live");
   }catch(e){
     setHB("err", "Feed unreachable — retrying&hellip;");
@@ -205,7 +270,7 @@ function toggleTheme(){
   h.setAttribute("data-theme", next);
   try{ localStorage.setItem("ofb_theme", next); }catch(e){}
   document.getElementById("themeBtn").textContent = next === "dark" ? "Light" : "Dark";
-  paintSparks();
+  renderSide("bull"); renderSide("bear");
 }
 (function init(){
   try{
