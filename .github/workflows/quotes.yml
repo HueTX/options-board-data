@@ -44,11 +44,16 @@ jobs:
           # every schedule; on failure keep the previous file so the board
           # keeps showing the last good ranking instead of going blank.
           python fetch_quotes.py --movers market_movers.json || echo "movers fetch failed, keeping previous"
-          # Morning watchlist levels (PDH/PDL/PMH/PML), rebuilt once per trading
-          # day after the premarket completes; on failure keep the previous file
-          # so the watchlist never goes blank. Needs watchlist_tickers.txt and
-          # watchlist_caps.json in the repo root (both in this zip's publisher/).
-          python fetch_quotes.py --watchlist watchlist.json || echo "watchlist build failed, keeping previous"
+          # Detail-drawer bars + 1H regime bars for tickers outside the
+          # 56-ticker quotes feed. Runs on every schedule; on failure keep
+          # the previous files so the board keeps showing the last good data.
+          python fetch_quotes.py --dbars dbars.json || echo "dbars fetch failed, keeping previous"
+          python fetch_quotes.py --regime1h regime1h.json || echo "regime1h fetch failed, keeping previous"
+          # NOTE: the morning watchlist (watchlist.json + wcharts.json) is published
+          # by the 08:05 CT morning-breakout-watchlist cron from the true 311-ticker
+          # premarket scan. Do NOT rebuild it here: the old --watchlist step ranked a
+          # different 72-ticker set by closing-price proximity and clobbered the real
+          # morning list on every manual dispatch.
 
       - name: Commit and push
         run: |
