@@ -1,0 +1,82 @@
+{
+  "asOf": "2026-10-01T00:00:00Z",
+  "date": "2026-09-30",
+  "ignitions": [
+    {
+      "ticker": "FDN",
+      "x": 23.0
+    },
+    {
+      "ticker": "FAZ",
+      "x": 9.5
+    },
+    {
+      "ticker": "EDC",
+      "x": 7.4
+    },
+    {
+      "ticker": "JDST",
+      "x": 7.0
+    },
+    {
+      "ticker": "TECS",
+      "x": 6.9
+    },
+    {
+      "ticker": "DUST",
+      "x": 5.8
+    },
+    {
+      "ticker": "LIT",
+      "x": 5.0
+    },
+    {
+      "ticker": "PH",
+      "x": 4.6
+    },
+    {
+      "ticker": "NOC",
+      "x": 4.1
+    },
+    {
+      "ticker": "YANG",
+      "x": 3.9
+    },
+    {
+      "ticker": "BEAM",
+      "x": 3.8
+    },
+    {
+      "ticker": "JNUG",
+      "x": 3.4
+    },
+    {
+      "ticker": "XLU",
+      "x": 3.3
+    },
+    {
+      "ticker": "AMGN",
+      "x": 3.3
+    },
+    {
+      "ticker": "TAN",
+      "x": 3.2
+    },
+    {
+      "ticker": "TECL",
+      "x": 3.1
+    },
+    {
+      "ticker": "MDB",
+      "x": 3.0
+    },
+    {
+      "ticker": "EQT",
+      "x": 3.0
+    },
+    {
+      "ticker": "RL",
+      "x": 3.0
+    }
+  ]
+}
