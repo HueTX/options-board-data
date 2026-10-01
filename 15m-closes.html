@@ -40,13 +40,13 @@ a{color:var(--orange); text-decoration:none}
 .fcol-title .upd{font-size:11.5px; color:var(--muted); font-weight:600; font-variant-numeric:tabular-nums}
 .tri-up{color:var(--gain)} .tri-dn{color:var(--loss)}
 /* column headers — front-page colhdr */
-.colhdr{display:grid; grid-template-columns:minmax(0,1fr) 92px 86px 34px; gap:8px; padding:0 2px 6px;
+.colhdr{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,2fr) 86px 34px; gap:8px; padding:0 2px 6px;
   font-size:10.5px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--muted)}
 .colhdr span:nth-child(3){text-align:right}
 .flow-list{display:flex; flex-direction:column; gap:8px; min-width:0}
 /* runner cards — exact front-page style */
 .runner{
-  display:grid; grid-template-columns:minmax(0,1fr) 92px 86px 34px; gap:8px; align-items:center;
+  display:grid; grid-template-columns:minmax(0,1fr) minmax(0,2fr) 86px 34px; gap:8px; align-items:center;
   border:1px solid var(--panel-brd); border-radius:12px; padding:10px 4px 10px 12px; min-width:0; cursor:pointer;
   background:var(--pill-bg); overflow:hidden;
 }
@@ -65,7 +65,7 @@ a{color:var(--orange); text-decoration:none}
 .sig-badge.flipped{color:var(--gold); border-color:rgba(224,170,62,.45); background:rgba(224,170,62,.12)}
 .sig-badge.sig15.bull{color:var(--gain); border-color:rgba(48,209,88,.45); background:rgba(48,209,88,.14)}
 .sig-badge.sig15.bear{color:var(--loss); border-color:rgba(255,69,58,.45); background:rgba(255,69,58,.14)}
-canvas.r-spark{width:92px; height:34px; display:block}
+canvas.r-spark{width:100%; height:46px; display:block; min-width:0}
 canvas.r-spark.hide{display:none}
 .r-nums{text-align:right; min-width:0}
 .runner .px{font-weight:800; font-size:15.5px; font-variant-numeric:tabular-nums}
@@ -74,6 +74,8 @@ canvas.r-spark.hide{display:none}
 .pin{font-family:var(--font); cursor:pointer; font-size:14px; color:var(--faint);
   width:30px; height:30px; border-radius:50%; border:1px solid var(--panel-brd); background:transparent;
   display:flex; align-items:center; justify-content:center; padding:0; line-height:1}
+.runner.pinned{border-color:rgba(255,159,10,.5)}
+.runner.pinned .pin{color:var(--gold); border-color:rgba(224,170,62,.5)}
 /* pager — front-page style */
 .pager{display:flex; align-items:center; justify-content:center; gap:10px; margin:10px 0 4px; font-size:13px; color:var(--muted)}
 .pager button{font:inherit; font-weight:700; color:var(--text); background:var(--pill-bg); border:1px solid var(--panel-brd);
@@ -82,9 +84,8 @@ canvas.r-spark.hide{display:none}
 .empty{color:var(--text-dim); font-size:13px; padding:18px; text-align:center; border:1px dashed var(--border); border-radius:12px}
 .note{font-size:12px; color:var(--text-dim); text-align:center; line-height:1.5; margin-top:14px}
 @media (max-width:560px){
-  .colhdr{grid-template-columns:minmax(0,1fr) 74px 78px 32px}
-  .runner{grid-template-columns:minmax(0,1fr) 74px 78px 32px}
-  canvas.r-spark{width:74px}
+  .colhdr{grid-template-columns:minmax(0,1fr) minmax(0,1.6fr) 78px 32px}
+  .runner{grid-template-columns:minmax(0,1fr) minmax(0,1.6fr) 78px 32px}
 }
 </style>
 </head>
@@ -119,6 +120,20 @@ const NAMES = {"GUSH":"Direxion Daily S&P Oil & Gas Exp. & Prod. Bull 2X Shares"
 let charts = {};
 let DATA = {bull: [], bear: []};
 let page = {bull: 1, bear: 1};
+// favorites — shared with the front page via the same localStorage key
+let pins = new Set();
+try { pins = new Set(JSON.parse(localStorage.getItem("ofb_pins") || "[]")); } catch(e){}
+function togglePin(ev, t){
+  ev.stopPropagation();
+  if(pins.has(t)) pins.delete(t); else pins.add(t);
+  try { localStorage.setItem("ofb_pins", JSON.stringify([...pins])); } catch(e2){}
+  document.querySelectorAll(`.runner[data-sym="${CSS.escape(t)}"]`).forEach(card => {
+    const on = pins.has(t);
+    card.classList.toggle("pinned", on);
+    const b = card.querySelector(".pin");
+    if(b) b.textContent = on ? "★" : "☆";
+  });
+}
 function cssVar(v){ return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
 function esc(s){ return String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
 function pctDist(px, lv){
@@ -130,32 +145,39 @@ function prioRank(t){ const i = PRIORITY.indexOf(t); return i === -1 ? 99 : i; }
 function sortRows(rows){
   return rows.slice().sort((a, b) => (prioRank(a.ticker) - prioRank(b.ticker)) || a.ticker.localeCompare(b.ticker));
 }
-/* 15m line chart with level lines — drawn from the same candles that triggered the signal */
+/* 15m line chart with all four level lines — drawn from the same candles that triggered the signal.
+   Price line sits above the levels on bullish cards, below on bearish cards. */
 function drawSpark(cv, closes, levels, bull){
   if(!closes || closes.length < 2) return;
   const dpr = Math.min(2, window.devicePixelRatio || 1);
-  const W = cv.clientWidth || 92, H = cv.clientHeight || 34;
+  const W = cv.clientWidth || 200, H = cv.clientHeight || 46;
   if(!W || !H) return;
   cv.width = W * dpr; cv.height = H * dpr;
   const ctx = cv.getContext("2d"); ctx.scale(dpr, dpr);
-  const lv = bull ? [levels.pdh, levels.pmh] : [levels.pdl, levels.pml];
-  const all = closes.concat(lv.filter(v => v != null));
+  const lvDefs = [
+    {v: levels.pdh, up: true,  dash: []},
+    {v: levels.pmh, up: true,  dash: [4, 2]},
+    {v: levels.pdl, up: false, dash: []},
+    {v: levels.pml, up: false, dash: [4, 2]},
+  ].filter(d => d.v != null);
+  const all = closes.concat(lvDefs.map(d => d.v));
   const lo = Math.min(...all), hi = Math.max(...all);
-  const py = v => H - 3 - ((v - lo) / ((hi - lo) || 1)) * (H - 6);
-  const px = i => (i / (closes.length - 1)) * W;
-  // level lines first (behind the price line)
-  lv.forEach(v => {
-    if(v == null) return;
-    ctx.strokeStyle = bull ? "rgba(48,209,88,.45)" : "rgba(255,69,58,.45)";
-    ctx.lineWidth = 1; ctx.setLineDash([3, 2]); ctx.beginPath();
-    ctx.moveTo(0, py(v)); ctx.lineTo(W, py(v)); ctx.stroke(); ctx.setLineDash([]);
+  const span = (hi - lo) || 1, pad = span * 0.12;
+  const py = v => H - 4 - ((v - lo + pad) / (span + pad * 2)) * (H - 8);
+  const px = i => 2 + (i / (closes.length - 1)) * (W - 4);
+  // all four level lines first (behind the price line); the pair that triggered the signal is brighter
+  lvDefs.forEach(d => {
+    const relevant = d.up === bull;
+    ctx.strokeStyle = d.up ? `rgba(48,209,88,${relevant ? 0.6 : 0.22})` : `rgba(255,69,58,${relevant ? 0.6 : 0.22})`;
+    ctx.lineWidth = 1; ctx.setLineDash(d.dash); ctx.beginPath();
+    ctx.moveTo(0, py(d.v)); ctx.lineTo(W, py(d.v)); ctx.stroke(); ctx.setLineDash([]);
   });
-  // 15m close line
+  // 15m close line, from today's open
   const col = bull ? cssVar("--gain") : cssVar("--loss");
-  ctx.strokeStyle = col; ctx.lineWidth = 1.5; ctx.lineJoin = "round"; ctx.beginPath();
+  ctx.strokeStyle = col; ctx.lineWidth = 2; ctx.lineJoin = "round"; ctx.lineCap = "round"; ctx.beginPath();
   closes.forEach((v, i) => i ? ctx.lineTo(px(i), py(v)) : ctx.moveTo(px(i), py(v)));
   ctx.stroke();
-  ctx.fillStyle = col; ctx.beginPath(); ctx.arc(px(closes.length - 1), py(closes[closes.length - 1]), 2.2, 0, 7); ctx.fill();
+  ctx.fillStyle = col; ctx.beginPath(); ctx.arc(px(closes.length - 1), py(closes[closes.length - 1]), 2.6, 0, 7); ctx.fill();
 }
 function levelsFor(r, bull){
   const ch = charts[r.ticker];
@@ -191,13 +213,14 @@ function cardHTML(r, side){
   const st = r.status === "new" ? '<span class="sig-badge new">NEW</span>'
     : r.status === "flipped" ? '<span class="sig-badge flipped">FLIPPED</span>' : "";
   const url = "15m-chart.html?t=" + encodeURIComponent(r.ticker);
-  return `<div class="runner ${bull ? "bull-side" : "bear-side"}" data-sym="${esc(r.ticker)}" onclick="location.href='${url}'">`
+  const isPinned = pins.has(r.ticker);
+  return `<div class="runner ${bull ? "bull-side" : "bear-side"}${isPinned ? " pinned" : ""}" data-sym="${esc(r.ticker)}" onclick="location.href='${url}'">`
     + `<div class="r-main"><div class="tk ${bull ? "bull" : "bear"}">${esc(r.ticker)}</div>`
     + (nm ? `<div class="rname">${esc(nm)}</div>` : "")
     + `<div class="badges">${badge15}${bPDH}${bPDL}${st}</div></div>`
     + `<canvas class="r-spark${closes.length > 1 ? "" : " hide"}" width="184" height="68" data-sym="${esc(r.ticker)}" data-side="${side}"></canvas>`
     + `<div class="r-nums"><div class="px">$${px != null ? px.toFixed(2) : "&mdash;"}</div><div class="ch ${chCls}">${mvTxt}</div></div>`
-    + `<button class="pin" aria-label="Chart for ${esc(r.ticker)}" onclick="event.stopPropagation();location.href='${url}'">&#9734;</button>`
+    + `<button class="pin" aria-label="Favorite ${esc(r.ticker)}" onclick="togglePin(event,'${esc(r.ticker)}')">${isPinned ? "★" : "☆"}</button>`
     + `</div>`;
 }
 function paintSparks(root){
@@ -225,6 +248,14 @@ function renderSide(side){
     + `<button ${page[side] >= pages ? "disabled" : ""} onclick="goPage('${side}',1)" aria-label="Next page">&rsaquo;</button>`;
 }
 function goPage(side, d){ page[side] += d; renderSide(side); }
+let rszT = null;
+window.addEventListener("resize", () => {
+  clearTimeout(rszT);
+  rszT = setTimeout(() => {
+    paintSparks(document.getElementById("bullList"));
+    paintSparks(document.getElementById("bearList"));
+  }, 150);
+});
 function setHB(state, text){
   const d = document.getElementById("hbDot");
   d.className = "hb-dot" + (state === "ok" ? " green" : state === "wait" ? " amber" : "");
