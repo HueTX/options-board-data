@@ -65,7 +65,7 @@ a{color:var(--orange); text-decoration:none}
 .sig-badge.flipped{color:var(--gold); border-color:rgba(224,170,62,.45); background:rgba(224,170,62,.12)}
 .sig-badge.sig15.bull{color:var(--gain); border-color:rgba(48,209,88,.45); background:rgba(48,209,88,.14)}
 .sig-badge.sig15.bear{color:var(--loss); border-color:rgba(255,69,58,.45); background:rgba(255,69,58,.14)}
-canvas.r-spark{width:100%; height:46px; display:block; min-width:0}
+canvas.r-spark{width:100%; height:64px; display:block; min-width:0}
 canvas.r-spark.hide{display:none}
 .r-nums{text-align:right; min-width:0}
 .runner .px{font-weight:800; font-size:15.5px; font-variant-numeric:tabular-nums}
@@ -160,7 +160,11 @@ function drawSpark(cv, closes, levels, bull){
     {v: levels.pdl, up: false, dash: []},
     {v: levels.pml, up: false, dash: [4, 2]},
   ].filter(d => d.v != null);
-  const all = closes.concat(lvDefs.map(d => d.v));
+  // Scale to the price action + the RELEVANT level pair only. Including the far
+  // pair (PDL/PML on bullish cards) flattens the price line into invisibility.
+  // All four lines are still drawn — canvas clips any that fall outside the range.
+  const rel = lvDefs.filter(d => d.up === bull).map(d => d.v);
+  const all = closes.concat(rel);
   const lo = Math.min(...all), hi = Math.max(...all);
   const span = (hi - lo) || 1, pad = span * 0.12;
   const py = v => H - 4 - ((v - lo + pad) / (span + pad * 2)) * (H - 8);
@@ -174,7 +178,7 @@ function drawSpark(cv, closes, levels, bull){
   });
   // 15m close line, from today's open
   const col = bull ? cssVar("--gain") : cssVar("--loss");
-  ctx.strokeStyle = col; ctx.lineWidth = 2; ctx.lineJoin = "round"; ctx.lineCap = "round"; ctx.beginPath();
+  ctx.strokeStyle = col; ctx.lineWidth = 2.5; ctx.lineJoin = "round"; ctx.lineCap = "round"; ctx.beginPath();
   closes.forEach((v, i) => i ? ctx.lineTo(px(i), py(v)) : ctx.moveTo(px(i), py(v)));
   ctx.stroke();
   ctx.fillStyle = col; ctx.beginPath(); ctx.arc(px(closes.length - 1), py(closes[closes.length - 1]), 2.6, 0, 7); ctx.fill();
