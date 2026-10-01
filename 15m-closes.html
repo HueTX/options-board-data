@@ -66,7 +66,6 @@ a{color:var(--orange); text-decoration:none}
 .sig-badge.sig15.bull{color:var(--gain); border-color:rgba(48,209,88,.45); background:rgba(48,209,88,.14)}
 .sig-badge.sig15.bear{color:var(--loss); border-color:rgba(255,69,58,.45); background:rgba(255,69,58,.14)}
 canvas.r-spark{width:100%; height:64px; display:block; min-width:0}
-canvas.r-spark.hide{display:none}
 .r-nums{text-align:right; min-width:0}
 .runner .px{font-weight:800; font-size:15.5px; font-variant-numeric:tabular-nums}
 .runner .ch{font-size:12.5px; font-weight:700; font-variant-numeric:tabular-nums}
@@ -82,6 +81,13 @@ canvas.r-spark.hide{display:none}
   border-radius:8px; padding:4px 14px; cursor:pointer}
 .pager button:disabled{opacity:.35; cursor:default}
 .empty{color:var(--text-dim); font-size:13px; padding:18px; text-align:center; border:1px dashed var(--border); border-radius:12px}
+/* sort chips — same as the trading-morning watchlist */
+.wsortbar{display:flex; align-items:center; gap:10px; margin:2px 0 4px; flex-wrap:wrap}
+.wsort-label{font-size:11px; font-weight:800; letter-spacing:1.2px; color:var(--muted)}
+.wchip{font-family:var(--font); font-size:12.5px; font-weight:800; padding:7px 18px; border-radius:999px;
+  border:1px solid var(--panel-brd); background:var(--pill-bg); color:var(--text); cursor:pointer; white-space:nowrap}
+.wchip.on{border-color:var(--orange); color:var(--orange); background:transparent}
+.wlegend{font-size:11px; color:var(--muted); margin:2px 0 8px}
 .note{font-size:12px; color:var(--text-dim); text-align:center; line-height:1.5; margin-top:14px}
 @media (max-width:560px){
   .colhdr{grid-template-columns:minmax(0,1fr) minmax(0,1.6fr) 78px 32px}
@@ -98,6 +104,14 @@ canvas.r-spark.hide{display:none}
 <div class="hb"><span class="hb-dot" id="hbDot"></span><span id="hbText">Connecting&hellip;</span></div>
 <div class="hb-time" id="hbTime"></div>
 
+<div class="wsortbar" id="sortChips"><span class="wsort-label">SORT BY</span>
+  <button class="wchip on" data-sort="rank">Rank</button>
+  <button class="wchip" data-sort="cap">Market cap</button>
+  <button class="wchip" data-sort="chg">% change</button>
+  <button class="wchip" data-sort="dir">Direction</button>
+</div>
+<div class="wlegend">Dashed line on each chart = series mean &middot; line color = 15m trend (last close vs mean)</div>
+
 <div class="fcol-title"><span class="tri-up">&#9650;</span> Bullish <span class="count" id="bullCount">0</span><span class="upd" id="updBull"></span></div>
 <div class="colhdr"><span>Symbol</span><span>15min</span><span>Price</span><span></span></div>
 <div class="flow-list" id="bullList"><div class="empty">Loading&hellip;</div></div>
@@ -113,8 +127,11 @@ canvas.r-spark.hide{display:none}
 <script>
 const FEED = "https://raw.githubusercontent.com/HueTX/options-board-data/main/fifteen_min_closes.json";
 const CHARTS = "https://raw.githubusercontent.com/HueTX/options-board-data/main/fifteen_min_charts.json";
+const CAPS_URL = "https://raw.githubusercontent.com/HueTX/options-board-data/main/market_caps.json";
 const PAGE = 10;
 const PRIORITY = ["SPY", "QQQ", "IWM"]; // standing rule: qualifying index ETFs always rank first
+let CAPS = {};   // ticker -> marketCapB ($billions); unknown tickers sort last under Market cap
+let sortMode = "rank";   // 'rank' | 'cap' | 'chg' | 'dir' — the four trading-morning watchlist sorts
 const NAMES = {"GUSH":"Direxion Daily S&P Oil & Gas Exp. & Prod. Bull 2X Shares","DRIP":"Direxion Daily S&P Oil & Gas Exp. & Prod. Bear 2X Shares","NRGU":"MicroSectors U.S. Big Oil 3x Leveraged ETNs","NRGD":"MicroSectors U.S. Big Oil -3x Inverse Leveraged ETNs","XLV":"Health Care Select Sector SPDR Fund","XLI":"Industrial Select Sector SPDR Fund","XLY":"Consumer Discretionary Select Sector SPDR Fund","XLB":"Materials Select Sector SPDR Fund","HYG":"iShares iBoxx $ High Yield Corporate Bond ETF","URA":"Global X Uranium ETF","ITA":"iShares U.S. Aerospace & Defense ETF","CRM":"Salesforce, Inc.","TXN":"Texas Instruments Incorporated","MU":"Micron Technology, Inc.","ANET":"Arista Networks, Inc.","WDC":"Western Digital Corporation","STX":"Seagate Technology Holdings plc","MDB":"MongoDB, Inc.","AI":"C3.ai, Inc.","COIN":"Coinbase Global, Inc.","MSTR":"Strategy Incorporated","MARA":"MARA Holdings, Inc.","LABU":"Direxion Daily S&P Biotech Bull 3X Shares","EDC":"Direxion Daily MSCI Emerging Markets Bull 3X Shares","EDZ":"Direxion Daily MSCI Emerging Markets Bear 3X Shares","XLRE":"State Street Real Estate Select Sector SPDR ETF","XLC":"State Street Communication Services Select Sector SPDR ETF","UNG":"United States Natural Gas Fund, LP","TAN":"Invesco Solar ETF","ARM":"Arm Holdings plc","NET":"Cloudflare, Inc.","UPST":"Upstart Holdings, Inc.","CLSK":"CleanSpark, Inc.","SOFI":"SoFi Technologies, Inc.","NU":"Nu Holdings Ltd.","SPOT":"Spotify Technology S.A."};
 
 let charts = {};
@@ -142,43 +159,82 @@ function pctDist(px, lv){
   return (d >= 0 ? "+" : "") + d.toFixed(1) + "%";
 }
 function prioRank(t){ const i = PRIORITY.indexOf(t); return i === -1 ? 99 : i; }
-function sortRows(rows){
-  return rows.slice().sort((a, b) => (prioRank(a.ticker) - prioRank(b.ticker)) || a.ticker.localeCompare(b.ticker));
+function capOf(t){ const c = CAPS[t]; return (c != null && isFinite(c)) ? c : null; }
+// 15m trend for the Direction sort: last close vs the mean of today's 15m closes
+function dir15(r){
+  const ch = charts[r.ticker];
+  if(!ch || !ch.candles15m || ch.candles15m.length < 2) return null;
+  const closes = ch.candles15m.map(c => c.c);
+  let sum = 0; for(const v of closes) sum += v;
+  return closes[closes.length - 1] >= sum / closes.length ? "up" : "down";
 }
-/* 15m line chart with all four level lines — drawn from the same candles that triggered the signal.
-   Price line sits above the levels on bullish cards, below on bearish cards. */
+// the four trading-morning watchlist sorts, applied per side; SPY/QQQ/IWM priority always leads
+function sortRows(rows, side){
+  const bull = side === "bull";
+  const alpha = (a, b) => a.ticker.localeCompare(b.ticker);
+  const prio = (a, b) => prioRank(a.ticker) - prioRank(b.ticker);
+  const mvOf = r => dayMove(r);
+  if(sortMode === "cap")
+    return rows.slice().sort((a, b) => prio(a, b) ||
+      ((capOf(b.ticker) != null ? capOf(b.ticker) : -1) - (capOf(a.ticker) != null ? capOf(a.ticker) : -1)) || alpha(a, b));
+  if(sortMode === "chg")
+    return rows.slice().sort((a, b) => prio(a, b) || (bull
+      ? ((mvOf(b) != null ? mvOf(b) : -Infinity) - (mvOf(a) != null ? mvOf(a) : -Infinity))
+      : ((mvOf(a) != null ? mvOf(a) : Infinity) - (mvOf(b) != null ? mvOf(b) : Infinity))) || alpha(a, b));
+  if(sortMode === "dir"){
+    const drank = r => { const d = dir15(r); return d == null ? 2 : (bull ? (d === "up" ? 0 : 1) : (d === "down" ? 0 : 1)); };
+    return rows.slice().sort((a, b) => prio(a, b) || (drank(a) - drank(b)) ||
+      (Math.abs(mvOf(b) || 0) - Math.abs(mvOf(a) || 0)) || alpha(a, b));
+  }
+  return rows.slice().sort((a, b) => prio(a, b) || alpha(a, b));
+}
+/* 15m chart in the trading-morning watchlist style: direction-colored 15m close line
+   (last close vs series mean), dashed mean line, final dot — with the PDH/PMH/PDL/PML
+   level lines behind. y-domain fits price action + the relevant level pair so the
+   line keeps its shape; all four level lines still draw (canvas clips the far pair). */
 function drawSpark(cv, closes, levels, bull){
-  if(!closes || closes.length < 2) return;
   const dpr = Math.min(2, window.devicePixelRatio || 1);
-  const W = cv.clientWidth || 200, H = cv.clientHeight || 46;
+  const W = cv.clientWidth || 200, H = cv.clientHeight || 64;
   if(!W || !H) return;
   cv.width = W * dpr; cv.height = H * dpr;
   const ctx = cv.getContext("2d"); ctx.scale(dpr, dpr);
+  if(!closes || closes.length < 2){
+    // honest blank state, like the watchlist
+    ctx.fillStyle = cssVar("--muted") || "#888"; ctx.font = "10.5px system-ui, sans-serif";
+    ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    ctx.fillText("Chart unavailable", W / 2, H / 2);
+    return;
+  }
   const lvDefs = [
     {v: levels.pdh, up: true,  dash: []},
     {v: levels.pmh, up: true,  dash: [4, 2]},
     {v: levels.pdl, up: false, dash: []},
     {v: levels.pml, up: false, dash: [4, 2]},
   ].filter(d => d.v != null);
-  // Scale to the price action + the RELEVANT level pair only. Including the far
-  // pair (PDL/PML on bullish cards) flattens the price line into invisibility.
-  // All four lines are still drawn — canvas clips any that fall outside the range.
   const rel = lvDefs.filter(d => d.up === bull).map(d => d.v);
   const all = closes.concat(rel);
   const lo = Math.min(...all), hi = Math.max(...all);
   const span = (hi - lo) || 1, pad = span * 0.12;
   const py = v => H - 4 - ((v - lo + pad) / (span + pad * 2)) * (H - 8);
   const px = i => 2 + (i / (closes.length - 1)) * (W - 4);
-  // all four level lines first (behind the price line); the pair that triggered the signal is brighter
+  // all four level lines first (behind the price line)
   lvDefs.forEach(d => {
     const relevant = d.up === bull;
     ctx.strokeStyle = d.up ? `rgba(48,209,88,${relevant ? 0.6 : 0.22})` : `rgba(255,69,58,${relevant ? 0.6 : 0.22})`;
     ctx.lineWidth = 1; ctx.setLineDash(d.dash); ctx.beginPath();
     ctx.moveTo(0, py(d.v)); ctx.lineTo(W, py(d.v)); ctx.stroke(); ctx.setLineDash([]);
   });
-  // 15m close line, from today's open
-  const col = bull ? cssVar("--gain") : cssVar("--loss");
-  ctx.strokeStyle = col; ctx.lineWidth = 2.5; ctx.lineJoin = "round"; ctx.lineCap = "round"; ctx.beginPath();
+  // series mean — dashed, like the watchlist
+  let sum = 0; for(const v of closes) sum += v;
+  const mean = sum / closes.length;
+  ctx.strokeStyle = cssVar("--faint") || "#666"; ctx.lineWidth = 1;
+  ctx.setLineDash([5, 4]); ctx.globalAlpha = .6;
+  ctx.beginPath(); ctx.moveTo(0, py(mean)); ctx.lineTo(W, py(mean)); ctx.stroke();
+  ctx.setLineDash([]); ctx.globalAlpha = 1;
+  // 15m close line, colored by 15m trend (last close vs mean) — watchlist style
+  const up = closes[closes.length - 1] >= mean;
+  const col = up ? cssVar("--gain") : cssVar("--loss");
+  ctx.strokeStyle = col; ctx.lineWidth = 2; ctx.lineJoin = "round"; ctx.lineCap = "round"; ctx.beginPath();
   closes.forEach((v, i) => i ? ctx.lineTo(px(i), py(v)) : ctx.moveTo(px(i), py(v)));
   ctx.stroke();
   ctx.fillStyle = col; ctx.beginPath(); ctx.arc(px(closes.length - 1), py(closes[closes.length - 1]), 2.6, 0, 7); ctx.fill();
@@ -203,8 +259,6 @@ function dayMove(r){
 function cardHTML(r, side){
   const bull = side === "bull";
   const lv = levelsFor(r, bull);
-  const ch = charts[r.ticker];
-  const closes = ch ? ch.candles15m.map(c => c.c) : [];
   const px = r.close;
   const mv = dayMove(r);
   const chCls = mv == null ? "" : (mv >= 0 ? "up" : "dn");
@@ -222,20 +276,30 @@ function cardHTML(r, side){
     + `<div class="r-main"><div class="tk ${bull ? "bull" : "bear"}">${esc(r.ticker)}</div>`
     + (nm ? `<div class="rname">${esc(nm)}</div>` : "")
     + `<div class="badges">${badge15}${bPDH}${bPDL}${st}</div></div>`
-    + `<canvas class="r-spark${closes.length > 1 ? "" : " hide"}" width="184" height="68" data-sym="${esc(r.ticker)}" data-side="${side}"></canvas>`
+    + `<canvas class="r-spark" width="184" height="68" data-sym="${esc(r.ticker)}" data-side="${side}"></canvas>`
     + `<div class="r-nums"><div class="px">$${px != null ? px.toFixed(2) : "&mdash;"}</div><div class="ch ${chCls}">${mvTxt}</div></div>`
     + `<button class="pin" aria-label="Favorite ${esc(r.ticker)}" onclick="togglePin(event,'${esc(r.ticker)}')">${isPinned ? "★" : "☆"}</button>`
     + `</div>`;
 }
 function paintSparks(root){
-  root.querySelectorAll("canvas.r-spark:not(.hide)").forEach(cv => {
+  root.querySelectorAll("canvas.r-spark").forEach(cv => {
     const sym = cv.dataset.sym, bull = cv.dataset.side === "bull";
     const ch = charts[sym];
-    if(!ch || ch.candles15m.length < 2) return;
     const r = DATA.bull.concat(DATA.bear).find(x => x.ticker === sym);
-    drawSpark(cv, ch.candles15m.map(c => c.c), levelsFor(r || {}, bull), bull);
+    drawSpark(cv, ch ? ch.candles15m.map(c => c.c) : [], levelsFor(r || {}, bull), bull);
   });
 }
+function applySort(){
+  DATA.bull = sortRows(DATA.bull, "bull");
+  DATA.bear = sortRows(DATA.bear, "bear");
+  page.bull = 1; page.bear = 1;
+  renderSide("bull"); renderSide("bear");
+}
+document.querySelectorAll("#sortChips .wchip").forEach(b => b.addEventListener("click", () => {
+  sortMode = b.dataset.sort;
+  document.querySelectorAll("#sortChips .wchip").forEach(x => x.classList.toggle("on", x === b));
+  applySort();
+}));
 function renderSide(side){
   const rows = DATA[side];
   const pages = Math.max(1, Math.ceil(rows.length / PAGE));
@@ -272,18 +336,20 @@ function ctFmt(d){
 async function load(){
   setHB("wait", "Connecting&hellip;");
   try{
-    const [fr, cr] = await Promise.all([
+    const [fr, cr, mr] = await Promise.all([
       fetch(FEED + "?t=" + Date.now(), {cache: "no-store"}),
-      fetch(CHARTS + "?t=" + Date.now(), {cache: "no-store"}).catch(() => null)
+      fetch(CHARTS + "?t=" + Date.now(), {cache: "no-store"}).catch(() => null),
+      fetch(CAPS_URL + "?t=" + Date.now(), {cache: "no-store"}).then(r => r.ok ? r.json() : null).catch(() => null)
     ]);
     if(!fr.ok) throw new Error("HTTP " + fr.status);
     const d = await fr.json();
     if(cr && cr.ok){ const cd = await cr.json(); charts = cd.charts || {}; }
+    if(mr && mr.caps) CAPS = mr.caps;
     const nb = new Set(d.newBullish || []), nbe = new Set(d.newBearish || []), fl = new Set(d.flipped || []);
     const tag = r => ({...r, status: fl.has(r.ticker) ? "flipped" : (nb.has(r.ticker) || nbe.has(r.ticker)) ? "new" : ""});
     // SPY/QQQ/IWM always first when they have a qualifying close (standing rule)
-    DATA.bull = sortRows((d.bullish || []).map(tag));
-    DATA.bear = sortRows((d.bearish || []).map(tag));
+    DATA.bull = sortRows((d.bullish || []).map(tag), "bull");
+    DATA.bear = sortRows((d.bearish || []).map(tag), "bear");
     document.getElementById("bullCount").textContent = DATA.bull.length;
     document.getElementById("bearCount").textContent = DATA.bear.length;
     const asof = d.asOf ? ctFmt(new Date(d.asOf)) + " CT" : "";
