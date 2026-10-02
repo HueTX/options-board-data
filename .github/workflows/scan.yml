@@ -88,6 +88,12 @@ jobs:
           cd scanner
           python3 fifteen_min_closes.py || echo "15m poller failed, keeping previous files"
 
+      - name: Build persistence (streaks, confirmed ignitions, first-appearance)
+        if: steps.gate.outputs.open == 'true'
+        run: |
+          cd scanner
+          python3 build_persistence.py persistence.json || echo "persistence build failed, keeping previous file"
+
       - name: Publish feeds to repo root
         if: steps.gate.outputs.open == 'true'
         run: |
@@ -95,6 +101,7 @@ jobs:
           cp scanner/fifteen_min_closes.json fifteen_min_closes.json
           cp scanner/fifteen_min_charts.json fifteen_min_charts.json
           cp scanner/follow_through.json follow_through.json
+          cp scanner/persistence.json persistence.json
           cp scanner/names_cache.json names_cache.json
 
       - name: Commit and push
