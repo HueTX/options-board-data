@@ -1,0 +1,51 @@
+name: Premarket data
+
+# Premarket gap data for the morning board. Runs on GitHub infrastructure
+# every 15 min during premarket hours (Mon-Fri). The main scan workflow
+# picks up scanner/premarket.json when building the snapshot.
+# Times are UTC. CT = UTC-5, so 12:00-13:30 UTC = 07:00-08:30 CT.
+on:
+  schedule:
+    - cron: '*/15 12-13 * * 1-5'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: options-premarket
+  cancel-in-progress: true
+
+jobs:
+  premarket:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: python -m pip install --quiet --disable-pip-version-check -r scanner/requirements.txt
+
+      - name: Fetch premarket data
+        run: |
+          cd scanner
+          python3 premarket.py || echo "premarket fetch failed, keeping previous"
+
+      - name: Commit and push
+        run: |
+          git config user.name "options-scanner"
+          git config user.email "scanner@github-actions"
+          git add scanner/premarket.json
+          if git diff --cached --quiet; then
+            echo "no changes to commit"
+          else
+            git commit -m "premarket: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            git pull --rebase
+            git push
+          fi
