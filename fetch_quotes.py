@@ -128,21 +128,32 @@ def fetch_movers(out_file):
     predefined screeners (NOT limited to our tracked universe). Each entry
     carries t/price/chgPct plus mc (marketCap, raw dollars) when Yahoo returns it.
     Falls back to ranking the locally fetched 311-ticker universe when the
-    screeners are unreachable, so the board keeps a fresh movers feed."""
+    screeners are unreachable, so the board keeps a fresh movers feed.
+    PREMARKET RULE (Hubert 2026-10-02): before 9:30am ET, Yahoo's day_gainers/
+    day_losers screeners do NOT reflect premarket movers — they return stale or
+    irrelevant rankings. In premarket hours, skip the screeners entirely and rank
+    the local universe quotes (which carry fresh premarket prices) instead."""
+    import datetime as _dt
+    et_now = _dt.datetime.now(_dt.timezone.utc).astimezone(
+        _dt.timezone(_dt.timedelta(hours=-4)))  # ET (EDT)
+    is_premarket = et_now.weekday() < 5 and _dt.time(4, 0) <= et_now.time() < _dt.time(9, 30)
     sess = requests.Session()
     sess.headers.update(UA)
     gainers, losers = [], []
-    try:
-        gainers = fetch_movers_screener(sess, "day_gainers")
-    except Exception as e:
-        print("day_gainers: %s" % e)
-    try:
-        losers = fetch_movers_screener(sess, "day_losers")
-    except Exception as e:
-        print("day_losers: %s" % e)
+    if not is_premarket:
+        try:
+            gainers = fetch_movers_screener(sess, "day_gainers")
+        except Exception as e:
+            print("day_gainers: %s" % e)
+        try:
+            losers = fetch_movers_screener(sess, "day_losers")
+        except Exception as e:
+            print("day_losers: %s" % e)
+    else:
+        print("movers: premarket hours — skipping Yahoo screeners, ranking local universe")
     if not gainers and not losers:
-        # Screener blocked/failed: rank the universe quotes file this job
-        # already maintains instead of publishing nothing.
+        # Screener blocked/failed (or premarket skip): rank the universe quotes
+        # file this job already maintains instead of publishing nothing.
         try:
             with open("quotes_universe.json") as f:
                 uni = json.load(f).get("tickers", {})
@@ -202,7 +213,7 @@ def fetch_chart(sess, sym, rng, interval, tries=3):
 
 def build_watchlist(out_file, tickers_file="watchlist_tickers.txt",
                     caps_file="watchlist_caps.json"):
-    """DEPRECATED as a builder: the 08:05 CT morning-breakout-watchlist cron is
+    """DEPRECATED as a builder: the 06:35 CT morning-breakout-watchlist cron is
     now the SOLE writer of watchlist.json (true 311-ticker premarket scan).
     Rebuilding here ranked a different 72-ticker set by closing-price proximity
     and clobbered the real morning list on every workflow run (2026-10-01).
@@ -426,12 +437,15 @@ def build_regime1h(out_file):
             q = ((r.get("indicators") or {}).get("quote") or [{}])[0] or {}
             closes = q.get("close") or []
             bars = []
+            now_ts = time.time()
             for t, c in zip(ts, closes):
                 if c is None:
                     continue
                 et = datetime.datetime.fromtimestamp(t, datetime.timezone.utc).astimezone(ET)
                 m = et.hour * 60 + et.minute
-                if et.weekday() < 5 and 570 <= m < 960:
+                # Match the artifact watchlist parser: only completed hourly
+                # candles whose start is inside the 09:30–16:00 ET session.
+                if et.weekday() < 5 and 570 <= m < 960 and t + 3600 <= now_ts:
                     bars.append(round(float(c), 2))
             h1 = bars[-107:]
         except Exception as e:
