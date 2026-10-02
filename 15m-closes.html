@@ -149,7 +149,7 @@ canvas.wspark{width:100%; height:74px; display:block; min-width:0}
     <button class="wchip fav" data-sort="fav">&#9733; Favorites</button>
   </div>
 </div>
-<div class="legend-card">Candles: green closed up / red closed down &middot; PDH &amp; PMH: labeled green horizontals &middot; PDL &amp; PML: labeled red horizontals &middot; dashed gray: series mean</div>
+<div class="legend-card">Candles: green bullish / red bearish &middot; PDH &amp; PMH: labeled green horizontals &middot; PDL &amp; PML: labeled red horizontals &middot; dashed gray: series mean</div>
 
 <div class="panels">
   <section class="panel">
@@ -252,11 +252,12 @@ function sortRows(rows, side){
   }
   return pool.slice().sort((a, b) => prio(a, b) || alpha(a, b));
 }
-/* 15m mini chart: candlesticks (green = closed up, red = closed down), dashed
-   series-mean line, plus the four breakout levels (PDH solid green, PMH dotted
-   green, PDL solid red, PML dotted red — same convention as the detail chart),
-   labeled at the right edge. The y-domain spans the candle highs/lows so wicks
-   never clip; level lines outside today's range are clipped off-chart. */
+/* 15m mini chart: candlesticks colored by bullish/bearish SIDE (green = bullish
+   panel, red = bearish panel), dashed series-mean line, plus the four breakout
+   levels (PDH solid green, PMH dotted green, PDL solid red, PML dotted red —
+   same convention as the detail chart), labeled at the right edge. The y-domain
+   spans the candle highs/lows so wicks never clip; level lines outside today's
+   range are clipped off-chart. */
 function drawSpark(cv, candles, levels, side){
   const dpr = Math.min(2, window.devicePixelRatio || 1);
   const W = cv.clientWidth || 200, H = cv.clientHeight || 74;
@@ -299,13 +300,14 @@ function drawSpark(cv, candles, levels, side){
   ctx.setLineDash([5, 4]); ctx.globalAlpha = .7;
   ctx.beginPath(); ctx.moveTo(plotLeft, py(mean)); ctx.lineTo(plotRight, py(mean)); ctx.stroke();
   ctx.setLineDash([]); ctx.globalAlpha = 1;
-  // 15m candlesticks: green when the candle closed up, red when it closed down
+  // 15m candlesticks, colored by bullish/bearish side (never by candle direction)
+  const sideCol = side === "bear" ? loss : gain;
   const n = candles.length;
   const slotW = (plotRight - plotLeft) / n;
   const bodyW = Math.max(2, Math.min(7, slotW * 0.62));
   candles.forEach((c, i) => {
     const x = plotLeft + slotW * (i + 0.5);
-    const col = c.c >= c.o ? gain : loss;
+    const col = sideCol;
     ctx.strokeStyle = col; ctx.lineWidth = 1;
     ctx.beginPath(); ctx.moveTo(x, py(c.h)); ctx.lineTo(x, py(c.l)); ctx.stroke();
     const yO = py(c.o), yC = py(c.c);
