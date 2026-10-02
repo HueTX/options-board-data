@@ -454,6 +454,10 @@ canvas.r-spark.hide{display:none}
 .persist-grid .empty{grid-column:1/-1}
 .persist-label{grid-column:1/-1;font-weight:700;font-size:13px;margin:4px 0 2px}
 .persist-label span{font-weight:400;color:var(--muted);font-size:12px}
+.radar-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.radar-grid .empty{grid-column:1/-1}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.55}}
+@media(max-width:700px){.radar-grid{grid-template-columns:1fr}}
 .ig-card{
   border:1px solid var(--panel-brd);border-radius:10px;padding:8px 10px;min-width:0;cursor:pointer;
   background:linear-gradient(165deg, rgba(224,170,62,.10), rgba(224,170,62,.03) 60%, transparent), var(--pill-bg);
@@ -807,6 +811,15 @@ footer.appfoot{margin:26px 0 0;font-size:12.5px;color:var(--faint);text-align:ce
         </ol>
       </div>
     </section>
+
+    <section class="panel" id="secRadar">
+      <div class="sec-head" data-sec="secRadar">
+        <div class="titles"><h2>ETF Breakout Radar</h2><p class="sub" id="radarSub">SPY · QQQ · IWM — early entry signals</p><span class="upd" id="updRadar"></span></div>
+        <span class="head-meta" id="radarMeta"></span>
+        <button class="chev" aria-label="Collapse">&#8964;</button>
+      </div>
+      <div class="sec-body"><div class="radar-grid" id="radarGrid"><div class="empty">Loading&hellip;</div></div></div>
+    </section>
   </main>
 
   <footer class="appfoot">Quotes: Yahoo Finance &middot; Flow snapshot: scanner &middot; Signals need completed 15-minute candles only &middot; <a href="standing-rules.html" style="color:var(--faint)">Standing rules</a></footer>
@@ -1058,7 +1071,9 @@ async function refreshQuotes(){
     }
     if (r11 && r11.asOf){
       const ms11 = Date.parse(r11.asOf); if (isFinite(ms11)) closes15AsOfMs = ms11;
+      CLOSES15 = r11;
     }
+    if (r9 && r9.bars){ DBARS = r9.bars; }
     if (r12 && r12.marketDate){ PERSIST = r12; renderPersist(); }
     // live movers feed failure is non-fatal: universe-computed movers remain the fallback
     // snapshot fetch failure / older file is non-fatal: the embedded snapshot keeps the page working
@@ -1252,6 +1267,7 @@ const DS = {};
 for (const [k] of DS_DEFS) DS[k] = {state:'checking', asOf:null, sub:''};
 let quotesDate = null, uniDate = null;   // YYYY-MM-DD (ET) of the live quote feeds
 let quotesAsOfMs = null, uniAsOfMs = null, closes15AsOfMs = null;   // epoch ms of the feeds' own timestamps (freshness is measured on data age, not poll time)
+let CLOSES15 = null, DBARS = null;   // full 15m closes feed + 5m bars, for the ETF radar
 let MV = null, mvDate = null, mvAsOfMs = null;   // live market_movers.json feed {asOf, gainers:[], losers:[]}
 const ctFmtHM = new Intl.DateTimeFormat('en-US',{timeZone:'America/Chicago',hour:'numeric',minute:'2-digit',hour12:true});
 function mvCount(){ let n = 0; for (const s of UNISET){ const q = Q.get(s); if (q && q.chgPct != null) n++; } return n; }
@@ -2180,6 +2196,102 @@ function renderPersist(){
   if (P.asOf) $('updPersist').textContent = 'updated ' + ctTime(Date.parse(P.asOf));
 }
 
+/* ================= ETF BREAKOUT RADAR ================= */
+// Early-entry signals for SPY/QQQ/IWM: live lean, flow confluence, approach,
+// test count, premarket setup, 5m trigger.
+function radarLevels(sym){
+  const q = Q.get(sym) || {};
+  const lv = LEVELS.get(sym) || {};
+  return {
+    pdh: lv.pdh, pdl: lv.pdl,
+    pmh: q.pmh != null ? q.pmh : null,
+    pml: q.pml != null ? q.pml : null,
+  };
+}
+function minToCandleClose(){
+  const now = new Date();
+  const et = new Date(now.toLocaleString('en-US', {timeZone: 'America/New_York'}));
+  const m = et.getMinutes();
+  return 15 - (m % 15) || 15;
+}
+function radarCard(sym){
+  const q = Q.get(sym) || {};
+  const px = livePrice(sym);
+  if (px == null) return `<div class="ig-card"><div class="tk">${sym}</div><div class="ix">no quote</div></div>`;
+  const L = radarLevels(sym);
+  const lvls = [];
+  if (L.pdh != null) lvls.push(['PDH', L.pdh]);
+  if (L.pmh != null) lvls.push(['PMH', L.pmh]);
+  if (L.pdl != null) lvls.push(['PDL', L.pdl]);
+  if (L.pml != null) lvls.push(['PML', L.pml]);
+  // nearest level
+  let near = null, nearDist = Infinity;
+  for (const [name, v] of lvls){
+    const d = Math.abs(px - v) / v * 100;
+    if (d < nearDist){ nearDist = d; near = [name, v]; }
+  }
+  const open = isMarketOpen();
+  const minLeft = open ? minToCandleClose() : 0;
+  // 1. live lean: where is price vs the key resistance/support right now?
+  const res = Math.min(...lvls.filter(([n]) => n === 'PDH' || n === 'PMH').map(([,v]) => v).filter(isFinite));
+  const sup = Math.max(...lvls.filter(([n]) => n === 'PDL' || n === 'PML').map(([,v]) => v).filter(isFinite));
+  let lean = '', leanCls = '';
+  if (isFinite(res) && px > res){ lean = `above ${res === L.pdh ? 'PDH' : 'PMH'} — leaning bull`; leanCls = 'up'; }
+  else if (isFinite(sup) && px < sup){ lean = `below ${sup === L.pdl ? 'PDL' : 'PML'} — leaning bear`; leanCls = 'dn'; }
+  else if (near){ lean = `${nearDist.toFixed(2)}% from ${near[0]} ${fmtPx(near[1])}`; }
+  // 3. approach badge
+  const approaching = nearDist < 0.15;
+  // 2. flow confluence: is this ETF in the flow snapshot?
+  let flow = null;
+  for (const r of (SNAP.bullish||[])){ if (r.ticker === sym){ flow = ['bull', r.relativeVolume]; break; } }
+  if (!flow) for (const r of (SNAP.bearish||[])){ if (r.ticker === sym){ flow = ['bear', r.relativeVolume]; break; } }
+  // 4. test count: how many 15m candles touched the nearest level today?
+  let tests = 0;
+  if (CLOSES15 && near){
+    const all = (CLOSES15.bullish||[]).concat(CLOSES15.bearish||[]);
+    tests = all.filter(r => r.ticker === sym).length;
+  }
+  // 6. 5m trigger: did the last 5m bar close through a level?
+  let m5 = '';
+  const bars = DBARS && DBARS[sym];
+  if (bars && bars.length){
+    const last = bars[bars.length - 1];
+    const c = last.c != null ? last.c : last.close;
+    if (c != null){
+      if (isFinite(res) && c > res) m5 = '<span class="sig-badge bull">5m ▲ thru res</span>';
+      else if (isFinite(sup) && c < sup) m5 = '<span class="sig-badge bear">5m ▼ thru sup</span>';
+    }
+  }
+  // 5. premarket setup (before open)
+  let pm = '';
+  if (!open && near){
+    pm = `<div class="ix">premarket: ${nearDist.toFixed(2)}% from ${near[0]}</div>`;
+  }
+  const flowHtml = flow
+    ? `<span class="sig-badge ${flow[0] === 'bull' ? 'bull' : 'bear'}" title="${flow[1] != null ? flow[1].toFixed(1) + 'x avg flow' : 'unusual flow'}">${flow[0] === 'bull' ? '▲' : '▼'} flow ${flow[1] != null ? flow[1].toFixed(1) + 'x' : ''}</span>`
+    : '';
+  const agree = flow && leanCls && ((flow[0] === 'bull' && leanCls === 'up') || (flow[0] === 'bear' && leanCls === 'dn'))
+    ? '<span class="sig-badge new">✓ flow + level agree</span>' : '';
+  return `<div class="ig-card" data-sym="${sym}" style="min-width:200px">` +
+    `<div class="tk">${sym} <span style="font-weight:400">${fmtPx(px)}</span></div>` +
+    `<div class="ix ${leanCls}">${esc(lean)}${open ? ` · ${minLeft}m to 15m close` : ''}</div>` +
+    (approaching ? `<div><span class="sig-badge new" style="animation:pulse 1.5s infinite">⚡ APPROACHING ${near[0]}</span></div>` : '') +
+    `<div class="badges" style="margin-top:4px">${flowHtml}${agree}${m5}</div>` +
+    (tests ? `<div class="ix" style="color:var(--muted)">${tests} level ${tests === 1 ? 'touch' : 'touches'} today</div>` : '') +
+    pm + `</div>`;
+}
+function renderRadar(){
+  const el = $('radarGrid');
+  if (!el) return;
+  const syms = ['SPY', 'QQQ', 'IWM'];
+  el.innerHTML = syms.map(radarCard).join('');
+  const open = isMarketOpen();
+  $('radarSub').textContent = open
+    ? 'SPY · QQQ · IWM — live lean · flow confluence · 5m trigger'
+    : 'SPY · QQQ · IWM — premarket setup vs PDH/PMH/PDL/PML';
+  $('updRadar').textContent = 'updated ' + ctTime(Date.now());
+}
+
 /* ================= DATE VERIFICATION ================= */
 // The NYSE market date in America/New_York: the trading day whose data the board
 // should expect. Rolls back to the previous trading day overnight (before the
@@ -2356,7 +2468,7 @@ function renderAll(){
   renderStatus(); renderRegime(); renderSession(); evalHealth();
   if (!pollDone) { renderUpdated(); return; }  // first poll pending: show checking state, don't paint stale embedded data
   paintCapChips(); renderSignals();
-  renderIgnitions(); renderPersist(); renderFlow(); renderPremarket(); renderSectors(); renderMovers(); renderWatchlist(); renderPins();
+  renderIgnitions(); renderPersist(); renderRadar(); renderFlow(); renderPremarket(); renderSectors(); renderMovers(); renderWatchlist(); renderPins();
   renderUpdated();
 }
 
