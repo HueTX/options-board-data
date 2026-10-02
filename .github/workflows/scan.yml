@@ -1,0 +1,112 @@
+name: Scan and publish options data
+
+# Main data pipeline — runs ENTIRELY on GitHub infrastructure.
+# Every 5 min during market hours (Mon-Fri): tiered options scan,
+# snapshot build, 15m closes, and publish to repo root for the
+# standalone site and the hosted board to pull.
+# Times are UTC. CT = UTC-5, so 13:30-20:05 UTC = 08:30-15:05 CT.
+on:
+  schedule:
+    - cron: '*/5 13-20 * * 1-5'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+# Never run two scans at once; a new run cancels a stuck one.
+concurrency:
+  group: options-scan
+  cancel-in-progress: true
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # full history so pull --rebase never trips
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: python -m pip install --quiet --disable-pip-version-check -r scanner/requirements.txt
+
+      - name: Market-hours gate
+        id: gate
+        run: |
+          python3 - <<'EOF'
+          import datetime, os
+          from zoneinfo import ZoneInfo
+          ct = datetime.datetime.now(ZoneInfo("America/Chicago"))
+          holidays = {"2026-11-26","2026-12-25","2027-01-01","2027-01-18",
+                      "2027-02-15","2027-03-26","2027-05-31","2027-06-18",
+                      "2027-07-05","2027-09-06","2027-11-25","2027-12-24"}
+          ok = (ct.weekday() < 5
+                and ct.strftime("%Y-%m-%d") not in holidays
+                and 510 <= ct.hour*60+ct.minute <= 905)
+          print(f"gate: {ct.isoformat()} -> {'OPEN' if ok else 'CLOSED'}")
+          with open(os.environ["GITHUB_OUTPUT"], "a") as f:
+              f.write(f"open={'true' if ok else 'false'}\n")
+          EOF
+
+      - name: Previous-day OHLC (idempotent)
+        if: steps.gate.outputs.open == 'true'
+        run: |
+          cd scanner
+          python3 fetch_prev_ohlc.py
+
+      - name: Tiered options scan
+        if: steps.gate.outputs.open == 'true'
+        run: |
+          cd scanner
+          now=$(date +%s)
+          last=0
+          if [ -f .last_full_scan ]; then last=$(cat .last_full_scan); fi
+          age=$((now - last))
+          if [ "$age" -gt 900 ]; then
+            echo "FULL scan (last full ${age}s ago)"
+            python3 scan.py
+            echo "$now" > .last_full_scan
+          else
+            echo "LIGHT scan (last full ${age}s ago)"
+            python3 scan.py --light
+          fi
+
+      - name: Build snapshot + follow-through
+        if: steps.gate.outputs.open == 'true'
+        run: |
+          cd scanner
+          python3 build_snapshot.py
+          python3 build_follow_through.py
+
+      - name: 15-minute closes
+        if: steps.gate.outputs.open == 'true'
+        run: |
+          cd scanner
+          python3 fifteen_min_closes.py || echo "15m poller failed, keeping previous files"
+
+      - name: Publish feeds to repo root
+        if: steps.gate.outputs.open == 'true'
+        run: |
+          cp scanner/snapshot_payload.json snapshot.json
+          cp scanner/fifteen_min_closes.json fifteen_min_closes.json
+          cp scanner/fifteen_min_charts.json fifteen_min_charts.json
+          cp scanner/follow_through.json follow_through.json
+          cp scanner/names_cache.json names_cache.json
+
+      - name: Commit and push
+        if: steps.gate.outputs.open == 'true'
+        run: |
+          git config user.name "options-scanner"
+          git config user.email "scanner@github-actions"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "no changes to commit"
+          else
+            git commit -m "scan: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            git pull --rebase
+            git push
+          fi
