@@ -193,6 +193,37 @@ def main():
                      "lastSeenDaysAgo": last_seen})
     echo.sort(key=lambda r: -r["x"])
 
+    # --- 6. dead money: 5+ day unusual-flow streak but price flat (|chg| < 2%) ---
+    # price changes come from snapshot first, then Yahoo for streak names missing there
+    dead = []
+    need_px = [s["ticker"] for s in streaks if s["streakDays"] >= 5 and s["ticker"] not in px_chg]
+    if need_px:
+        try:
+            import yfinance as yf
+            data = yf.download(" ".join(need_px), period="2d", progress=False, auto_adjust=False)
+            closes = data["Close"]
+            for t in need_px:
+                try:
+                    c = closes[t].dropna()
+                    if len(c) >= 2:
+                        px_chg[t] = float((c.iloc[-1] / c.iloc[-2] - 1) * 100)
+                except (KeyError, IndexError):
+                    pass
+        except Exception:
+            pass
+    for s in streaks:
+        if s["streakDays"] < 5:
+            continue
+        t = s["ticker"]
+        chg = px_chg.get(t)
+        if chg is None or abs(chg) >= 2.0:
+            continue
+        dead.append({
+            "ticker": t, "side": s["side"], "streakDays": s["streakDays"],
+            "lastX": s["lastX"], "changePct": round(chg, 2),
+        })
+    dead.sort(key=lambda r: (-r["streakDays"], -r["lastX"]))
+
     out = {
         "asOf": datetime.now(timezone.utc).isoformat(),
         "marketDate": market_date,
@@ -201,6 +232,7 @@ def main():
         "firstAppearance": first,
         "sectorRotation": rotation,
         "echo": echo,
+        "deadMoney": dead,
     }
     with open(out_path, "w") as f:
         json.dump(out, f)
