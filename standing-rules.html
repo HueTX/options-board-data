@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Standing Rules — Options Board</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #0a0a0f; color: #e8e8ed; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 24px 16px 60px; }
+  .wrap { max-width: 760px; margin: 0 auto; }
+  h1 { font-size: 1.6rem; margin-bottom: 4px; }
+  .sub { color: #888; font-size: 0.9rem; margin-bottom: 28px; }
+  .rule { background: #14141c; border: 1px solid #26262f; border-radius: 12px; padding: 18px 20px; margin-bottom: 16px; }
+  .rule h2 { font-size: 1.05rem; color: #f5a623; margin-bottom: 10px; }
+  .rule ol, .rule ul { padding-left: 20px; }
+  .rule li { margin-bottom: 8px; line-height: 1.55; font-size: 0.95rem; }
+  .rule li:last-child { margin-bottom: 0; }
+  .tag { display: inline-block; font-size: 0.72rem; background: #26262f; color: #aaa; border-radius: 6px; padding: 2px 8px; margin-left: 8px; vertical-align: middle; }
+  .quote { border-left: 3px solid #f5a623; padding-left: 12px; color: #ccc; font-style: italic; margin: 8px 0; }
+  a.back { display: inline-block; margin-top: 24px; color: #f5a623; text-decoration: none; font-size: 0.95rem; }
+  a.back:hover { text-decoration: underline; }
+  .updated { color: #666; font-size: 0.8rem; margin-top: 32px; text-align: center; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Standing Rules</h1>
+  <div class="sub">Operating rules set by Hubert — the system follows these without being asked twice.</div>
+
+  <div class="rule">
+    <h2>Morning data freshness <span class="tag">2026-10-02</span></h2>
+    <div class="quote">"I am tired of telling you what is wrong on the website. Here are the standing rules!"</div>
+    <ol>
+      <li><strong>Every morning, check ALL panels</strong> ("pills") for accurate live data as of the current date. Hubert should NEVER have to report stale data — the system must catch it first.</li>
+      <li><strong>Polls and heartbeats are not decorative</strong> — they must ACTIVELY refresh stale data. If a poll or heartbeat finds stale data, it heals it on the spot (rebuild + push), not just log it.</li>
+      <li><strong>Before 7:30 AM CT, a secondary sweep</strong> verifies everything from rule 1 is accurate, so live data is ready for morning review.</li>
+    </ol>
+  </div>
+
+  <div class="rule">
+    <h2>All board data live by 07:30 CT <span class="tag">2026-10-02</span></h2>
+    <div class="quote">"I need all the data before 7:30am to be always live! No more stale data or excuses. Fix the logic once and for all."</div>
+    <ul>
+      <li>Every morning-critical feed must be fresh by 07:30 CT on NYSE trading days: watchlist (today), follow-through ignitions (yesterday), premarket snapshot (today), 15-min closes (exists — yesterday's final is correct pre-open), quotes (live).</li>
+      <li>"Live" before the open means the most recent <em>correct</em> data with the right date shown on every panel.</li>
+      <li>Enforced by the 07:20 CT morning-readiness sweep, which heals any stale feed automatically.</li>
+    </ul>
+  </div>
+
+  <div class="rule">
+    <h2>5-minute full-board refresh <span class="tag">2026-10-02</span></h2>
+    <ul>
+      <li>The whole website refreshes and pulls new data to <strong>all pills every 5 minutes</strong>, updating with new data until the session ends (15:05 CT).</li>
+      <li>Applies to both the standalone site and the hosted board.</li>
+    </ul>
+  </div>
+
+  <div class="rule">
+    <h2>Never sit idle <span class="tag">2026-09-25</span></h2>
+    <div class="quote">"Rather than getting stuck and waiting on me, if you see that I'm taking too long to respond to you go ahead and do other things."</div>
+    <ul>
+      <li>While waiting on Hubert for input, keep working every other front — never park the whole process on one pending reply.</li>
+    </ul>
+  </div>
+
+  <div class="rule">
+    <h2>Cross-market price discrepancies <span class="tag">2026-09-30</span></h2>
+    <ul>
+      <li>Retain qualifying cross-market price discrepancies and show <strong>both</strong> prices with <strong>both</strong> sources — a discrepancy can be a good deal, never suppress it.</li>
+    </ul>
+  </div>
+
+  <a class="back" href="index.html">← Back to the board</a>
+  <div class="updated">Last updated 2026-10-02</div>
+</div>
+</body>
+</html>
