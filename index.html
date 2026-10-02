@@ -450,6 +450,10 @@ canvas.r-spark.hide{display:none}
 /* ============ IGNITIONS ============ */
 .ig-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;min-width:0}
 .ig-grid .empty{grid-column:1/-1}
+.persist-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;min-width:0;margin-top:12px}
+.persist-grid .empty{grid-column:1/-1}
+.persist-label{grid-column:1/-1;font-weight:700;font-size:13px;margin:4px 0 2px}
+.persist-label span{font-weight:400;color:var(--muted);font-size:12px}
 .ig-card{
   border:1px solid var(--panel-brd);border-radius:10px;padding:8px 10px;min-width:0;cursor:pointer;
   background:linear-gradient(165deg, rgba(224,170,62,.10), rgba(224,170,62,.03) 60%, transparent), var(--pill-bg);
@@ -773,6 +777,19 @@ footer.appfoot{margin:26px 0 0;font-size:12.5px;color:var(--faint);text-align:ce
       <div class="sec-body"><div class="ig-grid" id="igGrid"><div class="empty">Loading ignition history&hellip;</div></div></div>
     </section>
 
+    <section class="panel" id="secPersist">
+      <div class="sec-head" data-sec="secPersist">
+        <div class="titles"><h2>Flow persistence</h2><p class="sub" id="persistSub">Streaks · confirmed ignitions · first appearances</p><span class="upd" id="updPersist"></span></div>
+        <span class="head-meta" id="persistMeta"></span>
+        <button class="chev" aria-label="Collapse">&#8964;</button>
+      </div>
+      <div class="sec-body">
+        <div class="persist-grid" id="persistConfirmed"><div class="empty">Loading&hellip;</div></div>
+        <div class="persist-grid" id="persistStreaks"></div>
+        <div class="persist-grid" id="persistFirst"></div>
+      </div>
+    </section>
+
     <section class="panel" id="secMFlow">
       <div class="sec-head" data-sec="secMFlow">
         <div class="titles"><h2>Morning flow</h2><p class="sub">Your four-step reference</p></div>
@@ -917,6 +934,7 @@ const MOVERS_URL = "https://raw.githubusercontent.com/HueTX/options-board-data/m
 const DBARS_URL = "https://raw.githubusercontent.com/HueTX/options-board-data/main/dbars.json";   // 5m drawer bars for flow/mover tickers outside the 56-ticker quotes feed
 const REGIME1H_URL = "https://raw.githubusercontent.com/HueTX/options-board-data/main/regime1h.json"; // 1H regime bars, same h1 semantics as the watchlist charts
 const CLOSES15_URL = "https://raw.githubusercontent.com/HueTX/options-board-data/main/fifteen_min_closes.json"; // 15m confirmed closes feed; its asOf drives the "15m closes" health chip
+const PERSIST_URL = "https://raw.githubusercontent.com/HueTX/options-board-data/main/persistence.json"; // flow persistence: streaks, confirmed ignitions, first appearances
 const FEED_OK = !/PUT-YOUR/.test(QUOTES_URL + QUOTES_UNI_URL + WATCHLIST_URL);   // replace-all safe: true once the placeholder is gone from the URLs
 // Per-feed heartbeat: last SUCCESSFUL fetch time (epoch ms). A failed fetch leaves the
 // previous timestamp alone, so the chip ages honestly toward STALE while the section
@@ -974,7 +992,7 @@ async function refreshQuotes(){
     const bust = '?t=' + Math.floor(Date.now()/15000);
     for (const [k] of DS_DEFS) DS[k] = {state:'checking', asOf:null, sub:''};
     dsPaint();
-    const [r1, r2, r4, r5, r6, r7, r8, r9, r10, r11] = await Promise.all([
+    const [r1, r2, r4, r5, r6, r7, r8, r9, r10, r11, r12] = await Promise.all([
       fetch(QUOTES_URL + bust).then(r => { if(!r.ok) throw new Error('quotes '+r.status); return r.json(); }).catch(() => null),
       fetch(QUOTES_UNI_URL + bust).then(r => { if(!r.ok) throw new Error('uni '+r.status); return r.json(); }).catch(() => null),
       fetch(FT_URL + bust).then(r => { if(!r.ok) throw new Error('ft '+r.status); return r.json(); }).catch(() => null),
@@ -984,7 +1002,8 @@ async function refreshQuotes(){
       fetch(WCHARTS_URL + bust).then(r => { if(!r.ok) throw new Error('wc '+r.status); return r.json(); }).catch(() => null),
       fetch(DBARS_URL + bust).then(r => { if(!r.ok) throw new Error('db '+r.status); return r.json(); }).catch(() => null),
       fetch(REGIME1H_URL + bust).then(r => { if(!r.ok) throw new Error('r1h '+r.status); return r.json(); }).catch(() => null),
-      fetch(CLOSES15_URL + bust).then(r => { if(!r.ok) throw new Error('15m '+r.status); return r.json(); }).catch(() => null)
+      fetch(CLOSES15_URL + bust).then(r => { if(!r.ok) throw new Error('15m '+r.status); return r.json(); }).catch(() => null),
+      fetch(PERSIST_URL + bust).then(r => { if(!r.ok) throw new Error('persist '+r.status); return r.json(); }).catch(() => null)
     ]);
     const now = Date.now();
     if (r1){
@@ -1037,6 +1056,7 @@ async function refreshQuotes(){
     if (r11 && r11.asOf){
       const ms11 = Date.parse(r11.asOf); if (isFinite(ms11)) closes15AsOfMs = ms11;
     }
+    if (r12 && r12.marketDate){ PERSIST = r12; renderPersist(); }
     // live movers feed failure is non-fatal: universe-computed movers remain the fallback
     // snapshot fetch failure / older file is non-fatal: the embedded snapshot keeps the page working
     feedAsOf = now; lastErr = null; pollDone = true;
@@ -1594,6 +1614,12 @@ function flowBadge(r){
   if (!flowVerified() || r.relativeVolume == null || r.relativeVolume < 2) return '';
   return `<span class="sig-badge flow${r.relativeVolume >= 5 ? ' x5' : ''}" title="${r.relativeVolume.toFixed(1)}x avg options volume">↑ Flow</span>`;
 }
+function firstBadge(r){
+  if (!PERSIST || !Array.isArray(PERSIST.firstAppearance)) return '';
+  const f = PERSIST.firstAppearance.find(x => x.ticker === r.ticker);
+  if (!f) return '';
+  return `<span class="sig-badge new" title="First unusual flow in 30 days (${f.x}x avg)">✨ First</span>`;
+}
 function sig15Badge(r, sig){
   if (!sig || !sig.side) return '';
   const bull = sig.side === 'bull';
@@ -1616,7 +1642,7 @@ function runnerRow(r, prevSig){
   const noQuote = !quoteFresh(q);
   return `<div class="runner g${g}${pinned?' pinned':''}" data-sym="${esc(r.ticker)}">
     <div class="r-main"><div class="tk ${sideCls}">${esc(r.ticker)}</div>${cname ? `<div class="rname">${esc(cname)}</div>` : ''}
-      <div class="badges">${sig15Badge(r, sig)}${lvlBadge(r)}${isNew?'<span class="sig-badge new">• New</span>':''}${flowBadge(r)}${noQuote?'<span class="sig-badge noq">QUOTE UNAVAILABLE</span>':''}</div></div>
+      <div class="badges">${sig15Badge(r, sig)}${lvlBadge(r)}${isNew?'<span class="sig-badge new">• New</span>':''}${flowBadge(r)}${firstBadge(r)}${noQuote?'<span class="sig-badge noq">QUOTE UNAVAILABLE</span>':''}</div></div>
     <canvas class="r-spark${hasBars?'':' hide'}" width="184" height="68" data-sym="${esc(r.ticker)}"></canvas>
     <div class="r-nums"><div class="px">${fmtPx(px)}</div><div class="ch ${chCls}">${fmtPct(chg)}</div></div>
     <button class="pin" data-pin="${esc(r.ticker)}" aria-label="Pin ${esc(r.ticker)}">${pinned?'★':'☆'}</button>
@@ -2090,6 +2116,40 @@ function renderIgnitions(){
   }).join('');
 }
 
+/* ================= FLOW PERSISTENCE ================= */
+let PERSIST = null;
+function renderPersist(){
+  const P = PERSIST || {};
+  const confirmed = P.confirmed || [], streaks = P.streaks || [], first = P.firstAppearance || [];
+  $('persistMeta').textContent = P.marketDate ? `${confirmed.length} confirmed · ${streaks.length} streaks · ${first.length} first-timers · ${fmtMonD(P.marketDate)}` : '';
+  // Confirmed ignitions: ignited yesterday + broke out today
+  $('persistConfirmed').innerHTML = confirmed.length
+    ? '<div class="persist-label">✓ Confirmed ignitions <span>ignited yesterday, broke out today</span></div>' +
+      confirmed.map(c => `<div class="ig-card" data-sym="${esc(c.ticker)}">` +
+        `<div class="tk">${esc(c.ticker)}</div>` +
+        `<div class="ix">${esc(String(c.ignitionX))}× → ${esc(c.breakoutSide)} ${esc(c.breakoutCandle || '')}</div></div>`).join('')
+    : '<div class="empty">No confirmed ignitions today.</div>';
+  // Streaks: top 10 by streak length
+  const top = streaks.slice(0, 10);
+  $('persistStreaks').innerHTML = top.length
+    ? '<div class="persist-label">🔥 Persistence streaks <span>consecutive days of unusual flow</span></div>' +
+      top.map(s => {
+        const f = s.priceFollow == null ? '' : s.priceFollow ? '<span class="sig-badge">✓ price followed</span>' : '<span class="sig-badge noq">✗ price diverged</span>';
+        return `<div class="ig-card" data-sym="${esc(s.ticker)}">` +
+          `<div class="tk">${esc(s.ticker)}</div>` +
+          `<div class="ix">${s.streakDays}d streak · ${esc(String(s.lastX))}× ${esc(s.side)}</div>${f}</div>`;
+      }).join('')
+    : '';
+  // First appearances
+  $('persistFirst').innerHTML = first.length
+    ? '<div class="persist-label">✨ First appearance <span>unusual flow, first time in 30 days</span></div>' +
+      first.map(f => `<div class="ig-card" data-sym="${esc(f.ticker)}">` +
+        `<div class="tk">${esc(f.ticker)}</div>` +
+        `<div class="ix">${esc(String(f.x))}× ${esc(f.side)}</div></div>`).join('')
+    : '';
+  if (P.asOf) $('updPersist').textContent = 'updated ' + ctTime(Date.parse(P.asOf));
+}
+
 /* ================= DATE VERIFICATION ================= */
 // The NYSE market date in America/New_York: the trading day whose data the board
 // should expect. Rolls back to the previous trading day overnight (before the
@@ -2266,7 +2326,7 @@ function renderAll(){
   renderStatus(); renderRegime(); renderSession(); evalHealth();
   if (!pollDone) { renderUpdated(); return; }  // first poll pending: show checking state, don't paint stale embedded data
   paintCapChips(); renderSignals();
-  renderIgnitions(); renderFlow(); renderPremarket(); renderSectors(); renderMovers(); renderWatchlist(); renderPins();
+  renderIgnitions(); renderPersist(); renderFlow(); renderPremarket(); renderSectors(); renderMovers(); renderWatchlist(); renderPins();
   renderUpdated();
 }
 
