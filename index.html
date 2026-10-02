@@ -787,6 +787,8 @@ footer.appfoot{margin:26px 0 0;font-size:12.5px;color:var(--faint);text-align:ce
         <div class="persist-grid" id="persistConfirmed"><div class="empty">Loading&hellip;</div></div>
         <div class="persist-grid" id="persistStreaks"></div>
         <div class="persist-grid" id="persistFirst"></div>
+        <div class="persist-grid" id="persistEcho"></div>
+        <div class="persist-grid" id="persistSectors"></div>
       </div>
     </section>
 
@@ -2146,6 +2148,25 @@ function renderPersist(){
       first.map(f => `<div class="ig-card" data-sym="${esc(f.ticker)}">` +
         `<div class="tk">${esc(f.ticker)}</div>` +
         `<div class="ix">${esc(String(f.x))}× ${esc(f.side)}</div></div>`).join('')
+    : '';
+  // Flow echo: back after going quiet
+  const echo = P.echo || [];
+  $('persistEcho').innerHTML = echo.length
+    ? '<div class="persist-label">🔁 Flow echo <span>unusual again after 5+ quiet days</span></div>' +
+      echo.slice(0, 8).map(e => `<div class="ig-card" data-sym="${esc(e.ticker)}">` +
+        `<div class="tk">${esc(e.ticker)}</div>` +
+        `<div class="ix">${esc(String(e.x))}× ${esc(e.side)} · back after ${e.lastSeenDaysAgo}d</div></div>`).join('')
+    : '';
+  // Sector rotation: week-over-week flow share shifts
+  const rot = P.sectorRotation || [];
+  const movers = rot.filter(r => Math.abs(r.deltaPct) >= 1).slice(0, 8);
+  $('persistSectors').innerHTML = movers.length
+    ? '<div class="persist-label">🔄 Sector rotation <span>share of unusual flow, this week vs last</span></div>' +
+      movers.map(r => {
+        const up = r.deltaPct >= 0;
+        return `<div class="ig-card"><div class="tk" style="font-size:12px">${esc(r.sector)}</div>` +
+          `<div class="ix ${up ? 'up' : 'dn'}">${up ? '▲' : '▼'} ${Math.abs(r.deltaPct).toFixed(1)}% <span style="color:var(--muted)">${r.lastWeekPct.toFixed(0)}→${r.thisWeekPct.toFixed(0)}%</span></div></div>`;
+      }).join('')
     : '';
   if (P.asOf) $('updPersist').textContent = 'updated ' + ctTime(Date.parse(P.asOf));
 }
