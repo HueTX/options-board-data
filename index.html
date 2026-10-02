@@ -1504,7 +1504,7 @@ function renderSignals(){
   if (pill && sub){
     const open = isMarketOpen();
     const checked = ALL_NAMES.filter(s => LEVELS.has(s) && Q.has(s) && capPass(s)).length;
-    let txt = `${bull.length + bear.length} active · ${checked} checked`;
+    let txt = `${bull.length + bear.length} active · ${checked} checked · ${fmtMonD(nyMarketDate())}`;
     if (open){
       pill.textContent = 'LIVE';
       const step = 15*60*1000, next = Math.ceil((Date.now()+1000)/step)*step;
@@ -1651,7 +1651,7 @@ function renderFlow(prevSig){
   paintSparks($('bullFlowList')); paintSparks($('bearFlowList'));
   $('bullFlowCount').textContent = bull.length;
   $('bearFlowCount').textContent = bear.length;
-  $('flowSub').textContent = `${bull.length} bullish · ${bear.length} bearish · ${SNAP_FRESH ? 'today' : 'snapshot'} ${etFmtShort.format(SNAP_D)} ET`;
+  $('flowSub').textContent = `${bull.length} bullish · ${bear.length} bearish · ${fmtMonD(SNAP.marketDate)} · ${etFmtShort.format(SNAP_D)} ET`;
   const flt = {all:'All', calls:'Calls', puts:'Puts', ignited:'Ignited', breakouts:'Breakouts'}[flowFilter];
   $('flowCount').textContent = `· ${bull.length + bear.length} shown (${flt})`;
 }
@@ -1740,7 +1740,7 @@ function renderPremarket(){
   const {wd, min} = etParts();
   const preBell = !['Sat','Sun'].includes(wd) && min < 570;
   if (preBell) $('pmSub').innerHTML = `<span class="pm-count">Opens in ${durHM(570 - min)}</span>`;
-  else $('pmSub').textContent = rows.length ? `${rows.length} names · ${SNAP_FRESH ? 'live premarket' : 'snapshot'} ${etFmtShort.format(SNAP_D)} ET` : 'No premarket leaders in the snapshot';
+  else $('pmSub').textContent = rows.length ? `${rows.length} names · ${fmtMonD(SNAP.marketDate)} · ${etFmtShort.format(SNAP_D)} ET` : 'No premarket leaders in the snapshot';
   let latest = null;
   for (const r of rows){ const t = Date.parse(r.quoteAsOf); if (isFinite(t) && (latest == null || t > latest)) latest = t; }
   $('pmMeta').textContent = latest != null ? `as of ${etFmtShort.format(new Date(latest))} ET · options only` : 'options only';
