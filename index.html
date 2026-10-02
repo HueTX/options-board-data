@@ -597,7 +597,7 @@ footer.appfoot{margin:26px 0 0;font-size:12.5px;color:var(--faint);text-align:ce
 
     <section class="panel tint-teal" id="secMovers">
       <div class="sec-head" data-sec="secMovers">
-        <div class="titles"><h2>Full-market movers</h2><p class="sub">Price leaders across the 311-ticker universe · computed from live day change</p></div>
+        <div class="titles"><h2>Full-market movers</h2><p class="sub" id="moversSub">Price leaders across the 311-ticker universe · computed from live day change</p></div>
         <span class="head-meta" id="moversMeta"></span>
         <button class="chev" aria-label="Collapse">&#8964;</button>
       </div>
@@ -916,6 +916,7 @@ const WCHARTS_URL = "https://raw.githubusercontent.com/HueTX/options-board-data/
 const MOVERS_URL = "https://raw.githubusercontent.com/HueTX/options-board-data/main/market_movers.json";
 const DBARS_URL = "https://raw.githubusercontent.com/HueTX/options-board-data/main/dbars.json";   // 5m drawer bars for flow/mover tickers outside the 56-ticker quotes feed
 const REGIME1H_URL = "https://raw.githubusercontent.com/HueTX/options-board-data/main/regime1h.json"; // 1H regime bars, same h1 semantics as the watchlist charts
+const CLOSES15_URL = "https://raw.githubusercontent.com/HueTX/options-board-data/main/fifteen_min_closes.json"; // 15m confirmed closes feed; its asOf drives the "15m closes" health chip
 const FEED_OK = !/PUT-YOUR/.test(QUOTES_URL + QUOTES_UNI_URL + WATCHLIST_URL);   // replace-all safe: true once the placeholder is gone from the URLs
 // Per-feed heartbeat: last SUCCESSFUL fetch time (epoch ms). A failed fetch leaves the
 // previous timestamp alone, so the chip ages honestly toward STALE while the section
@@ -973,7 +974,7 @@ async function refreshQuotes(){
     const bust = '?t=' + Math.floor(Date.now()/15000);
     for (const [k] of DS_DEFS) DS[k] = {state:'checking', asOf:null, sub:''};
     dsPaint();
-    const [r1, r2, r4, r5, r6, r7, r8, r9, r10] = await Promise.all([
+    const [r1, r2, r4, r5, r6, r7, r8, r9, r10, r11] = await Promise.all([
       fetch(QUOTES_URL + bust).then(r => { if(!r.ok) throw new Error('quotes '+r.status); return r.json(); }).catch(() => null),
       fetch(QUOTES_UNI_URL + bust).then(r => { if(!r.ok) throw new Error('uni '+r.status); return r.json(); }).catch(() => null),
       fetch(FT_URL + bust).then(r => { if(!r.ok) throw new Error('ft '+r.status); return r.json(); }).catch(() => null),
@@ -982,7 +983,8 @@ async function refreshQuotes(){
       fetch(MOVERS_URL + bust).then(r => { if(!r.ok) throw new Error('mv '+r.status); return r.json(); }).catch(() => null),
       fetch(WCHARTS_URL + bust).then(r => { if(!r.ok) throw new Error('wc '+r.status); return r.json(); }).catch(() => null),
       fetch(DBARS_URL + bust).then(r => { if(!r.ok) throw new Error('db '+r.status); return r.json(); }).catch(() => null),
-      fetch(REGIME1H_URL + bust).then(r => { if(!r.ok) throw new Error('r1h '+r.status); return r.json(); }).catch(() => null)
+      fetch(REGIME1H_URL + bust).then(r => { if(!r.ok) throw new Error('r1h '+r.status); return r.json(); }).catch(() => null),
+      fetch(CLOSES15_URL + bust).then(r => { if(!r.ok) throw new Error('15m '+r.status); return r.json(); }).catch(() => null)
     ]);
     const now = Date.now();
     if (r1){
@@ -1031,6 +1033,9 @@ async function refreshQuotes(){
       // 1H regime bars (same h1 semantics as the watchlist charts): the regime
       // strip plots the identical 1-hour history as the trading watchlist.
       Object.assign(WCHARTS, r10.charts);
+    }
+    if (r11 && r11.asOf){
+      const ms11 = Date.parse(r11.asOf); if (isFinite(ms11)) closes15AsOfMs = ms11;
     }
     // live movers feed failure is non-fatal: universe-computed movers remain the fallback
     // snapshot fetch failure / older file is non-fatal: the embedded snapshot keeps the page working
@@ -1223,7 +1228,7 @@ const DS_DEFS = [
 const DS = {};
 for (const [k] of DS_DEFS) DS[k] = {state:'checking', asOf:null, sub:''};
 let quotesDate = null, uniDate = null;   // YYYY-MM-DD (ET) of the live quote feeds
-let quotesAsOfMs = null, uniAsOfMs = null;   // epoch ms of the feeds' own timestamps (freshness is measured on data age, not poll time)
+let quotesAsOfMs = null, uniAsOfMs = null, closes15AsOfMs = null;   // epoch ms of the feeds' own timestamps (freshness is measured on data age, not poll time)
 let MV = null, mvDate = null, mvAsOfMs = null;   // live market_movers.json feed {asOf, gainers:[], losers:[]}
 const ctFmtHM = new Intl.DateTimeFormat('en-US',{timeZone:'America/Chicago',hour:'numeric',minute:'2-digit',hour12:true});
 function mvCount(){ let n = 0; for (const s of UNISET){ const q = Q.get(s); if (q && q.chgPct != null) n++; } return n; }
@@ -1273,8 +1278,8 @@ function evalHealth(){
   else if (!HB.universe) DS.movers = pollDone ? {state:'warn', asOf:null, sub:'offline'} : {state:'checking', asOf:null, sub:''};
   else DS.movers = mLive ? {state:'ok', asOf:uniAsOfMs, sub:''} : {state:'warn', asOf:uniAsOfMs || HB.universe, sub:''};
   // Zero signals is a valid evaluated result, not an error — the chip tracks feed state.
-  if (!HB.quotes) DS.closes = pollDone ? {state:'warn', asOf:null, sub:'offline'} : {state:'checking', asOf:null, sub:''};
-  else DS.closes = qLive ? {state:'ok', asOf:quotesAsOfMs, sub:''} : {state:'warn', asOf:quotesAsOfMs || HB.quotes, sub:''};
+  if (!closes15AsOfMs) DS.closes = pollDone ? {state:'warn', asOf:null, sub:'offline'} : {state:'checking', asOf:null, sub:''};
+  else DS.closes = qLive ? {state:'ok', asOf:closes15AsOfMs, sub:''} : {state:'warn', asOf:closes15AsOfMs, sub:''};
   const snapAge = SNAP_TS ? Date.now() - SNAP_TS : Infinity;
   if (!SNAP.marketDate) DS.flow = {state:'warn', asOf:null, sub:'no date'};
   else if (SNAP.marketDate === today && snapAge < 1800000) DS.flow = {state:'ok', asOf:SNAP_TS, sub:''};
@@ -1948,7 +1953,10 @@ function renderMovers(){
   $('gainPager').innerHTML = mvPagerHTML('gain', gain.length);
   $('lossPager').innerHTML = mvPagerHTML('loss', loss.length);
   const asof = (scope.src === 'feed' && mvDate) ? ' · as of ' + fmtMonD(mvDate) : (uniDate ? ' · as of ' + fmtMonD(uniDate) : '');
-  $('moversMeta').textContent = scope.label + ' · ' + gain.length + ' gainers · ' + loss.length + ' losers' + (mvSort === 'cap' ? ' · by market cap' : '') + (scope.src === 'feed' ? ' · live' : '') + asof;
+  const liveTag = (scope.src === 'feed') ? (isMarketOpen() ? ' · live' : ' · final') : '';
+  $('moversMeta').textContent = scope.label + ' · ' + gain.length + ' gainers · ' + loss.length + ' losers' + (mvSort === 'cap' ? ' · by market cap' : '') + liveTag + asof;
+  const sub = $('moversSub');
+  if (sub) sub.textContent = 'Price leaders across the 311-ticker universe · computed from ' + (isMarketOpen() ? 'live day change' : 'final day change');
 }
 
 $('mvSortSel').addEventListener('change', e => {
@@ -2255,7 +2263,9 @@ function renderWatchlist(){
 
 /* ================= RENDER ALL ================= */
 function renderAll(){
-  renderStatus(); renderRegime(); renderSession(); evalHealth(); paintCapChips(); renderSignals();
+  renderStatus(); renderRegime(); renderSession(); evalHealth();
+  if (!pollDone) { renderUpdated(); return; }  // first poll pending: show checking state, don't paint stale embedded data
+  paintCapChips(); renderSignals();
   renderIgnitions(); renderFlow(); renderPremarket(); renderSectors(); renderMovers(); renderWatchlist(); renderPins();
   renderUpdated();
 }
