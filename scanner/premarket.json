@@ -1,0 +1,324 @@
+{
+ "date": "2026-10-02",
+ "generated_at": "2026-10-02T13:29",
+ "scanned": 311,
+ "gaps": [
+  {
+   "ticker": "STX",
+   "gap": -12.2,
+   "pm_price": 830.54,
+   "pm_time": "2026-10-02T09:27:22-04:00",
+   "marketCapB": 209.5,
+   "rel": 0.7,
+   "pc": 1.19,
+   "lean": "mixed flow",
+   "yday": "Thu",
+   "ychg": 2.5,
+   "ph": 946.36,
+   "pl": 893.75,
+   "pos": "below"
+  },
+  {
+   "ticker": "WDC",
+   "gap": -8.3,
+   "pm_price": 424.2,
+   "pm_time": "2026-10-02T09:27:27-04:00",
+   "marketCapB": 163.4,
+   "rel": 0.5,
+   "pc": 1.01,
+   "lean": "mixed flow",
+   "yday": "Thu",
+   "ychg": 1.8,
+   "ph": 463.55,
+   "pl": 440.05,
+   "pos": "below"
+  },
+  {
+   "ticker": "NKE",
+   "gap": -7.9,
+   "pm_price": 32.36,
+   "pm_time": "2026-10-02T09:29:05-04:00",
+   "marketCapB": 53.9,
+   "rel": 3.0,
+   "pc": 0.98,
+   "lean": "mixed flow",
+   "yday": "Thu",
+   "ychg": -0.7,
+   "ph": 36.24,
+   "pl": 35.02,
+   "pos": "below"
+  },
+  {
+   "ticker": "SOXL",
+   "gap": 7.5,
+   "pm_price": 165.16,
+   "pm_time": "2026-10-02T09:26:10-04:00",
+   "marketCapB": 19.3,
+   "rel": 0.7,
+   "pc": 1.1,
+   "lean": "mixed flow",
+   "yday": "Thu",
+   "ychg": 3.9,
+   "ph": 156.71,
+   "pl": 144.31,
+   "pos": "above"
+  },
+  {
+   "ticker": "SOXS",
+   "gap": -7.3,
+   "pm_price": 29.43,
+   "pm_time": "2026-10-02T09:26:16-04:00",
+   "marketCapB": 1.4,
+   "rel": 0.3,
+   "pc": 0.31,
+   "lean": "calls leaning",
+   "yday": "Thu",
+   "ychg": -4.0,
+   "ph": 33.89,
+   "pl": 31.1,
+   "pos": "below"
+  },
+  {
+   "ticker": "ON",
+   "gap": 6.0,
+   "pm_price": 84.85,
+   "pm_time": "2026-10-02T09:27:18-04:00",
+   "marketCapB": 29.5,
+   "rel": 1.1,
+   "pc": 0.3,
+   "lean": "calls leaning",
+   "yday": "Thu",
+   "ychg": 4.2,
+   "ph": 80.46,
+   "pl": 76.12,
+   "pos": "above"
+  },
+  {
+   "ticker": "YINN",
+   "gap": -5.9,
+   "pm_price": 23.31,
+   "pm_time": "2026-10-02T09:23:40-04:00",
+   "marketCapB": 0.6,
+   "rel": 0.8,
+   "pc": 0.35,
+   "lean": "calls leaning",
+   "yday": "Thu",
+   "ychg": -0.6,
+   "ph": 25.63,
+   "pl": 24.5,
+   "pos": "below"
+  },
+  {
+   "ticker": "YANG",
+   "gap": 5.9,
+   "pm_price": 34.2,
+   "pm_time": "2026-10-02T08:49:00-04:00",
+   "marketCapB": 0.1,
+   "rel": 3.9,
+   "pc": 0.21,
+   "lean": "calls leaning",
+   "yday": "Thu",
+   "ychg": 0.5,
+   "ph": 32.64,
+   "pl": 31.19,
+   "pos": "above"
+  },
+  {
+   "ticker": "APP",
+   "gap": -5.4,
+   "pm_price": 266.07,
+   "pm_time": "2026-10-02T09:27:15-04:00",
+   "marketCapB": 103.5,
+   "rel": 1.8,
+   "pc": 1.35,
+   "lean": "puts leaning",
+   "yday": "Thu",
+   "ychg": -3.1,
+   "ph": 291.55,
+   "pl": 275.13,
+   "pos": "below"
+  },
+  {
+   "ticker": "OPEN",
+   "gap": 5.0,
+   "pm_price": 2.52,
+   "pm_time": "2026-10-02T09:27:38-04:00",
+   "marketCapB": 2.3,
+   "rel": 0.2,
+   "pc": 0.38,
+   "lean": "calls leaning",
+   "yday": "Thu",
+   "ychg": 1.3,
+   "ph": 2.43,
+   "pl": 2.25,
+   "pos": "above"
+  },
+  {
+   "ticker": "ARM",
+   "gap": 4.7,
+   "pm_price": 306.2,
+   "pm_time": "2026-10-02T09:26:35-04:00",
+   "marketCapB": 302.6,
+   "rel": 0.5,
+   "pc": 0.9,
+   "lean": "mixed flow",
+   "yday": "Thu",
+   "ychg": 0.9,
+   "ph": 297.14,
+   "pl": 287.5,
+   "pos": "above"
+  },
+  {
+   "ticker": "LABD",
+   "gap": -4.6,
+   "pm_price": 7.12,
+   "pm_time": "2026-10-02T09:23:20-04:00",
+   "marketCapB": 0.1,
+   "rel": 0.6,
+   "pc": 0.45,
+   "lean": "calls leaning",
+   "yday": "Thu",
+   "ychg": 6.1,
+   "ph": 7.47,
+   "pl": 6.86,
+   "pos": "inside"
+  },
+  {
+   "ticker": "TECL",
+   "gap": 4.5,
+   "pm_price": 250.14,
+   "pm_time": "2026-10-02T09:14:00-04:00",
+   "marketCapB": 5.9,
+   "rel": 3.2,
+   "pc": 0.65,
+   "lean": "calls leaning",
+   "yday": "Thu",
+   "ychg": 2.8,
+   "ph": 242.14,
+   "pl": 231.81,
+   "pos": "above"
+  },
+  {
+   "ticker": "LABU",
+   "gap": 4.5,
+   "pm_price": 261.0,
+   "pm_time": "2026-10-02T09:15:06-04:00",
+   "marketCapB": 0.6,
+   "rel": 0.8,
+   "pc": 0.98,
+   "lean": "mixed flow",
+   "yday": "Thu",
+   "ychg": -6.1,
+   "ph": 271.79,
+   "pl": 248.93,
+   "pos": "inside"
+  },
+  {
+   "ticker": "USO",
+   "gap": -4.4,
+   "pm_price": 143.49,
+   "pm_time": "2026-10-02T09:26:17-04:00",
+   "marketCapB": 1.9,
+   "rel": 0.6,
+   "pc": 1.69,
+   "lean": "puts leaning",
+   "yday": "Thu",
+   "ychg": 3.0,
+   "ph": 150.67,
+   "pl": 145.59,
+   "pos": "below"
+  }
+ ],
+ "heaters": [
+  {
+   "ticker": "FDN",
+   "rel": 22.8,
+   "chg": 0.22,
+   "pc": 7.82
+  },
+  {
+   "ticker": "FAZ",
+   "rel": 9.5,
+   "chg": -0.91,
+   "pc": 1.41
+  },
+  {
+   "ticker": "EDC",
+   "rel": 7.5,
+   "chg": 0.17,
+   "pc": 0.58
+  },
+  {
+   "ticker": "JDST",
+   "rel": 7.0,
+   "chg": 3.15,
+   "pc": 0.28
+  },
+  {
+   "ticker": "TECS",
+   "rel": 6.9,
+   "chg": -2.52,
+   "pc": 1.48
+  },
+  {
+   "ticker": "DUST",
+   "rel": 5.8,
+   "chg": 2.64,
+   "pc": 0.9
+  },
+  {
+   "ticker": "LIT",
+   "rel": 4.6,
+   "chg": -0.42,
+   "pc": 0.93
+  },
+  {
+   "ticker": "YANG",
+   "rel": 3.9,
+   "chg": 0.63,
+   "pc": 0.21
+  },
+  {
+   "ticker": "NOC",
+   "rel": 3.7,
+   "chg": -0.46,
+   "pc": 1.12
+  },
+  {
+   "ticker": "ITA",
+   "rel": 3.6,
+   "chg": 0.5,
+   "pc": 0.79
+  },
+  {
+   "ticker": "RL",
+   "rel": 3.6,
+   "chg": 2.21,
+   "pc": 0.51
+  },
+  {
+   "ticker": "AMGN",
+   "rel": 3.3,
+   "chg": -3.75,
+   "pc": 6.01
+  },
+  {
+   "ticker": "JNUG",
+   "rel": 3.3,
+   "chg": -2.87,
+   "pc": 0.39
+  },
+  {
+   "ticker": "APO",
+   "rel": 3.2,
+   "chg": -1.56,
+   "pc": 15.71
+  },
+  {
+   "ticker": "TECL",
+   "rel": 3.2,
+   "chg": 2.36,
+   "pc": 0.65
+  }
+ ]
+}
