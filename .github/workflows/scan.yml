@@ -80,7 +80,7 @@ jobs:
         run: |
           cd scanner
           python3 build_snapshot.py
-          python3 build_follow_through.py
+          python3 build_follow_through.py follow_through.json
 
       - name: 15-minute closes
         if: steps.gate.outputs.open == 'true'
