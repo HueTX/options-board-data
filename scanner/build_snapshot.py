@@ -5,7 +5,7 @@ normalizes per the cron body, writes snapshot_payload.json."""
 import csv, json, os, glob, sys, urllib.request
 from datetime import datetime, timezone
 
-SCAN = os.path.expanduser("~/workspace/options-scanner")
+SCAN = os.path.dirname(os.path.abspath(__file__))
 
 # newest dated report dir
 dirs = sorted(glob.glob(os.path.join(SCAN, "reports", "*")))
