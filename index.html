@@ -2589,13 +2589,27 @@ $('pmGrid').addEventListener('click', e => {
 });
 $('drawerX').addEventListener('click', closeDrawer);
 $('drawerVeil').addEventListener('click', closeDrawer);
-/* Back-to-top: appears after meaningful scroll, smooth-scrolls to the top. */
+/* Scroll toggle: ↓ at the top takes you to the bottom, ↑ at the bottom takes you to the top. */
 (function(){
   const btn = $('toTop');
-  const onScroll = () => btn.classList.toggle('show', (window.scrollY || document.documentElement.scrollTop) > 600);
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const onScroll = () => {
+    const y = window.scrollY || document.documentElement.scrollTop;
+    const max = document.documentElement.scrollHeight - innerHeight;
+    const nearBottom = max > 0 && (max - y) < 200;
+    btn.classList.add('show');   // always visible
+    btn.innerHTML = nearBottom ? '&#8593;' : '&#8595;';
+    btn.setAttribute('aria-label', nearBottom ? 'Back to top' : 'Go to bottom');
+    btn.title = nearBottom ? 'Back to top' : 'Go to bottom';
+    btn.dataset.dir = nearBottom ? 'up' : 'down';
+  };
   addEventListener('scroll', onScroll, {passive:true});
+  addEventListener('resize', onScroll);
   onScroll();
-  btn.addEventListener('click', () => window.scrollTo({top:0, behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'}));
+  btn.addEventListener('click', () => {
+    const top = btn.dataset.dir !== 'down';
+    window.scrollTo({top: top ? 0 : document.documentElement.scrollHeight, behavior: reduced ? 'auto' : 'smooth'});
+  });
 })();
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
 document.addEventListener('click', e => {
