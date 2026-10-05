@@ -13,10 +13,11 @@ on:
 permissions:
   contents: write
 
-# Never run two scans at once; a new run cancels a stuck one.
+# Never run two scans at once; queued runs wait their turn instead of
+# cancelling each other (cancel-in-progress caused a death spiral where
+# every new trigger killed the queued run before it got a runner).
 concurrency:
   group: options-scan
-  cancel-in-progress: true
 
 jobs:
   scan:
