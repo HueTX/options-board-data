@@ -1,10 +1,10 @@
 {
-  "asOf": "2026-10-05T00:00:00Z",
+  "asOf": "2026-10-06T00:00:00Z",
   "date": "2026-10-02",
   "ignitions": [
     {
       "ticker": "FDN",
-      "x": 22.7
+      "x": 22.8
     },
     {
       "ticker": "FAZ",
@@ -27,16 +27,16 @@
       "x": 5.7
     },
     {
+      "ticker": "AI",
+      "x": 5.1
+    },
+    {
       "ticker": "LIT",
       "x": 4.8
     },
     {
       "ticker": "YANG",
-      "x": 4.4
-    },
-    {
-      "ticker": "AI",
-      "x": 4.0
+      "x": 4.5
     },
     {
       "ticker": "RL",
@@ -44,7 +44,7 @@
     },
     {
       "ticker": "NKE",
-      "x": 3.6
+      "x": 3.8
     },
     {
       "ticker": "APO",
@@ -75,11 +75,11 @@
       "x": 3.2
     },
     {
-      "ticker": "ITA",
-      "x": 3.1
+      "ticker": "BEAM",
+      "x": 3.0
     },
     {
-      "ticker": "BEAM",
+      "ticker": "ITA",
       "x": 3.0
     }
   ]
