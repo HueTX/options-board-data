@@ -1,18 +1,18 @@
 {
-  "asOf": "2026-10-07T00:00:00Z",
-  "date": "2026-10-06",
+  "asOf": "2026-10-08T00:00:00Z",
+  "date": "2026-10-07",
   "ignitions": [
     {
       "ticker": "FDN",
-      "x": 17.6
+      "x": 17.7
     },
     {
       "ticker": "FAZ",
-      "x": 10.4
+      "x": 11.0
     },
     {
       "ticker": "EDC",
-      "x": 8.0
+      "x": 8.1
     },
     {
       "ticker": "TECS",
@@ -23,52 +23,40 @@
       "x": 7.1
     },
     {
-      "ticker": "LIT",
+      "ticker": "DUST",
       "x": 6.2
     },
     {
-      "ticker": "DUST",
-      "x": 5.7
-    },
-    {
-      "ticker": "RL",
-      "x": 5.1
+      "ticker": "LIT",
+      "x": 5.4
     },
     {
       "ticker": "YANG",
-      "x": 4.8
+      "x": 4.7
     },
     {
-      "ticker": "XLU",
-      "x": 3.8
+      "ticker": "PS",
+      "x": 4.1
     },
     {
-      "ticker": "BEAM",
+      "ticker": "JNUG",
       "x": 3.6
     },
     {
       "ticker": "STZ",
+      "x": 3.5
+    },
+    {
+      "ticker": "BEAM",
       "x": 3.4
+    },
+    {
+      "ticker": "RL",
+      "x": 3.2
     },
     {
       "ticker": "NOC",
-      "x": 3.4
-    },
-    {
-      "ticker": "JNUG",
-      "x": 3.3
-    },
-    {
-      "ticker": "PS",
-      "x": 3.3
-    },
-    {
-      "ticker": "TECL",
-      "x": 3.0
-    },
-    {
-      "ticker": "ZBH",
-      "x": 3.0
+      "x": 3.1
     }
   ]
 }

@@ -1,22 +1,22 @@
 {
   "asOf": "2026-10-08T00:00:00Z",
-  "date": "2026-10-02",
+  "date": "2026-10-07",
   "ignitions": [
     {
       "ticker": "FDN",
-      "x": 22.8
+      "x": 17.7
     },
     {
       "ticker": "FAZ",
-      "x": 10.9
+      "x": 11.0
     },
     {
       "ticker": "EDC",
-      "x": 7.7
+      "x": 8.1
     },
     {
       "ticker": "TECS",
-      "x": 7.1
+      "x": 7.7
     },
     {
       "ticker": "JDST",
@@ -24,63 +24,39 @@
     },
     {
       "ticker": "DUST",
-      "x": 5.7
-    },
-    {
-      "ticker": "AI",
-      "x": 5.1
+      "x": 6.2
     },
     {
       "ticker": "LIT",
-      "x": 4.8
+      "x": 5.4
     },
     {
       "ticker": "YANG",
-      "x": 4.5
+      "x": 4.7
     },
     {
-      "ticker": "RL",
-      "x": 4.0
-    },
-    {
-      "ticker": "NKE",
-      "x": 3.8
-    },
-    {
-      "ticker": "APO",
-      "x": 3.4
-    },
-    {
-      "ticker": "TAN",
-      "x": 3.4
-    },
-    {
-      "ticker": "NOC",
-      "x": 3.4
+      "ticker": "PS",
+      "x": 4.1
     },
     {
       "ticker": "JNUG",
-      "x": 3.3
+      "x": 3.6
     },
     {
-      "ticker": "TECL",
-      "x": 3.2
-    },
-    {
-      "ticker": "OTIS",
-      "x": 3.2
-    },
-    {
-      "ticker": "NSC",
-      "x": 3.2
+      "ticker": "STZ",
+      "x": 3.5
     },
     {
       "ticker": "BEAM",
-      "x": 3.0
+      "x": 3.4
     },
     {
-      "ticker": "ITA",
-      "x": 3.0
+      "ticker": "RL",
+      "x": 3.2
+    },
+    {
+      "ticker": "NOC",
+      "x": 3.1
     }
   ]
 }
