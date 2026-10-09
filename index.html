@@ -956,12 +956,21 @@ function selectMornTab(name){
     if (!old) return;
     const target = $(targetId);
     const body = old.querySelector('.sec-body');
+    const head = old.querySelector('.sec-head');
     if (target && body){
       if (label){
         const h = document.createElement('div');
         h.className = 'usub-label';
         h.textContent = label;
         target.appendChild(h);
+      }
+      // Preserve the old head's identified elements (meta/upd spans, tool buttons)
+      // so every renderer keeps working against the same IDs after the move.
+      if (head){
+        head.querySelectorAll('[id]').forEach(el => {
+          el.classList.add('moved-head-el');
+          target.appendChild(el);
+        });
       }
       while (body.firstChild) target.appendChild(body.firstChild);
     }
