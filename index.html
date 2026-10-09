@@ -579,6 +579,9 @@ footer.appfoot{margin:26px 0 0;font-size:12.5px;color:var(--faint);text-align:ce
 .br-dir-dn{color:var(--loss);font-weight:800}
 .br-score{font-weight:800;color:var(--orange)}
 .br-rank{color:var(--text-dim)}
+.br-sortable{cursor:pointer;user-select:none;white-space:nowrap}
+.br-sortable:hover{color:var(--orange)}
+.br-cap{color:var(--text-dim);white-space:nowrap}
 /* ============ CONSOLIDATED SECTIONS ============ */
 .mtabs{display:flex;gap:6px;margin:2px 2px 12px;flex-wrap:wrap}
 .mtab{border:1px solid var(--line);background:transparent;color:var(--text-dim);font-weight:700;font-size:13px;padding:7px 16px;border-radius:999px;cursor:pointer}
@@ -842,9 +845,10 @@ footer.appfoot{margin:26px 0 0;font-size:12.5px;color:var(--faint);text-align:ce
       <div class="sec-body">
         <div class="br-legend">Score = gap move (35) + break depth (35) + unusual flow (30) · levels only, no trade call</div>
         <div class="br-wrap"><table class="br-table" id="brTable" aria-label="Ranked first-candle breaks">
-          <thead><tr><th>#</th><th>Ticker</th><th>Dir</th><th>Close</th><th>Gap%</th><th>Thru%</th><th>Flow</th><th>Score</th></tr></thead>
-          <tbody id="brBody"><tr><td colspan="8"><div class="empty">Loading break ranking&hellip;</div></td></tr></tbody>
+          <thead id="brHead"><tr><th>#</th><th>Ticker</th><th>Dir</th><th>Close</th><th>Gap%</th><th>Thru%</th><th>Flow</th><th>Score</th></tr></thead>
+          <tbody id="brBody"><tr><td colspan="9"><div class="empty">Loading break ranking&hellip;</div></td></tr></tbody>
         </table></div>
+        <div class="pager" id="brPager"></div>
       </div>
     </section>
 
@@ -2285,22 +2289,60 @@ function renderIgnitions(){
 let PERSIST = null;
 /* ================= BREAK RANKING ================= */
 let BREAKRANK = null;
+/* ============ BREAK RANKING (sortable, paginated) ============ */
+let brSortKey = 'score', brSortDir = -1, brPage = 0;
+const BR_PAGE = 10;
+const BR_SORTS = {
+  score:  {label: 'Score', get: r => r.score},
+  side:   {label: 'Dir',   get: r => r.side === 'bull' ? 0 : 1},
+  mcap:   {label: 'MCap',  get: r => { const c = CAPS.get(r.ticker); return (c == null || !isFinite(c)) ? -1 : c; }},
+  gapPct: {label: 'Gap%',  get: r => r.gapPct},
+};
+function brRows(){
+  const B = BREAKRANK || {}, rows = (B.rows || []).slice();
+  const {get} = BR_SORTS[brSortKey] || BR_SORTS.score;
+  rows.sort((a, b) => {
+    const va = get(a), vb = get(b);
+    return (va < vb ? -1 : va > vb ? 1 : 0) * brSortDir;
+  });
+  return rows;
+}
 function renderBreakRank(){
-  const B = BREAKRANK || {}, rows = B.rows || [];
-  $('brMeta').textContent = B.marketDate ? `${rows.length} flags · ${fmtMonD(B.marketDate)}` : '';
+  const B = BREAKRANK || {};
+  const m = $('brMeta'); if (m) m.textContent = B.marketDate ? `${(B.rows || []).length} flags · ${fmtMonD(B.marketDate)}` : '';
+  const rows = brRows();
+  // header with sort indicators
+  const th = (key, label) => {
+    const sortable = !!BR_SORTS[key];
+    const arrow = sortable && brSortKey === key ? (brSortDir === -1 ? ' ▼' : ' ▲') : '';
+    return `<th${sortable ? ` data-brsort="${key}" class="br-sortable"` : ''}>${label}${arrow}</th>`;
+  };
+  const hd = $('brHead');
+  if (hd) hd.innerHTML = `<tr><th>#</th><th>Ticker</th>${th('side', 'Dir')}${th('mcap', 'MCap')}<th>Close</th>${th('gapPct', 'Gap%')}<th>Thru%</th><th>Flow</th>${th('score', 'Score')}</tr>`;
   const tb = $('brBody');
   if (!rows.length){
-    tb.innerHTML = '<tr><td colspan="8"><div class="empty">No ranked breaks for ' + esc(B.marketDate || 'today') + '.</div></td></tr>';
+    if (tb) tb.innerHTML = '<tr><td colspan="9"><div class="empty">No ranked breaks for ' + esc(B.marketDate || 'today') + '.</div></td></tr>';
+    const pg = $('brPager'); if (pg) pg.innerHTML = '';
     return;
   }
-  tb.innerHTML = rows.map(r => {
+  const pages = Math.max(1, Math.ceil(rows.length / BR_PAGE));
+  if (brPage > pages - 1) brPage = pages - 1;
+  const slice = rows.slice(brPage * BR_PAGE, brPage * BR_PAGE + BR_PAGE);
+  if (tb) tb.innerHTML = slice.map(r => {
     const bull = r.side === 'bull';
     const dir = `<span class="${bull ? 'br-dir-up' : 'br-dir-dn'}">${bull ? '&#9650;' : '&#9660;'}</span>`;
     const gap = (r.gapPct >= 0 ? '+' : '') + Number(r.gapPct).toFixed(1) + '%';
+    const cap = CAPS.get(r.ticker);
     return `<tr><td class="br-rank">${r.rank}</td><td class="br-tick">${esc(r.ticker)}</td><td>${dir}</td>` +
+      `<td class="br-cap">${(cap == null || !isFinite(cap)) ? '—' : fmtCapB(cap)}</td>` +
       `<td>$${Number(r.close).toFixed(2)}</td><td>${gap}</td><td>${Number(r.thruPct).toFixed(2)}%</td>` +
       `<td>${Number(r.flowX).toFixed(1)}x</td><td class="br-score">${Number(r.score).toFixed(1)}</td></tr>`;
   }).join('');
+  const pg = $('brPager');
+  if (pg) pg.innerHTML = pages <= 1 ? '' :
+    `<button data-brpg="-1" ${brPage <= 0 ? 'disabled' : ''} aria-label="Previous page">‹</button>` +
+    `<span>${brPage + 1} / ${pages}</span>` +
+    `<button data-brpg="1" ${brPage >= pages - 1 ? 'disabled' : ''} aria-label="Next page">›</button>`;
 }
 function renderPersist(){
   const P = PERSIST || {};
@@ -2647,9 +2689,21 @@ $('sectorGrid').addEventListener('click', e => {
   const card = e.target.closest('[data-sec]');
   if (card){ secView = card.dataset.sec; renderSectors(); }
 });
+$('brTable').addEventListener('click', e => {
+  const th = e.target.closest('[data-brsort]'); if (!th) return;
+  const k = th.dataset.brsort;
+  if (brSortKey === k) brSortDir = -brSortDir;
+  else { brSortKey = k; brSortDir = (k === 'side' ? 1 : -1); }
+  brPage = 0;
+  renderBreakRank();
+});
+$('brPager').addEventListener('click', e => {
+  const b = e.target.closest('[data-brpg]'); if (!b || b.disabled) return;
+  brPage = Math.max(0, brPage + parseInt(b.dataset.brpg, 10));
+  renderBreakRank();
+});
 $('pmPills').addEventListener('click', e => {
-  const b = e.target.closest('[data-pm]'); if (!b) return;
-  const k = b.dataset.pm;
+  const b = e.target.closest('[data-pm]'); if (!b) return;  const k = b.dataset.pm;
   if (k === 'breakout') pmBreakout = !pmBreakout;
   else if (k === 'fav') pmFav = !pmFav;
   else if (k === 'mega') pmMega = !pmMega;
