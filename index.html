@@ -1201,6 +1201,8 @@ async function refreshQuotes(){
       // WCHARTS object stays as the fallback when the feed is missing or stale.
       Object.assign(WCHARTS, r8.charts);
       if ($('watchList')) paintWatchCharts($('watchList'));
+      if ($('mpane-breaks')) paintWatchCharts($('mpane-breaks'));
+      if ($('pmGrid')) paintWatchCharts($('pmGrid'));
     }
     // watchlist fetch failure is non-fatal: the embedded rows keep the panel working
     if (r6 && r6.marketDate && Array.isArray(r6.bullish) && Array.isArray(r6.bearish)
