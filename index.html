@@ -584,15 +584,6 @@ footer.appfoot{margin:26px 0 0;font-size:12.5px;color:var(--faint);text-align:ce
 .br-sortable:hover{color:var(--orange)}
 .br-cap{color:var(--text-dim);white-space:nowrap}
 /* ============ UNIFIED MORNING TILES (all tabs look like Levels) ============ */
-.mtile{display:grid;grid-template-columns:34px minmax(200px,1.3fr) minmax(220px,1fr) 52px;
-  gap:8px 12px;align-items:center;min-width:0;padding:10px 14px;border-bottom:1px solid var(--panel-brd);cursor:pointer}
-.mtile:last-child{border-bottom:none}
-.mt-stats{display:flex;align-items:center;gap:14px;min-width:0}
-.mt-bignum{font-weight:800;font-size:22px;font-variant-numeric:tabular-nums;color:var(--orange)}
-.mt-bigcap{font-size:10.5px;font-weight:800;letter-spacing:.06em;color:var(--faint);text-transform:uppercase;margin-left:6px}
-.mt-chips{display:flex;flex-wrap:wrap;gap:6px}
-.mt-chips span{font-size:12px;color:var(--text-dim);background:var(--pill-bg);border-radius:999px;padding:3px 10px;white-space:nowrap;font-variant-numeric:tabular-nums}
-.mt-chips span b{color:var(--text);font-weight:700}
 .msortbar{display:flex;align-items:center;gap:8px;margin:2px 2px 10px;flex-wrap:wrap}
 .msortbar .wsort-label{font-size:11px;font-weight:800;letter-spacing:.08em;color:var(--faint)}
 @media (max-width:700px){
@@ -1916,28 +1907,27 @@ function pmStrength(r){
 function pmStrengthTier(s){ return s >= 70 ? 'hot' : s >= 40 ? 'warm' : 'mild'; }
 function pmCard(r, idx){
   const bo = pmBreakoutOf(r);
-  const badge = bo.state === 'up' ? `<span class="pm-badge up">${esc(bo.label)}</span>`
-    : bo.state === 'dn' ? `<span class="pm-badge dn">${esc(bo.label)}</span>`
-    : `<span class="pm-badge flat">${esc(bo.label)}</span>`;
-  const st = pmStrength(r), tier = pmStrengthTier(st);
+  const badge = bo.state === 'up' ? '▲' : bo.state === 'dn' ? '▼' : '—';
+  const st = pmStrength(r);
   const side = (r.gap || 0) >= 0 ? 'bull' : 'bear';
+  const t4 = side === 'bull' ? 'up' : 'dn';
   const name = (typeof NAMES !== 'undefined' && NAMES.get(r.ticker)) || '';
   const rel = r.relativeVolume;
   const lp = livePrice(r.ticker);
   const px = lp != null ? lp : r.price;
-  let range = '';
-  const lo = r.priorLow, hi = r.priorHigh;
-  if (lo != null && hi != null && hi > lo && px != null){
-    const pct = Math.min(100, Math.max(0, (px - lo) / (hi - lo) * 100));
-    range = `<div class="pm-range"><div class="pm-track"><span class="pm-dot" style="left:${pct.toFixed(1)}%"></span></div>` +
-      `<div class="pm-rl"><span>${fmtPx(lo)}</span><span class="mid">${esc(r.priorDay || '')} range</span><span>${fmtPx(hi)}</span></div></div>`;
-  }
-  return `<div class="mtile" data-sym="${esc(r.ticker)}">` +
+  const gapTxt = fmtPct(r.gap);
+  const barW = Math.min(96, Math.max(4, st));
+  return `<div class="wrow" data-sym="${esc(r.ticker)}">` +
     tileHead((idx || 0) + 1, r.ticker, side, name, px, r.gap, r.marketCapB) +
-    `<div class="mt-stats"><div><span class="mt-bignum">${fmtPct(r.gap)}</span><span class="mt-bigcap">gap</span></div>` +
-    `<div class="mt-chips">${badge}<span>Strength <b>${st.toFixed(0)}</b></span><span>Flow <b>${rel != null ? rel.toFixed(1) + 'x' : '—'}</b></span></div></div>` +
-    `<div class="wr-watch"><button class="wr-star pin${pins.has(r.ticker) ? ' on' : ''}" data-pin="${esc(r.ticker)}" aria-label="Pin ${esc(r.ticker)}">${pins.has(r.ticker) ? '★' : '☆'}</button></div></div>` +
-    (range ? `<div class="mt-range-row">${range}</div>` : '');
+    tileCharts(r.ticker) +
+    `<div class="wr-sess"><div class="wr-lvline"><span class="lvk">GAP</span>` +
+    `<span class="lvv ${t4}">${gapTxt}</span>` +
+    `<span class="arr">${side === 'bull' ? '←' : '→'}</span><span class="lvk">FLOW</span>` +
+    `<span class="lvv">${rel != null ? rel.toFixed(1) + 'x' : '—'}</span><span class="lvk">STR</span>` +
+    `<span class="lvv">${st.toFixed(0)}</span></div>` +
+    `<div class="sessbar"><span style="width:${barW.toFixed(1)}%;background:var(--orange)"></span>` +
+    `<span style="width:${(100 - barW).toFixed(1)}%;background:var(--pill-bg)"></span></div></div>` +
+    `<div class="wr-watch"><button class="wr-star pin${pins.has(r.ticker) ? ' on' : ''}" data-pin="${esc(r.ticker)}" aria-label="Pin ${esc(r.ticker)}">${pins.has(r.ticker) ? '★' : '☆'}</button></div></div>`;
 }
 const PM_SORTS = {
   gap:      {label: 'Biggest gap',       fn: (a,b) => (((a.gap||0) >= 0 ? 0 : 1) - ((b.gap||0) >= 0 ? 0 : 1)) || (Math.abs(b.gap||0) - Math.abs(a.gap||0))},
@@ -1981,6 +1971,7 @@ function renderPremarket(){
   const pages = Math.max(1, Math.ceil(list.length / PM_PAGE));
   if (pmPage > pages) pmPage = pages;
   $('pmGrid').innerHTML = list.slice((pmPage-1)*PM_PAGE, pmPage*PM_PAGE).map(pmCard).join('') || '<div class="empty">Premarket watchlist is empty.</div>';
+  if (typeof paintWatchCharts === 'function') paintWatchCharts($('pmGrid'));
   $('pmPager').innerHTML = pmPagerHTML(list.length);
   placePremarket();
 }
@@ -2318,7 +2309,6 @@ function tileHead(rank, ticker, side, name, price, chgPct, mcapB){
   const tri = side === 'bull' ? '▲' : side === 'bear' ? '▼' : '';
   const chgCls = (chgPct == null || !isFinite(chgPct)) ? 'na' : (chgPct > 0 ? 'up' : chgPct < 0 ? 'dn' : 'na');
   const chgTxt = (chgPct == null || !isFinite(chgPct)) ? '—' : ((chgPct >= 0 ? '+' : '') + chgPct.toFixed(2) + '%');
-  const starred = (typeof watchStars !== 'undefined' && watchStars.has(ticker));
   return `<span class="wr-rank">#${rank}</span>` +
     `<div class="wr-id"><div class="wr-tkline">${tri ? `<span class="wr-tri ${t}">${tri}</span>` : ''}` +
     `<span class="wr-tk ${t}">${esc(ticker)}</span></div>` +
@@ -2329,6 +2319,10 @@ function tileHead(rank, ticker, side, name, price, chgPct, mcapB){
 function tileStar(ticker){
   const starred = (typeof watchStars !== 'undefined' && watchStars.has(ticker));
   return `<div class="wr-watch"><button class="wr-star${starred ? ' on' : ''}" data-wstar="${esc(ticker)}" aria-label="Watch ${esc(ticker)}">${starred ? '★' : '☆'}</button></div>`;
+}
+function tileCharts(ticker){
+  return `<div class="wr-c1"><canvas class="wchart" data-wc="${esc(ticker)}|h1" title="1H closes · dashed line = series mean"></canvas></div>` +
+         `<div class="wr-c2"><canvas class="wchart" data-wc="${esc(ticker)}|h4" title="4H closes · dashed line = series mean"></canvas></div>`;
 }
 function brRows(){
   const B = BREAKRANK || {}, rows = (B.rows || []).slice();
@@ -2342,12 +2336,22 @@ function brRows(){
 function breakTile(r){
   const cap = CAPS.get(r.ticker);
   const name = (typeof NAMES !== 'undefined' && NAMES.get(r.ticker)) || '';
+  const bull = r.side === 'bull';
+  const t4 = bull ? 'up' : 'dn';
+  const score = Number(r.score).toFixed(1);
   const thru = Number(r.thruPct).toFixed(2) + '%';
   const flow = Number(r.flowX).toFixed(1) + 'x';
-  return `<div class="mtile" data-sym="${esc(r.ticker)}">` +
+  const barW = Math.min(96, Math.max(4, Number(r.score)));
+  return `<div class="wrow" data-sym="${esc(r.ticker)}">` +
     tileHead(r.rank, r.ticker, r.side, name, r.close, r.gapPct, cap) +
-    `<div class="mt-stats"><div><span class="mt-bignum">${Number(r.score).toFixed(1)}</span><span class="mt-bigcap">score</span></div>` +
-    `<div class="mt-chips"><span>Thru <b>${thru}</b></span><span>Flow <b>${flow}</b></span></div></div>` +
+    tileCharts(r.ticker) +
+    `<div class="wr-sess"><div class="wr-lvline"><span class="lvk">SCORE</span>` +
+    `<span class="lvv ${t4}">${score}</span>` +
+    `<span class="arr">${bull ? '←' : '→'}</span><span class="lvk">THRU</span>` +
+    `<span class="lvv">${thru}</span><span class="lvk">FLOW</span>` +
+    `<span class="lvv">${flow}</span></div>` +
+    `<div class="sessbar"><span style="width:${barW.toFixed(1)}%;background:var(--orange)"></span>` +
+    `<span style="width:${(100 - barW).toFixed(1)}%;background:var(--pill-bg)"></span></div></div>` +
     tileStar(r.ticker) + `</div>`;
 }
 function renderBreakRank(){
@@ -2371,7 +2375,10 @@ function renderBreakRank(){
       `<span>${brPage + 1} / ${pages}</span>` +
       `<button data-brpg="1" ${brPage >= pages - 1 ? 'disabled' : ''} aria-label="Next page">›</button></div>`;
   }
-  if (host) host.innerHTML = html;
+  if (host){
+    host.innerHTML = html;
+    if (typeof paintWatchCharts === 'function') paintWatchCharts(host);
+  }
 }
 function renderPersist(){
   const P = PERSIST || {};
