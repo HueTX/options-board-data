@@ -352,7 +352,9 @@ canvas.r-spark.hide{display:none}
 }
 .pager button:disabled{opacity:.35;cursor:default}
 /* ============ PREMARKET ============ */
-.pm-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.pm-grid{display:flex;flex-direction:column;min-width:0}
+.mt-range-row{padding:0 14px 10px 60px;border-bottom:1px solid var(--panel-brd)}
+.mt-range-row:last-child{border-bottom:none}
 .pm-card{position:relative;border:1px solid var(--panel-brd);border-radius:16px;
   background:linear-gradient(165deg, rgba(48,209,88,.10), rgba(48,209,88,.03) 60%, transparent), var(--pill-bg);
   -webkit-backdrop-filter:var(--frost);backdrop-filter:var(--frost);
@@ -521,7 +523,6 @@ footer.appfoot{margin:26px 0 0;font-size:12.5px;color:var(--faint);text-align:ce
   canvas.r-spark{width:66px;height:30px}
   .sig-badge{padding:2px 5px}
   .sec-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
-  .pm-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
   .ig-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
 
@@ -582,6 +583,22 @@ footer.appfoot{margin:26px 0 0;font-size:12.5px;color:var(--faint);text-align:ce
 .br-sortable{cursor:pointer;user-select:none;white-space:nowrap}
 .br-sortable:hover{color:var(--orange)}
 .br-cap{color:var(--text-dim);white-space:nowrap}
+/* ============ UNIFIED MORNING TILES (all tabs look like Levels) ============ */
+.mtile{display:grid;grid-template-columns:34px minmax(200px,1.3fr) minmax(220px,1fr) 52px;
+  gap:8px 12px;align-items:center;min-width:0;padding:10px 14px;border-bottom:1px solid var(--panel-brd);cursor:pointer}
+.mtile:last-child{border-bottom:none}
+.mt-stats{display:flex;align-items:center;gap:14px;min-width:0}
+.mt-bignum{font-weight:800;font-size:22px;font-variant-numeric:tabular-nums;color:var(--orange)}
+.mt-bigcap{font-size:10.5px;font-weight:800;letter-spacing:.06em;color:var(--faint);text-transform:uppercase;margin-left:6px}
+.mt-chips{display:flex;flex-wrap:wrap;gap:6px}
+.mt-chips span{font-size:12px;color:var(--text-dim);background:var(--pill-bg);border-radius:999px;padding:3px 10px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.mt-chips span b{color:var(--text);font-weight:700}
+.msortbar{display:flex;align-items:center;gap:8px;margin:2px 2px 10px;flex-wrap:wrap}
+.msortbar .wsort-label{font-size:11px;font-weight:800;letter-spacing:.08em;color:var(--faint)}
+@media (max-width:700px){
+  .mtile{grid-template-columns:28px minmax(0,1fr) 44px}
+  .mt-stats{grid-column:2}
+}
 /* ============ CONSOLIDATED SECTIONS ============ */
 .mtabs{display:flex;gap:6px;margin:2px 2px 12px;flex-wrap:wrap}
 .mtab{border:1px solid var(--line);background:transparent;color:var(--text-dim);font-weight:700;font-size:13px;padding:7px 16px;border-radius:999px;cursor:pointer}
@@ -1897,33 +1914,30 @@ function pmStrength(r){
   return Math.round((gap + flow + prox) * 10) / 10;
 }
 function pmStrengthTier(s){ return s >= 70 ? 'hot' : s >= 40 ? 'warm' : 'mild'; }
-function pmCard(r){
+function pmCard(r, idx){
   const bo = pmBreakoutOf(r);
   const badge = bo.state === 'up' ? `<span class="pm-badge up">${esc(bo.label)}</span>`
     : bo.state === 'dn' ? `<span class="pm-badge dn">${esc(bo.label)}</span>`
     : `<span class="pm-badge flat">${esc(bo.label)}</span>`;
   const st = pmStrength(r), tier = pmStrengthTier(st);
-  const gapCls = (r.gap || 0) >= 0 ? 'up' : 'dn';
-  const pinned = pins.has(r.ticker);
-  const rel = r.relativeVolume, cap = pmCapLabel(r.marketCapB);
-  let range = '';
-  const lo = r.priorLow, hi = r.priorHigh, lp = livePrice(r.ticker);
+  const side = (r.gap || 0) >= 0 ? 'bull' : 'bear';
+  const name = (typeof NAMES !== 'undefined' && NAMES.get(r.ticker)) || '';
+  const rel = r.relativeVolume;
+  const lp = livePrice(r.ticker);
   const px = lp != null ? lp : r.price;
+  let range = '';
+  const lo = r.priorLow, hi = r.priorHigh;
   if (lo != null && hi != null && hi > lo && px != null){
     const pct = Math.min(100, Math.max(0, (px - lo) / (hi - lo) * 100));
     range = `<div class="pm-range"><div class="pm-track"><span class="pm-dot" style="left:${pct.toFixed(1)}%"></span></div>` +
       `<div class="pm-rl"><span>${fmtPx(lo)}</span><span class="mid">${esc(r.priorDay || '')} range</span><span>${fmtPx(hi)}</span></div></div>`;
   }
-  const asof = r.quoteAsOf ? Date.parse(r.quoteAsOf) : NaN;
-  return `<div class="pm-card${pinned ? ' pinned' : ''}" data-sym="${esc(r.ticker)}">` +
-    `<div class="pm-top"><span class="pm-tk">${esc(r.ticker)}</span>` +
-    `<button class="pin" data-pin="${esc(r.ticker)}" aria-label="Pin ${esc(r.ticker)}">${pinned ? '★' : '☆'}</button></div>` +
-    `<div>${badge}<span class="pm-badge str ${tier}" title="0–100 standout: gap 40 + flow 35 + breakout 25">STRENGTH ${st.toFixed(0)}</span></div>` +
-    `<div class="pm-gap ${gapCls}">${fmtPct(r.gap)}</div>` +
-    `<div class="pm-mid">${fmtPx(px)} · ${rel != null ? rel.toFixed(1) + 'x flow' : 'flow —'}</div>` +
-    (cap ? `<div class="pm-cap">${cap}</div>` : '') +
-    (isFinite(asof) ? `<div class="pm-asof">as of ${ctFmtShort.format(new Date(asof))} CT</div>` : '') +
-    range + '</div>';
+  return `<div class="mtile" data-sym="${esc(r.ticker)}">` +
+    tileHead((idx || 0) + 1, r.ticker, side, name, px, r.gap, r.marketCapB) +
+    `<div class="mt-stats"><div><span class="mt-bignum">${fmtPct(r.gap)}</span><span class="mt-bigcap">gap</span></div>` +
+    `<div class="mt-chips">${badge}<span>Strength <b>${st.toFixed(0)}</b></span><span>Flow <b>${rel != null ? rel.toFixed(1) + 'x' : '—'}</b></span></div></div>` +
+    `<div class="wr-watch"><button class="wr-star pin${pins.has(r.ticker) ? ' on' : ''}" data-pin="${esc(r.ticker)}" aria-label="Pin ${esc(r.ticker)}">${pins.has(r.ticker) ? '★' : '☆'}</button></div></div>` +
+    (range ? `<div class="mt-range-row">${range}</div>` : '');
 }
 const PM_SORTS = {
   gap:      {label: 'Biggest gap',       fn: (a,b) => (((a.gap||0) >= 0 ? 0 : 1) - ((b.gap||0) >= 0 ? 0 : 1)) || (Math.abs(b.gap||0) - Math.abs(a.gap||0))},
@@ -2289,15 +2303,33 @@ function renderIgnitions(){
 let PERSIST = null;
 /* ================= BREAK RANKING ================= */
 let BREAKRANK = null;
-/* ============ BREAK RANKING (sortable, paginated) ============ */
+/* ============ BREAK RANKING (tiles, sortable, paginated) ============ */
 let brSortKey = 'score', brSortDir = -1, brPage = 0;
 const BR_PAGE = 10;
 const BR_SORTS = {
-  score:  {label: 'Score', get: r => r.score},
-  side:   {label: 'Dir',   get: r => r.side === 'bull' ? 0 : 1},
-  mcap:   {label: 'MCap',  get: r => { const c = CAPS.get(r.ticker); return (c == null || !isFinite(c)) ? -1 : c; }},
-  gapPct: {label: 'Gap%',  get: r => r.gapPct},
+  score:  {label: 'Score',      get: r => r.score},
+  side:   {label: 'Direction',  get: r => r.side === 'bull' ? 0 : 1},
+  mcap:   {label: 'Market cap', get: r => { const c = CAPS.get(r.ticker); return (c == null || !isFinite(c)) ? -1 : c; }},
+  gapPct: {label: 'Gap %',      get: r => r.gapPct},
 };
+/* Shared morning-tile header: identical look across Gaps / Levels / Breaks. */
+function tileHead(rank, ticker, side, name, price, chgPct, mcapB){
+  const t = side === 'bull' ? 'up' : side === 'bear' ? 'dn' : '';
+  const tri = side === 'bull' ? '▲' : side === 'bear' ? '▼' : '';
+  const chgCls = (chgPct == null || !isFinite(chgPct)) ? 'na' : (chgPct > 0 ? 'up' : chgPct < 0 ? 'dn' : 'na');
+  const chgTxt = (chgPct == null || !isFinite(chgPct)) ? '—' : ((chgPct >= 0 ? '+' : '') + chgPct.toFixed(2) + '%');
+  const starred = (typeof watchStars !== 'undefined' && watchStars.has(ticker));
+  return `<span class="wr-rank">#${rank}</span>` +
+    `<div class="wr-id"><div class="wr-tkline">${tri ? `<span class="wr-tri ${t}">${tri}</span>` : ''}` +
+    `<span class="wr-tk ${t}">${esc(ticker)}</span></div>` +
+    (name ? `<div class="wr-name">${esc(name)}</div>` : '') +
+    `<div class="wr-sub">${price != null && isFinite(price) ? `<span class="wr-px">${fmtPx(price)}</span><span class="sep">·</span>` : ''}<span class="chg ${chgCls}">${chgTxt}</span><span class="sep">·</span>` +
+    `<span class="cap">${(mcapB == null || !isFinite(mcapB)) ? 'cap —' : fmtCapB(mcapB)}</span></div></div>`;
+}
+function tileStar(ticker){
+  const starred = (typeof watchStars !== 'undefined' && watchStars.has(ticker));
+  return `<div class="wr-watch"><button class="wr-star${starred ? ' on' : ''}" data-wstar="${esc(ticker)}" aria-label="Watch ${esc(ticker)}">${starred ? '★' : '☆'}</button></div>`;
+}
 function brRows(){
   const B = BREAKRANK || {}, rows = (B.rows || []).slice();
   const {get} = BR_SORTS[brSortKey] || BR_SORTS.score;
@@ -2307,42 +2339,39 @@ function brRows(){
   });
   return rows;
 }
+function breakTile(r){
+  const cap = CAPS.get(r.ticker);
+  const name = (typeof NAMES !== 'undefined' && NAMES.get(r.ticker)) || '';
+  const thru = Number(r.thruPct).toFixed(2) + '%';
+  const flow = Number(r.flowX).toFixed(1) + 'x';
+  return `<div class="mtile" data-sym="${esc(r.ticker)}">` +
+    tileHead(r.rank, r.ticker, r.side, name, r.close, r.gapPct, cap) +
+    `<div class="mt-stats"><div><span class="mt-bignum">${Number(r.score).toFixed(1)}</span><span class="mt-bigcap">score</span></div>` +
+    `<div class="mt-chips"><span>Thru <b>${thru}</b></span><span>Flow <b>${flow}</b></span></div></div>` +
+    tileStar(r.ticker) + `</div>`;
+}
 function renderBreakRank(){
   const B = BREAKRANK || {};
   const m = $('brMeta'); if (m) m.textContent = B.marketDate ? `${(B.rows || []).length} flags · ${fmtMonD(B.marketDate)}` : '';
   const rows = brRows();
-  // header with sort indicators
-  const th = (key, label) => {
-    const sortable = !!BR_SORTS[key];
-    const arrow = sortable && brSortKey === key ? (brSortDir === -1 ? ' ▼' : ' ▲') : '';
-    return `<th${sortable ? ` data-brsort="${key}" class="br-sortable"` : ''}>${label}${arrow}</th>`;
-  };
-  const hd = $('brHead');
-  if (hd) hd.innerHTML = `<tr><th>#</th><th>Ticker</th>${th('side', 'Dir')}${th('mcap', 'MCap')}<th>Close</th>${th('gapPct', 'Gap%')}<th>Thru%</th><th>Flow</th>${th('score', 'Score')}</tr>`;
-  const tb = $('brBody');
+  const host = $('mpane-breaks');
+  // sort chips row (same language as the Levels tab)
+  let html = `<div class="msortbar"><span class="wsort-label">SORT BY</span>` +
+    Object.entries(BR_SORTS).map(([k, s]) =>
+      `<button class="wchip${brSortKey === k ? ' on' : ''}" data-brsort="${k}">${s.label}${brSortKey === k ? (brSortDir === -1 ? ' ▼' : ' ▲') : ''}</button>`
+    ).join('') + `</div>`;
   if (!rows.length){
-    if (tb) tb.innerHTML = '<tr><td colspan="9"><div class="empty">No ranked breaks for ' + esc(B.marketDate || 'today') + '.</div></td></tr>';
-    const pg = $('brPager'); if (pg) pg.innerHTML = '';
-    return;
+    html += '<div class="empty">No ranked breaks for ' + esc(B.marketDate || 'today') + '.</div>';
+  } else {
+    const pages = Math.max(1, Math.ceil(rows.length / BR_PAGE));
+    if (brPage > pages - 1) brPage = pages - 1;
+    html += `<div class="watch-grid">` + rows.slice(brPage * BR_PAGE, brPage * BR_PAGE + BR_PAGE).map(breakTile).join('') + `</div>`;
+    if (pages > 1) html += `<div class="pager" id="brPager">` +
+      `<button data-brpg="-1" ${brPage <= 0 ? 'disabled' : ''} aria-label="Previous page">‹</button>` +
+      `<span>${brPage + 1} / ${pages}</span>` +
+      `<button data-brpg="1" ${brPage >= pages - 1 ? 'disabled' : ''} aria-label="Next page">›</button></div>`;
   }
-  const pages = Math.max(1, Math.ceil(rows.length / BR_PAGE));
-  if (brPage > pages - 1) brPage = pages - 1;
-  const slice = rows.slice(brPage * BR_PAGE, brPage * BR_PAGE + BR_PAGE);
-  if (tb) tb.innerHTML = slice.map(r => {
-    const bull = r.side === 'bull';
-    const dir = `<span class="${bull ? 'br-dir-up' : 'br-dir-dn'}">${bull ? '&#9650;' : '&#9660;'}</span>`;
-    const gap = (r.gapPct >= 0 ? '+' : '') + Number(r.gapPct).toFixed(1) + '%';
-    const cap = CAPS.get(r.ticker);
-    return `<tr><td class="br-rank">${r.rank}</td><td class="br-tick">${esc(r.ticker)}</td><td>${dir}</td>` +
-      `<td class="br-cap">${(cap == null || !isFinite(cap)) ? '—' : fmtCapB(cap)}</td>` +
-      `<td>$${Number(r.close).toFixed(2)}</td><td>${gap}</td><td>${Number(r.thruPct).toFixed(2)}%</td>` +
-      `<td>${Number(r.flowX).toFixed(1)}x</td><td class="br-score">${Number(r.score).toFixed(1)}</td></tr>`;
-  }).join('');
-  const pg = $('brPager');
-  if (pg) pg.innerHTML = pages <= 1 ? '' :
-    `<button data-brpg="-1" ${brPage <= 0 ? 'disabled' : ''} aria-label="Previous page">‹</button>` +
-    `<span>${brPage + 1} / ${pages}</span>` +
-    `<button data-brpg="1" ${brPage >= pages - 1 ? 'disabled' : ''} aria-label="Next page">›</button>`;
+  if (host) host.innerHTML = html;
 }
 function renderPersist(){
   const P = PERSIST || {};
@@ -2689,18 +2718,21 @@ $('sectorGrid').addEventListener('click', e => {
   const card = e.target.closest('[data-sec]');
   if (card){ secView = card.dataset.sec; renderSectors(); }
 });
-$('brTable').addEventListener('click', e => {
-  const th = e.target.closest('[data-brsort]'); if (!th) return;
-  const k = th.dataset.brsort;
-  if (brSortKey === k) brSortDir = -brSortDir;
-  else { brSortKey = k; brSortDir = (k === 'side' ? 1 : -1); }
-  brPage = 0;
-  renderBreakRank();
-});
-$('brPager').addEventListener('click', e => {
-  const b = e.target.closest('[data-brpg]'); if (!b || b.disabled) return;
-  brPage = Math.max(0, brPage + parseInt(b.dataset.brpg, 10));
-  renderBreakRank();
+$('mpane-breaks').addEventListener('click', e => {
+  const th = e.target.closest('[data-brsort]');
+  if (th){
+    const k = th.dataset.brsort;
+    if (brSortKey === k) brSortDir = -brSortDir;
+    else { brSortKey = k; brSortDir = (k === 'side' ? 1 : -1); }
+    brPage = 0;
+    renderBreakRank();
+    return;
+  }
+  const b = e.target.closest('[data-brpg]');
+  if (b && !b.disabled){
+    brPage = Math.max(0, brPage + parseInt(b.dataset.brpg, 10));
+    renderBreakRank();
+  }
 });
 $('pmPills').addEventListener('click', e => {
   const b = e.target.closest('[data-pm]'); if (!b) return;  const k = b.dataset.pm;
