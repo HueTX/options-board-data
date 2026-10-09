@@ -579,6 +579,17 @@ footer.appfoot{margin:26px 0 0;font-size:12.5px;color:var(--faint);text-align:ce
 .br-dir-dn{color:var(--loss);font-weight:800}
 .br-score{font-weight:800;color:var(--orange)}
 .br-rank{color:var(--text-dim)}
+/* ============ CONSOLIDATED SECTIONS ============ */
+.mtabs{display:flex;gap:6px;margin:2px 2px 12px;flex-wrap:wrap}
+.mtab{border:1px solid var(--line);background:transparent;color:var(--text-dim);font-weight:700;font-size:13px;padding:7px 16px;border-radius:999px;cursor:pointer}
+.mtab.on{background:var(--orange);border-color:var(--orange);color:#111}
+.mpane{display:none}
+.mpane.on{display:block}
+.usub{margin-bottom:18px}
+.usub:last-child{margin-bottom:0}
+.usub-label{font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--text-dim);font-weight:800;margin:0 2px 8px}
+.mflow-details{margin:6px 4px 0;border:1px solid var(--line);border-radius:10px;padding:10px 14px}
+.mflow-details summary{cursor:pointer;font-weight:800;color:var(--headline);font-size:14px}
 
 </style>
 </head>
@@ -612,6 +623,23 @@ footer.appfoot{margin:26px 0 0;font-size:12.5px;color:var(--faint);text-align:ce
         <button class="chev" aria-label="Collapse">&#8964;</button>
       </div>
       <div class="sec-body"><div class="pin-strip" id="pinStrip"></div></div>
+    </section>
+
+    <section class="panel tint-amber" id="secMorning">
+      <div class="sec-head" data-sec="secMorning">
+        <div class="titles"><h2>Morning</h2><p class="sub">Gaps &rarr; levels &rarr; breaks — one funnel, best first</p><span class="upd" id="updMorning"></span></div>
+        <button class="chev" aria-label="Collapse">&#8964;</button>
+      </div>
+      <div class="sec-body">
+        <div class="mtabs" id="mornTabs" role="tablist" aria-label="Morning stages">
+          <button class="mtab" data-mtab="gaps" role="tab">Gaps</button>
+          <button class="mtab" data-mtab="levels" role="tab">Levels</button>
+          <button class="mtab" data-mtab="breaks" role="tab">Breaks</button>
+        </div>
+        <div class="mpane" id="mpane-gaps" role="tabpanel"></div>
+        <div class="mpane" id="mpane-levels" role="tabpanel"></div>
+        <div class="mpane" id="mpane-breaks" role="tabpanel"></div>
+      </div>
     </section>
 
     <section class="panel tint-teal" id="secMovers">
@@ -715,6 +743,28 @@ footer.appfoot{margin:26px 0 0;font-size:12.5px;color:var(--faint);text-align:ce
             <div class="pager" id="bearPager"></div>
           </div>
         </div>
+      </div>
+    </section>
+
+    <section class="panel" id="secUFlow">
+      <div class="sec-head" data-sec="secUFlow">
+        <div class="titles"><h2>Unusual flow</h2><p class="sub">Yesterday's ignitions · streaks · first appearances</p><span class="upd" id="updUFlow"></span></div>
+        <button class="chev" aria-label="Collapse">&#8964;</button>
+      </div>
+      <div class="sec-body">
+        <div class="usub" id="uflow-ign"></div>
+        <div class="usub" id="uflow-persist"></div>
+      </div>
+    </section>
+
+    <section class="panel" id="secMarket">
+      <div class="sec-head" data-sec="secMarket">
+        <div class="titles"><h2>Market</h2><p class="sub">Movers · sector heat</p><span class="upd" id="updMarket"></span></div>
+        <button class="chev" aria-label="Collapse">&#8964;</button>
+      </div>
+      <div class="sec-body">
+        <div class="usub" id="mkt-movers"></div>
+        <div class="usub" id="mkt-sectors"></div>
       </div>
     </section>
 
@@ -889,6 +939,67 @@ window.addEventListener('error', function(e){
 /* ================= UTILITIES ================= */
 const $ = id => document.getElementById(id);
 const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+/* ============ SECTION CONSOLIDATION (runs first) ============
+   Morning funnel -> one tabbed panel (Gaps | Levels | Breaks);
+   ignitions+persistence -> Unusual flow; movers+sectors -> Market;
+   static Morning-flow reference -> collapsed <details>. All inner IDs are
+   preserved, so every renderer keeps working untouched. */
+let mornTabManual = false;
+function selectMornTab(name){
+  document.querySelectorAll('#mornTabs .mtab').forEach(t => t.classList.toggle('on', t.dataset.mtab === name));
+  ['gaps','levels','breaks'].forEach(k => { const p = $('mpane-' + k); if (p) p.classList.toggle('on', k === name); });
+  try { localStorage.setItem('ofb_mtab', name); } catch(e){}
+}
+(function consolidate(){
+  function moveBody(oldSecId, targetId, label){
+    const old = $(oldSecId);
+    if (!old) return;
+    const target = $(targetId);
+    const body = old.querySelector('.sec-body');
+    if (target && body){
+      if (label){
+        const h = document.createElement('div');
+        h.className = 'usub-label';
+        h.textContent = label;
+        target.appendChild(h);
+      }
+      while (body.firstChild) target.appendChild(body.firstChild);
+    }
+    old.remove();
+  }
+  moveBody('secPremarket', 'mpane-gaps');
+  moveBody('secWatch', 'mpane-levels');
+  moveBody('secBreakRank', 'mpane-breaks');
+  moveBody('secIgn', 'uflow-ign', "Yesterday's ignitions");
+  moveBody('secPersist', 'uflow-persist', 'Flow persistence');
+  moveBody('secMovers', 'mkt-movers', 'Full-market movers');
+  moveBody('secSectors', 'mkt-sectors', 'Sector heat');
+  const mf = $('secMFlow');
+  if (mf){
+    const det = document.createElement('details');
+    det.className = 'mflow-details';
+    const sum = document.createElement('summary');
+    sum.textContent = 'Morning flow — four-step reference';
+    det.appendChild(sum);
+    const body = mf.querySelector('.sec-body');
+    if (body){ while (body.firstChild) det.appendChild(body.firstChild); }
+    mf.replaceWith(det);
+  }
+  document.querySelectorAll('#mornTabs .mtab').forEach(t =>
+    t.addEventListener('click', () => { mornTabManual = true; selectMornTab(t.dataset.mtab); }));
+  let def = 'gaps';
+  try { def = localStorage.getItem('ofb_mtab') || def; } catch(e){}
+  selectMornTab(def);
+})();
+/* Auto-select the most relevant morning tab on fresh data (until the user picks one). */
+function autoMornTab(){
+  if (mornTabManual) return;
+  const hr = new Date().getHours(), min = new Date().getMinutes();
+  const ctMin = hr * 60 + min; // approx local; good enough for tab default
+  if (typeof BREAKRANK !== 'undefined' && BREAKRANK && BREAKRANK.rows && BREAKRANK.rows.length) selectMornTab('breaks');
+  else if (typeof wlLive !== 'undefined' && wlLive) selectMornTab('levels');
+  else selectMornTab('gaps');
+}
 const fmtPct = (v, d=2) => (v == null || !isFinite(v)) ? '—' : ((v >= 0 ? '+' : '') + v.toFixed(d) + '%');
 const fmtVol = v => (v == null) ? '—' : v >= 1e9 ? (v/1e9).toFixed(2)+'B' : v >= 1e6 ? (v/1e6).toFixed(1)+'M' : v >= 1e3 ? (v/1e3).toFixed(0)+'K' : String(Math.round(v));
 const fmtPx = p => (p == null || !isFinite(p)) ? '—' : '$' + p.toFixed(2);
@@ -1096,6 +1207,7 @@ async function refreshQuotes(){
     if (r9 && r9.bars){ DBARS = r9.bars; }
     if (r12 && r12.marketDate){ PERSIST = r12; renderPersist(); }
     if (r13 && r13.marketDate && Array.isArray(r13.rows)){ BREAKRANK = r13; renderBreakRank(); HB.breakrank = now; }
+    autoMornTab();
     // live movers feed failure is non-fatal: universe-computed movers remain the fallback
     // snapshot fetch failure / older file is non-fatal: the embedded snapshot keeps the page working
     feedAsOf = now; lastErr = null; pollDone = true;
@@ -1840,12 +1952,8 @@ function renderPremarket(){
   placePremarket();
 }
 function placePremarket(){
-  const board = $('board'), pm = $('secPremarket'), mv = $('secMovers'), sc = $('secSectors');
-  if (!board || !pm) return;
-  const {wd, min} = etParts();
-  const preBell = !['Sat','Sun'].includes(wd) && min < 570;
-  if (preBell){ if (pm.nextElementSibling !== mv) board.insertBefore(pm, mv); }
-  else { if (pm.nextElementSibling !== sc) board.insertBefore(pm, sc); }
+  // Retired 2026-10-09: the morning funnel is one tabbed panel (secMorning),
+  // statically positioned after pins. No DOM reordering needed.
 }
 
 /* ================= SECTORS ================= */
