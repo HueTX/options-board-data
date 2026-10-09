@@ -77,9 +77,14 @@ def latest_completed_15m(bars, session_date):
         bucket_start = 570 + ((mins - 570) // 15) * 15
         buckets.setdefault(bucket_start, []).append((t, c))
 
-    # Find latest bucket whose end time has passed
+    # Find latest bucket whose end time has passed. The 08:30-08:45 ET opening
+    # candle (bucket 570) is owned by the ranked break table
+    # (break_ranking.json) — never list it here; that would show the same
+    # breaks twice.
     best = None
     for start, closes in buckets.items():
+        if start == 570:
+            continue
         end = start + 15
         # Bucket is complete if we're past its end (with 1-min grace for data latency)
         # or if it's not today's session (historical)
