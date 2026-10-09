@@ -2526,7 +2526,9 @@ function renderWatchlist(){
 /* ================= RENDER ALL ================= */
 function renderAll(){
   renderStatus(); renderRegime(); renderSession(); evalHealth();
-  if (!pollDone) { renderUpdated(); return; }  // first poll pending: show checking state, don't paint stale embedded data
+  // Always paint (embedded fallback first, live data when the poll lands).
+  // A hung feed must never leave the board on "Loading..." — the health chips
+  // report staleness honestly instead.
   paintCapChips(); renderSignals();
   renderIgnitions(); renderPersist(); renderFlow(); renderPremarket(); renderSectors(); renderMovers(); renderWatchlist(); renderPins();
   renderUpdated();
