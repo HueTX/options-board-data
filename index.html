@@ -565,6 +565,20 @@ footer.appfoot{margin:26px 0 0;font-size:12.5px;color:var(--faint);text-align:ce
 .mflow{margin:0;padding:4px 0 4px 22px;display:flex;flex-direction:column;gap:12px;font-size:14px;line-height:1.55;color:var(--text)}
 .mflow li::marker{color:var(--orange);font-weight:800}
 .mflow b{color:var(--headline)}
+/* ============ BREAK RANKING ============ */
+.br-legend{font-size:12px;color:var(--text-dim);margin:2px 2px 10px}
+.br-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.br-table{width:100%;border-collapse:collapse;font-size:13px;min-width:560px}
+.br-table th{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--text-dim);font-weight:700;text-align:right;padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+.br-table th:nth-child(2),.br-table td:nth-child(2){text-align:left}
+.br-table td{padding:7px 10px;border-bottom:1px solid var(--line-soft,var(--line));text-align:right;white-space:nowrap;color:var(--text);font-variant-numeric:tabular-nums}
+.br-table tbody tr:last-child td{border-bottom:none}
+.br-table tbody tr:hover td{background:var(--hover,rgba(255,255,255,.03))}
+.br-tick{font-weight:800;color:var(--headline)}
+.br-dir-up{color:var(--gain);font-weight:800}
+.br-dir-dn{color:var(--loss);font-weight:800}
+.br-score{font-weight:800;color:var(--orange)}
+.br-rank{color:var(--text-dim)}
 
 </style>
 </head>
@@ -769,6 +783,21 @@ footer.appfoot{margin:26px 0 0;font-size:12.5px;color:var(--faint);text-align:ce
       </div>
     </section>
 
+    <section class="panel" id="secBreakRank">
+      <div class="sec-head" data-sec="secBreakRank">
+        <div class="titles"><h2>Break ranking</h2><p class="sub" id="brSub">First 15m candle breaks, ranked by continuation conviction</p><span class="upd" id="updBreakRank"></span></div>
+        <span class="head-meta" id="brMeta"></span>
+        <button class="chev" aria-label="Collapse">&#8964;</button>
+      </div>
+      <div class="sec-body">
+        <div class="br-legend">Score = gap move (35) + break depth (35) + unusual flow (30) · levels only, no trade call</div>
+        <div class="br-wrap"><table class="br-table" id="brTable" aria-label="Ranked first-candle breaks">
+          <thead><tr><th>#</th><th>Ticker</th><th>Dir</th><th>Close</th><th>Gap%</th><th>Thru%</th><th>Flow</th><th>Score</th></tr></thead>
+          <tbody id="brBody"><tr><td colspan="8"><div class="empty">Loading break ranking&hellip;</div></td></tr></tbody>
+        </table></div>
+      </div>
+    </section>
+
     <section class="panel" id="secIgn">
       <div class="sec-head" data-sec="secIgn">
         <div class="titles"><h2>Yesterday's ignitions</h2><p class="sub">Follow-through today</p><span class="upd" id="updIgn"></span></div>
@@ -934,6 +963,7 @@ const SNAPSHOT_URL = "https://raw.githubusercontent.com/HueTX/options-board-data
 const QUOTES_URL = "https://raw.githubusercontent.com/HueTX/options-board-data/main/quotes.json";
 const QUOTES_UNI_URL = "https://raw.githubusercontent.com/HueTX/options-board-data/main/quotes_universe.json";
 const WATCHLIST_URL = "https://raw.githubusercontent.com/HueTX/options-board-data/main/watchlist.json";
+const BREAKRANK_URL = "https://raw.githubusercontent.com/HueTX/options-board-data/main/break_ranking.json"; // ranked first-15m break table {marketDate, asOf, rows:[rank,ticker,side,close,gapPct,thruPct,flowX,score]}
 const WCHARTS_URL = "https://raw.githubusercontent.com/HueTX/options-board-data/main/wcharts.json";   // live 1H/4H trend series for the watchlist; merged into WCHARTS when its marketDate is >= the current rows'
 const MOVERS_URL = "https://raw.githubusercontent.com/HueTX/options-board-data/main/market_movers.json";
 const DBARS_URL = "https://raw.githubusercontent.com/HueTX/options-board-data/main/dbars.json";   // 5m drawer bars for flow/mover tickers outside the 56-ticker quotes feed
@@ -944,7 +974,7 @@ const FEED_OK = !/PUT-YOUR/.test(QUOTES_URL + QUOTES_UNI_URL + WATCHLIST_URL);  
 // Per-feed heartbeat: last SUCCESSFUL fetch time (epoch ms). A failed fetch leaves the
 // previous timestamp alone, so the chip ages honestly toward STALE while the section
 // keeps rendering its last-good data.
-const HB = { quotes: null, universe: null, snapshot: null, watchlist: null, ignitions: null, movers: null };
+const HB = { quotes: null, universe: null, snapshot: null, watchlist: null, ignitions: null, movers: null, breakrank: null };
 let lastPollT = 0;   // epoch ms of the last successful quote poll (drives the 60s refresh countdown)
 let pollDone = false;  // true once the first poll has finished (success or failure)
 const ctFmtT = new Intl.DateTimeFormat('en-US',{timeZone:'America/Chicago',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false});
@@ -997,7 +1027,7 @@ async function refreshQuotes(){
     const bust = '?t=' + Math.floor(Date.now()/15000);
     for (const [k] of DS_DEFS) DS[k] = {state:'checking', asOf:null, sub:''};
     dsPaint();
-    const [r1, r2, r4, r5, r6, r7, r8, r9, r10, r11, r12] = await Promise.all([
+    const [r1, r2, r4, r5, r6, r7, r8, r9, r10, r11, r12, r13] = await Promise.all([
       fetch(QUOTES_URL + bust).then(r => { if(!r.ok) throw new Error('quotes '+r.status); return r.json(); }).catch(() => null),
       fetch(QUOTES_UNI_URL + bust).then(r => { if(!r.ok) throw new Error('uni '+r.status); return r.json(); }).catch(() => null),
       fetch(FT_URL + bust).then(r => { if(!r.ok) throw new Error('ft '+r.status); return r.json(); }).catch(() => null),
@@ -1008,7 +1038,8 @@ async function refreshQuotes(){
       fetch(DBARS_URL + bust).then(r => { if(!r.ok) throw new Error('db '+r.status); return r.json(); }).catch(() => null),
       fetch(REGIME1H_URL + bust).then(r => { if(!r.ok) throw new Error('r1h '+r.status); return r.json(); }).catch(() => null),
       fetch(CLOSES15_URL + bust).then(r => { if(!r.ok) throw new Error('15m '+r.status); return r.json(); }).catch(() => null),
-      fetch(PERSIST_URL + bust).then(r => { if(!r.ok) throw new Error('persist '+r.status); return r.json(); }).catch(() => null)
+      fetch(PERSIST_URL + bust).then(r => { if(!r.ok) throw new Error('persist '+r.status); return r.json(); }).catch(() => null),
+      fetch(BREAKRANK_URL + bust).then(r => { if(!r.ok) throw new Error('breakrank '+r.status); return r.json(); }).catch(() => null)
     ]);
     const now = Date.now();
     if (r1){
@@ -1064,6 +1095,7 @@ async function refreshQuotes(){
     }
     if (r9 && r9.bars){ DBARS = r9.bars; }
     if (r12 && r12.marketDate){ PERSIST = r12; renderPersist(); }
+    if (r13 && r13.marketDate && Array.isArray(r13.rows)){ BREAKRANK = r13; renderBreakRank(); HB.breakrank = now; }
     // live movers feed failure is non-fatal: universe-computed movers remain the fallback
     // snapshot fetch failure / older file is non-fatal: the embedded snapshot keeps the page working
     feedAsOf = now; lastErr = null; pollDone = true;
@@ -1340,6 +1372,8 @@ function renderUpdated(){
         : 'levels ' + (WL.marketDate || '') + ' (embedded)');
   set('updIgn', (ftLive && HB.ignitions) ? 'updated ' + ctTime(HB.ignitions)
         : 'ignitions ' + (FT.date || '') + ' (embedded)');
+  set('updBreakRank', (BREAKRANK && HB.breakrank) ? 'updated ' + ctTime(HB.breakrank)
+        : (BREAKRANK ? 'ranking ' + (BREAKRANK.marketDate || '') : ''));
 }
 
 /* ================= HEARTBEAT ================= */
@@ -2126,6 +2160,25 @@ function renderIgnitions(){
 
 /* ================= FLOW PERSISTENCE ================= */
 let PERSIST = null;
+/* ================= BREAK RANKING ================= */
+let BREAKRANK = null;
+function renderBreakRank(){
+  const B = BREAKRANK || {}, rows = B.rows || [];
+  $('brMeta').textContent = B.marketDate ? `${rows.length} flags · ${fmtMonD(B.marketDate)}` : '';
+  const tb = $('brBody');
+  if (!rows.length){
+    tb.innerHTML = '<tr><td colspan="8"><div class="empty">No ranked breaks for ' + esc(B.marketDate || 'today') + '.</div></td></tr>';
+    return;
+  }
+  tb.innerHTML = rows.map(r => {
+    const bull = r.side === 'bull';
+    const dir = `<span class="${bull ? 'br-dir-up' : 'br-dir-dn'}">${bull ? '&#9650;' : '&#9660;'}</span>`;
+    const gap = (r.gapPct >= 0 ? '+' : '') + Number(r.gapPct).toFixed(1) + '%';
+    return `<tr><td class="br-rank">${r.rank}</td><td class="br-tick">${esc(r.ticker)}</td><td>${dir}</td>` +
+      `<td>$${Number(r.close).toFixed(2)}</td><td>${gap}</td><td>${Number(r.thruPct).toFixed(2)}%</td>` +
+      `<td>${Number(r.flowX).toFixed(1)}x</td><td class="br-score">${Number(r.score).toFixed(1)}</td></tr>`;
+  }).join('');
+}
 function renderPersist(){
   const P = PERSIST || {};
   const confirmed = P.confirmed || [], streaks = P.streaks || [], first = P.firstAppearance || [];
