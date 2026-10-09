@@ -10,7 +10,13 @@ Classification (Hubert's rule, corrected 2026-10-01):
   - BULLISH: 15m close > PDH OR close > PMH (close above ANY overhead level)
   - BEARISH: 15m close < PDL AND close < PML (breaks all support)
 
-State tracking across polls: each ticker is new / continuing / dropped / flipped.
+Signal discipline (2026-10-09): only the FIRST 15m candle closing through a
+level is listed. A ticker that broke on an earlier candle is stale — the
+follow-up move is the trade, and it starts on candle one. Later candles
+through the same level are not re-listed ("continuing" is gone); per-ticker
+sides persist across polls so nothing is misreported as new.
+
+State tracking across polls: each ticker is new / flipped / dropped.
 Output: fifteen_min_closes.json with asOf timestamp, consumed by the
 artifact's 15m-closes view and the standalone's 15m-closes.html page.
 """
@@ -202,18 +208,25 @@ def main():
         print(json.dumps({"ok": True, "marketOpen": False, "reason": why}))
         return 0
 
-    # Load previous state for new/dropped/flipped tracking. Stored list entries
-    # carry no "side" key, so previous sides are derived from list membership.
-    prev = {}
+    # Load previous per-ticker sides for new/dropped/flipped tracking.
+    # Persisted as a full side map (not list membership): a ticker whose
+    # break is old news is excluded from the output lists but must still be
+    # recognized next poll, otherwise it would be re-reported as "new" on
+    # every subsequent candle. Only the FIRST 15m candle closing through a
+    # level is a signal — later candles through the same level are stale.
+    prev_sides = {}
     if os.path.exists(OUT):
         try:
             prev_data = json.load(open(OUT))
-            for r in prev_data.get("bullish", []):
-                prev[r["ticker"]] = "bullish"
-            for r in prev_data.get("bearish", []):
-                prev[r["ticker"]] = "bearish"
+            prev_sides = prev_data.get("sides") or {}
+            if not prev_sides:
+                # Backward compat with files written before the sides map.
+                for r in prev_data.get("bullish", []):
+                    prev_sides[r["ticker"]] = "bullish"
+                for r in prev_data.get("bearish", []):
+                    prev_sides[r["ticker"]] = "bearish"
         except Exception:
-            pass
+            prev_sides = {}
 
     results = []
     with ThreadPoolExecutor(max_workers=12) as ex:
@@ -232,6 +245,7 @@ def main():
 
     for r in results:
         curr_sides[r["ticker"]] = r["side"]
+        prev_side = prev_sides.get(r["ticker"])
         if r["side"] == "bullish":
             # The board's import15mcloses schema requires pmh as a number. When a
             # ticker has no premarket bars (e.g. thin ETFs), pmh is undefined and
@@ -239,32 +253,28 @@ def main():
             # or mutating the payload for a single run.
             if r.get("pdh") is None or r.get("pmh") is None:
                 continue
+            if prev_side == "bullish":
+                continue  # break on an earlier candle: stale, not a fresh signal
             entry = {"ticker": r["ticker"], "close": r["close"], "candle": r["candle"],
                      "pdh": r["pdh"], "pmh": r["pmh"]}
+            entry["status"] = "new" if prev_side is None else "flipped"
+            (new_bullish if prev_side is None else flipped).append(r["ticker"])
             bullish.append(entry)
-            if prev.get(r["ticker"]) != "bullish":
-                entry["status"] = "new" if r["ticker"] not in prev else "flipped"
-                (new_bullish if r["ticker"] not in prev else flipped).append(r["ticker"])
-            else:
-                entry["status"] = "continuing"
         elif r["side"] == "bearish":
             if r.get("pdl") is None or r.get("pml") is None:
                 continue
+            if prev_side == "bearish":
+                continue  # break on an earlier candle: stale, not a fresh signal
             entry = {"ticker": r["ticker"], "close": r["close"], "candle": r["candle"],
                      "pdl": r["pdl"], "pml": r["pml"]}
+            entry["status"] = "new" if prev_side is None else "flipped"
+            (new_bearish if prev_side is None else flipped).append(r["ticker"])
             bearish.append(entry)
-            if prev.get(r["ticker"]) != "bearish":
-                entry["status"] = "new" if r["ticker"] not in prev else "flipped"
-                (new_bearish if r["ticker"] not in prev else flipped).append(r["ticker"])
-            else:
-                entry["status"] = "continuing"
 
-    # Dropped: was on a list last poll, on neither now
-    for sym, side in prev.items():
-        if side and curr_sides.get(sym) != side and curr_sides.get(sym) is None:
-            # Was bullish/bearish, now neither (and we did scan it)
-            if sym in curr_sides:
-                dropped.append({"ticker": sym, "was": side})
+    # Dropped: had a side last poll, scanned now, on neither side
+    for sym, side in prev_sides.items():
+        if side in ("bullish", "bearish") and sym in curr_sides and curr_sides[sym] is None:
+            dropped.append({"ticker": sym, "was": side})
 
     bullish.sort(key=lambda r: r["ticker"])
     bearish.sort(key=lambda r: r["ticker"])
@@ -306,6 +316,9 @@ def main():
         "flipped": sorted(flipped),
         "scanned": len(results),
         "universe": len(TICKERS),
+        # Full per-ticker side map for next poll's new/dropped/flipped
+        # tracking (see prev_sides above). Not for display.
+        "sides": curr_sides,
     }
     json.dump(out, open(OUT, "w"))
     print(json.dumps({
