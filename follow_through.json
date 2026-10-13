@@ -1,94 +1,86 @@
 {
-  "asOf": "2026-10-12T00:00:00Z",
-  "date": "2026-10-09",
+  "asOf": "2026-10-13T00:00:00Z",
+  "date": "2026-10-02",
   "ignitions": [
     {
       "ticker": "FDN",
-      "x": 18.2
+      "x": 22.8
     },
     {
       "ticker": "FAZ",
-      "x": 11.6
-    },
-    {
-      "ticker": "JDST",
-      "x": 8.7
+      "x": 10.9
     },
     {
       "ticker": "EDC",
-      "x": 8.1
-    },
-    {
-      "ticker": "TECS",
       "x": 7.7
     },
     {
+      "ticker": "TECS",
+      "x": 7.1
+    },
+    {
+      "ticker": "JDST",
+      "x": 7.1
+    },
+    {
       "ticker": "DUST",
-      "x": 6.1
-    },
-    {
-      "ticker": "XLRE",
-      "x": 5.9
-    },
-    {
-      "ticker": "YANG",
-      "x": 5.4
-    },
-    {
-      "ticker": "LIT",
-      "x": 5.4
+      "x": 5.7
     },
     {
       "ticker": "AI",
       "x": 5.1
     },
     {
-      "ticker": "MRNA",
-      "x": 3.8
+      "ticker": "LIT",
+      "x": 4.8
     },
     {
-      "ticker": "PS",
-      "x": 3.8
-    },
-    {
-      "ticker": "NOC",
-      "x": 3.7
-    },
-    {
-      "ticker": "JNUG",
-      "x": 3.7
-    },
-    {
-      "ticker": "GME",
-      "x": 3.6
-    },
-    {
-      "ticker": "PH",
-      "x": 3.5
-    },
-    {
-      "ticker": "DAL",
-      "x": 3.3
-    },
-    {
-      "ticker": "TMUS",
-      "x": 3.3
-    },
-    {
-      "ticker": "BEAM",
-      "x": 3.2
+      "ticker": "YANG",
+      "x": 4.5
     },
     {
       "ticker": "RL",
-      "x": 3.2
+      "x": 4.0
+    },
+    {
+      "ticker": "NKE",
+      "x": 3.8
+    },
+    {
+      "ticker": "APO",
+      "x": 3.4
     },
     {
       "ticker": "TAN",
-      "x": 3.1
+      "x": 3.4
+    },
+    {
+      "ticker": "NOC",
+      "x": 3.4
+    },
+    {
+      "ticker": "JNUG",
+      "x": 3.3
+    },
+    {
+      "ticker": "TECL",
+      "x": 3.2
+    },
+    {
+      "ticker": "OTIS",
+      "x": 3.2
+    },
+    {
+      "ticker": "NSC",
+      "x": 3.2
+    },
+    {
+      "ticker": "BEAM",
+      "x": 3.0
     },
     {
       "ticker": "ITA",
-      "x": 3.1
+      "x": 3.0
     }
   ]
 }
