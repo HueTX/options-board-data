@@ -1,85 +1,93 @@
 {
   "asOf": "2026-10-14T00:00:00Z",
-  "date": "2026-10-02",
+  "date": "2026-10-13",
   "ignitions": [
     {
       "ticker": "FDN",
-      "x": 22.8
+      "x": 18.8
     },
     {
       "ticker": "FAZ",
-      "x": 10.9
-    },
-    {
-      "ticker": "EDC",
-      "x": 7.7
-    },
-    {
-      "ticker": "TECS",
-      "x": 7.1
+      "x": 13.5
     },
     {
       "ticker": "JDST",
-      "x": 7.1
+      "x": 9.0
+    },
+    {
+      "ticker": "EDC",
+      "x": 8.1
+    },
+    {
+      "ticker": "TECS",
+      "x": 7.7
     },
     {
       "ticker": "DUST",
-      "x": 5.7
-    },
-    {
-      "ticker": "AI",
-      "x": 5.1
+      "x": 5.9
     },
     {
       "ticker": "LIT",
-      "x": 4.8
+      "x": 5.5
     },
     {
       "ticker": "YANG",
-      "x": 4.5
+      "x": 5.4
     },
     {
-      "ticker": "RL",
-      "x": 4.0
-    },
-    {
-      "ticker": "NKE",
-      "x": 3.8
-    },
-    {
-      "ticker": "APO",
-      "x": 3.4
-    },
-    {
-      "ticker": "TAN",
-      "x": 3.4
-    },
-    {
-      "ticker": "NOC",
-      "x": 3.4
+      "ticker": "MS",
+      "x": 4.2
     },
     {
       "ticker": "JNUG",
-      "x": 3.3
+      "x": 3.8
     },
     {
-      "ticker": "TECL",
-      "x": 3.2
+      "ticker": "ROK",
+      "x": 3.8
     },
     {
-      "ticker": "OTIS",
-      "x": 3.2
+      "ticker": "RL",
+      "x": 3.7
     },
     {
-      "ticker": "NSC",
-      "x": 3.2
-    },
-    {
-      "ticker": "BEAM",
-      "x": 3.0
+      "ticker": "TMO",
+      "x": 3.6
     },
     {
       "ticker": "ITA",
+      "x": 3.6
+    },
+    {
+      "ticker": "U",
+      "x": 3.5
+    },
+    {
+      "ticker": "PS",
+      "x": 3.5
+    },
+    {
+      "ticker": "NOC",
+      "x": 3.3
+    },
+    {
+      "ticker": "APO",
+      "x": 3.2
+    },
+    {
+      "ticker": "TAN",
+      "x": 3.2
+    },
+    {
+      "ticker": "BILI",
+      "x": 3.1
+    },
+    {
+      "ticker": "TECL",
+      "x": 3.0
+    },
+    {
+      "ticker": "PH",
       "x": 3.0
     }
   ]
