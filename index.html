@@ -264,6 +264,16 @@ section.collapsed .sec-body{display:none}
 .sig-card .sc-row2 .cap{font-size:10.5px;color:var(--muted);font-weight:600;white-space:nowrap;font-variant-numeric:tabular-nums;min-width:0;overflow:hidden;text-overflow:ellipsis}
 .sig-card .tag{font-family:var(--font);font-size:10px;font-weight:400;letter-spacing:.04em;margin-top:3px;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sig-card.bull .tag{color:var(--gain)} .sig-card.bear .tag{color:var(--loss)}
+.sig-card .lvbanner{margin-top:6px;padding:5px 6px;border-radius:7px;font-weight:800;font-size:12px;letter-spacing:.04em;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sig-card.bull .lvbanner{color:var(--gain);background:rgba(48,209,88,.16);border:1px solid rgba(48,209,88,.5)}
+.sig-card.bear .lvbanner{color:var(--loss);background:rgba(255,69,58,.16);border:1px solid rgba(255,69,58,.5)}
+.sig-card .lvlrow{display:flex;gap:4px;margin-top:5px;flex-wrap:wrap}
+.sig-card .lvlpill{font-size:10.5px;font-weight:800;padding:2px 7px;border-radius:999px;font-variant-numeric:tabular-nums;white-space:nowrap;border:1px solid var(--panel-brd);color:var(--muted);background:transparent}
+.sig-card.bull .lvlpill.on{background:var(--gain);border-color:var(--gain);color:#06280f}
+.sig-card.bear .lvlpill.on{background:var(--loss);border-color:var(--loss);color:#2b0603}
+.sig-card.both{border-width:2px}
+.sig-card.bull.both{border-color:rgba(48,209,88,.75)}
+.sig-card.bear.both{border-color:rgba(255,69,58,.75)}
 .sig-card .pxline{display:flex;align-items:center;justify-content:space-between;gap:4px;min-width:0;font-family:var(--font);font-size:10px;color:var(--muted);margin-top:3px;font-variant-numeric:tabular-nums}
 .sig-card .pxline>span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
 .sig-card.bull .pxline .pxv{color:var(--gain)} .sig-card.bear .pxline .pxv{color:var(--loss)}
@@ -718,10 +728,10 @@ footer.appfoot{margin:26px 0 0;font-size:12.5px;color:var(--faint);text-align:ce
       </div>
       <div class="sec-body">
         <div class="legend">
-          <span class="k"><span class="dot" style="background:var(--gain)"></span>Above 15min PDH and PMH</span>
+          <span class="k"><span class="dot" style="background:var(--gain)"></span>15m close above PDH/PMH</span>
           <span class="k"><span class="dot" style="background:var(--orange)"></span>Ignited</span>
           <span class="k"><span class="dot" style="background:var(--gold)"></span>Unusual flow ≥2x</span>
-          <span class="k"><span class="dot" style="background:var(--loss)"></span>Below 15min PDL and PML</span>
+          <span class="k"><span class="dot" style="background:var(--loss)"></span>15m close below PDL/PML</span>
         </div>
         <div class="fpills" id="flowFilters">
           <button class="fpill on" data-f="all">All</button>
@@ -1314,7 +1324,7 @@ const SIGSTATE = new Map();   // ticker -> 'bull' | 'bear' | null (last evaluate
 const SIGSTART = new Map();   // ticker -> 15m bucket index when the current signal streak started
 function signalFor(sym, now){
   const q = Q.get(sym); const lv = LEVELS.get(sym);
-  if (!q || !q.bars || !lv || !lv.pdh || !lv.pdl) return null;
+  if (!q || !q.bars || !lv || (lv.pdh == null && lv.pdl == null)) return null;
   const cs = candles15(q.bars, sym);   // completed 15m candles only (memoized per ticker)
   if (!cs.length) return null;
   const last = cs[cs.length - 1];
@@ -1322,10 +1332,18 @@ function signalFor(sym, now){
   // Prior-session candles, stale bars, and carried-forward quote-only data can never
   // confirm a signal — the panel shows the honest empty state instead.
   if (etDateOfMs(last.t*1000) !== nyMarketDate()){ SIGSTATE.delete(sym); SIGSTART.delete(sym); return null; }
-  let side = null;
-  // bullish/bearish both require the full directional pair — never a partial pair
-  if (last.c > lv.pdh && q.pmh != null && last.c > q.pmh) side = 'bull';
-  else if (last.c < lv.pdl && q.pml != null && last.c < q.pml) side = 'bear';
+  let side = null, lvls = [];
+  // A confirmed close through ANY marked level qualifies. lvls names exactly
+  // which levels the candle closed through; clearing BOTH levels of the pair
+  // is the strongest form and sorts to the front of the grid.
+  const up = [];
+  if (lv.pdh != null && last.c > lv.pdh) up.push('PDH');
+  if (q.pmh != null && last.c > q.pmh) up.push('PMH');
+  const dn = [];
+  if (lv.pdl != null && last.c < lv.pdl) dn.push('PDL');
+  if (q.pml != null && last.c < q.pml) dn.push('PML');
+  if (up.length){ side = 'bull'; lvls = up; }
+  else if (dn.length){ side = 'bear'; lvls = dn; }
   const prev = SIGSTATE.has(sym) ? SIGSTATE.get(sym) : undefined;
   SIGSTATE.set(sym, side);
   if (side !== prev){
@@ -1345,7 +1363,7 @@ function signalFor(sym, now){
         : (c[0] < c[1] && c[1] < c[2]);
     }
   }
-  return {side, close: last.c, open: last.o, t: last.t, fading};
+  return {side, close: last.c, open: last.o, t: last.t, fading, lvls, both: lvls.length === 2};
 }
 function quoteAgeMs(){
   let best = null;
@@ -1633,10 +1651,20 @@ function sigCard(s, sig){
   const cmv = (sig.open != null && sig.open) ? (sig.close - sig.open) / sig.open * 100 : null;
   const cmvTxt = (cmv == null || !isFinite(cmv)) ? 'candle move —'
     : `candle ${(cmv >= 0 ? '+' : '') + cmv.toFixed(2)}%`;
-  return `<div class="sig-card ${bull?'bull':'bear'}" data-sym="${esc(s)}">
+  // Prominent level readout: a banner naming exactly which level(s) the candle
+  // closed through, plus a pill per level with its price — cleared levels lit
+  // solid, the not-yet-cleared level of the pair shown muted as the next mark.
+  const lv = LEVELS.get(s) || {};
+  const pair = bull ? [['PDH', lv.pdh], ['PMH', q.pmh]] : [['PDL', lv.pdl], ['PML', q.pml]];
+  const cleared = new Set(sig.lvls || []);
+  const banner = (bull ? '▲ ABOVE ' : '▼ BELOW ') + (sig.lvls || []).join(' + ');
+  const pills = pair.filter(([,v]) => v != null)
+    .map(([n, v]) => `<span class="lvlpill ${cleared.has(n) ? 'on' : 'off'}">${n} ${fmtPx(v)}</span>`).join('');
+  return `<div class="sig-card ${bull?'bull':'bear'}${sig.both ? ' both' : ''}" data-sym="${esc(s)}">
     <div class="sc-row1"><span class="tk">${esc(s)}</span><span class="pct ${chgCls}">${esc(chgTxt)}</span></div>
     <div class="sc-row2">${sig.fading ? '<span class="badge fading">FADING</span>' : '<span></span>'}<span class="cap">${esc(capTxt)}</span></div>
-    <div class="tag">${bull ? 'PDH + PMH' : 'PDL + PML'}</div>
+    <div class="lvbanner">${esc(banner)}</div>
+    <div class="lvlrow">${pills}</div>
     <div class="pxline"><span class="pxv">${fmtPx(sig.close)}</span><span class="tm">${etFmtShort.format(new Date(sig.t*1000))} ET</span></div>
     <div class="sc-cmove">${esc(cmvTxt)}</div>
   </div>`;
@@ -1668,24 +1696,26 @@ function renderSignals(){
     else if (sig && sig.side === 'bear') bear.push([s, sig]);
   }
   if ($('sigSortSel')) $('sigSortSel').value = sigSort;
-  // SPY/QQQ/IWM + the other 7 priority tickers sort first; within a tier, by cap or % change.
+  // Cards that closed through BOTH levels of the pair come to the front; then
+  // SPY/QQQ/IWM + the other 7 priority tickers; within a tier, by cap or % change.
   const alpha = (a,b) => (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0);
+  const bothK = e => (e[1].both ? 0 : 1);
   if (sigSort === 'cap'){
     const cf = (a,b) => {
       const ca = CAPS.get(a[0]), cb = CAPS.get(b[0]);
-      return priTier(a[0]) - priTier(b[0]) || (cb != null ? cb : -1) - (ca != null ? ca : -1) || alpha(a,b);
+      return bothK(a) - bothK(b) || priTier(a[0]) - priTier(b[0]) || (cb != null ? cb : -1) - (ca != null ? ca : -1) || alpha(a,b);
     };
     bull.sort(cf); bear.sort(cf);
   } else {
     const chgOf = s => { const q = Q.get(s); return (q && q.chgPct != null) ? q.chgPct : null; };
     bull.sort((a,b) => {
       const ca = chgOf(a[0]), cb = chgOf(b[0]);
-      return priTier(a[0]) - priTier(b[0]) ||
+      return bothK(a) - bothK(b) || priTier(a[0]) - priTier(b[0]) ||
         (cb != null ? cb : -Infinity) - (ca != null ? ca : -Infinity) || alpha(a,b);
     });
     bear.sort((a,b) => {
       const ca = chgOf(a[0]), cb = chgOf(b[0]);
-      return priTier(a[0]) - priTier(b[0]) ||
+      return bothK(a) - bothK(b) || priTier(a[0]) - priTier(b[0]) ||
         (ca != null ? ca : Infinity) - (cb != null ? cb : Infinity) || alpha(a,b);
     });
   }
@@ -1806,8 +1836,9 @@ function firstBadge(r){
 function sig15Badge(r, sig){
   if (!sig || !sig.side) return '';
   const bull = sig.side === 'bull';
-  const lg = bull ? '▲ 15m close above PDH+PMH' : '▼ 15m close below PDL+PML';
-  const sm = bull ? '▲ 15m PDH+PMH' : '▼ 15m PDL+PML';
+  const lvTxt = (sig.lvls && sig.lvls.length) ? sig.lvls.join('+') : (bull ? 'PDH+PMH' : 'PDL+PML');
+  const lg = bull ? `▲ 15m close above ${lvTxt}` : `▼ 15m close below ${lvTxt}`;
+  const sm = bull ? `▲ 15m ${lvTxt}` : `▼ 15m ${lvTxt}`;
   return `<span class="sig-badge sig15 ${bull ? 'bull' : 'bear'}"><span class="lg">${lg}</span><span class="sm">${sm}</span></span>`;
 }
 function runnerRow(r, prevSig){
@@ -2237,7 +2268,7 @@ function openDrawer(sym){
   drawChart($('dchart'), q.bars, lv, q.pmh, q.pml);
   const sig = signalFor(sym);
   $('dNote').textContent = sig && sig.side
-    ? `15m signal: ${sig.side === 'bull' ? 'bullish' : 'bearish'} hold — last completed candle closed ${sig.side === 'bull' ? 'above' : 'below'} ${sig.side === 'bull' ? 'PDH and PMH' : 'PDL and PML'} at ${fmtPx(sig.close)}.`
+    ? `15m signal: ${sig.side === 'bull' ? 'bullish' : 'bearish'} hold — last completed candle closed ${sig.side === 'bull' ? 'above' : 'below'} ${(sig.lvls && sig.lvls.length ? sig.lvls : (sig.side === 'bull' ? ['PDH','PMH'] : ['PDL','PML'])).join(' and ')} at ${fmtPx(sig.close)}.`
     : 'No 15m confirmed-close signal on the latest completed candle.';
   $('drawer').classList.add('open'); $('drawerVeil').classList.add('open');
   $('drawer').setAttribute('aria-hidden','false');
