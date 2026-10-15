@@ -1,45 +1,65 @@
 {
-  "asOf": "2026-10-14T00:00:00Z",
-  "date": "2026-10-13",
+  "asOf": "2026-10-15T00:00:00Z",
+  "date": "2026-10-14",
   "ignitions": [
     {
       "ticker": "FDN",
-      "x": 18.8
+      "x": 18.7
     },
     {
       "ticker": "FAZ",
-      "x": 13.5
+      "x": 10.3
     },
     {
       "ticker": "JDST",
-      "x": 9.0
+      "x": 9.6
+    },
+    {
+      "ticker": "ZBH",
+      "x": 8.6
+    },
+    {
+      "ticker": "MCHP",
+      "x": 8.0
     },
     {
       "ticker": "EDC",
-      "x": 8.1
+      "x": 7.9
     },
     {
       "ticker": "TECS",
-      "x": 7.7
+      "x": 7.8
     },
     {
       "ticker": "DUST",
-      "x": 5.9
+      "x": 6.8
     },
     {
       "ticker": "LIT",
-      "x": 5.5
+      "x": 6.1
     },
     {
       "ticker": "YANG",
-      "x": 5.4
+      "x": 5.2
     },
     {
-      "ticker": "MS",
-      "x": 4.2
+      "ticker": "ABBV",
+      "x": 4.3
+    },
+    {
+      "ticker": "XLU",
+      "x": 3.9
     },
     {
       "ticker": "JNUG",
+      "x": 3.9
+    },
+    {
+      "ticker": "XLRE",
+      "x": 3.9
+    },
+    {
+      "ticker": "NOC",
       "x": 3.8
     },
     {
@@ -51,44 +71,16 @@
       "x": 3.7
     },
     {
-      "ticker": "TMO",
-      "x": 3.6
-    },
-    {
-      "ticker": "ITA",
-      "x": 3.6
-    },
-    {
-      "ticker": "U",
+      "ticker": "TAN",
       "x": 3.5
     },
     {
       "ticker": "PS",
-      "x": 3.5
-    },
-    {
-      "ticker": "NOC",
-      "x": 3.3
-    },
-    {
-      "ticker": "APO",
       "x": 3.2
-    },
-    {
-      "ticker": "TAN",
-      "x": 3.2
-    },
-    {
-      "ticker": "BILI",
-      "x": 3.1
     },
     {
       "ticker": "TECL",
-      "x": 3.0
-    },
-    {
-      "ticker": "PH",
-      "x": 3.0
+      "x": 3.1
     }
   ]
 }
