@@ -1,65 +1,65 @@
 {
-  "asOf": "2026-10-15T00:00:00Z",
-  "date": "2026-10-14",
+  "asOf": "2026-10-16T00:00:00Z",
+  "date": "2026-10-15",
   "ignitions": [
     {
       "ticker": "FDN",
-      "x": 18.7
-    },
-    {
-      "ticker": "FAZ",
-      "x": 10.3
+      "x": 20.6
     },
     {
       "ticker": "JDST",
-      "x": 9.6
+      "x": 10.9
     },
     {
-      "ticker": "ZBH",
-      "x": 8.6
+      "ticker": "FAZ",
+      "x": 9.8
     },
     {
-      "ticker": "MCHP",
-      "x": 8.0
-    },
-    {
-      "ticker": "EDC",
-      "x": 7.9
+      "ticker": "ETN",
+      "x": 9.0
     },
     {
       "ticker": "TECS",
+      "x": 8.0
+    },
+    {
+      "ticker": "ZBH",
       "x": 7.8
     },
     {
-      "ticker": "DUST",
-      "x": 6.8
+      "ticker": "EDC",
+      "x": 7.7
+    },
+    {
+      "ticker": "EOG",
+      "x": 6.9
+    },
+    {
+      "ticker": "RL",
+      "x": 6.9
     },
     {
       "ticker": "LIT",
-      "x": 6.1
+      "x": 6.7
     },
     {
-      "ticker": "YANG",
-      "x": 5.2
-    },
-    {
-      "ticker": "ABBV",
-      "x": 4.3
-    },
-    {
-      "ticker": "XLU",
-      "x": 3.9
-    },
-    {
-      "ticker": "JNUG",
-      "x": 3.9
+      "ticker": "DUST",
+      "x": 5.9
     },
     {
       "ticker": "XLRE",
-      "x": 3.9
+      "x": 5.1
     },
     {
-      "ticker": "NOC",
+      "ticker": "TSEM",
+      "x": 4.8
+    },
+    {
+      "ticker": "YANG",
+      "x": 4.6
+    },
+    {
+      "ticker": "JNUG",
       "x": 3.8
     },
     {
@@ -67,20 +67,32 @@
       "x": 3.8
     },
     {
-      "ticker": "RL",
+      "ticker": "TECL",
       "x": 3.7
     },
     {
-      "ticker": "TAN",
+      "ticker": "NOC",
+      "x": 3.6
+    },
+    {
+      "ticker": "TMO",
       "x": 3.5
     },
     {
-      "ticker": "PS",
-      "x": 3.2
+      "ticker": "ITA",
+      "x": 3.4
     },
     {
-      "ticker": "TECL",
+      "ticker": "LOW",
+      "x": 3.3
+    },
+    {
+      "ticker": "GILD",
       "x": 3.1
+    },
+    {
+      "ticker": "NSC",
+      "x": 3.0
     }
   ]
 }

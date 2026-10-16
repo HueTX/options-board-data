@@ -1,85 +1,97 @@
 {
   "asOf": "2026-10-16T00:00:00Z",
-  "date": "2026-10-02",
+  "date": "2026-10-15",
   "ignitions": [
     {
       "ticker": "FDN",
-      "x": 22.8
+      "x": 20.6
+    },
+    {
+      "ticker": "JDST",
+      "x": 10.9
     },
     {
       "ticker": "FAZ",
-      "x": 10.9
+      "x": 9.8
+    },
+    {
+      "ticker": "ETN",
+      "x": 9.0
+    },
+    {
+      "ticker": "TECS",
+      "x": 8.0
+    },
+    {
+      "ticker": "ZBH",
+      "x": 7.8
     },
     {
       "ticker": "EDC",
       "x": 7.7
     },
     {
-      "ticker": "TECS",
-      "x": 7.1
+      "ticker": "EOG",
+      "x": 6.9
     },
     {
-      "ticker": "JDST",
-      "x": 7.1
-    },
-    {
-      "ticker": "DUST",
-      "x": 5.7
-    },
-    {
-      "ticker": "AI",
-      "x": 5.1
+      "ticker": "RL",
+      "x": 6.9
     },
     {
       "ticker": "LIT",
+      "x": 6.7
+    },
+    {
+      "ticker": "DUST",
+      "x": 5.9
+    },
+    {
+      "ticker": "XLRE",
+      "x": 5.1
+    },
+    {
+      "ticker": "TSEM",
       "x": 4.8
     },
     {
       "ticker": "YANG",
-      "x": 4.5
-    },
-    {
-      "ticker": "RL",
-      "x": 4.0
-    },
-    {
-      "ticker": "NKE",
-      "x": 3.8
-    },
-    {
-      "ticker": "APO",
-      "x": 3.4
-    },
-    {
-      "ticker": "TAN",
-      "x": 3.4
-    },
-    {
-      "ticker": "NOC",
-      "x": 3.4
+      "x": 4.6
     },
     {
       "ticker": "JNUG",
-      "x": 3.3
+      "x": 3.8
+    },
+    {
+      "ticker": "ROK",
+      "x": 3.8
     },
     {
       "ticker": "TECL",
-      "x": 3.2
+      "x": 3.7
     },
     {
-      "ticker": "OTIS",
-      "x": 3.2
+      "ticker": "NOC",
+      "x": 3.6
     },
     {
-      "ticker": "NSC",
-      "x": 3.2
-    },
-    {
-      "ticker": "BEAM",
-      "x": 3.0
+      "ticker": "TMO",
+      "x": 3.5
     },
     {
       "ticker": "ITA",
+      "x": 3.4
+    },
+    {
+      "ticker": "LOW",
+      "x": 3.3
+    },
+    {
+      "ticker": "GILD",
+      "x": 3.1
+    },
+    {
+      "ticker": "NSC",
       "x": 3.0
     }
   ]
