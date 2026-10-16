@@ -1571,6 +1571,13 @@ function hourlyCloses(bars){
   if (last != null && curStart + 3600 <= nowSec) out.push(last);
   return out;
 }
+function bucket4h(closes){
+  // Last close of each consecutive 4-point group — the wcharts h4 semantics
+  // applied to an hourly series (fallback use only).
+  const out = [];
+  for (let i = 3; i < (closes || []).length; i += 4) out.push(closes[i]);
+  return out;
+}
 function regimeSeries(sym){
   // Same 1-hour history as the trading-morning watchlist: the published h1
   // series when available, else today's intraday bars aggregated to hourly
@@ -2389,8 +2396,13 @@ function breakTile(r){
 }
 function renderBreakRank(){
   const B = BREAKRANK || {};
-  const m = $('brMeta'); if (m) m.textContent = B.marketDate ? `${(B.rows || []).length} flags · ${fmtMonD(B.marketDate)}` : '';
-  const rows = brRows();
+  // A ranking from any day other than today is never rendered as today's
+  // table: before the first-candle ranking publishes, show the waiting state.
+  const staleDay = !!(B.marketDate && B.marketDate !== nyMarketDate());
+  const m = $('brMeta');
+  if (m) m.textContent = staleDay ? `Waiting for ${fmtMonD(nyMarketDate())}`
+    : (B.marketDate ? `${(B.rows || []).length} flags · ${fmtMonD(B.marketDate)}` : '');
+  const rows = staleDay ? [] : brRows();
   const host = $('mpane-breaks');
   // sort chips row (same language as the Levels tab)
   let html = `<div class="msortbar"><span class="wsort-label">SORT BY</span>` +
@@ -2398,7 +2410,9 @@ function renderBreakRank(){
       `<button class="wchip${brSortKey === k ? ' on' : ''}" data-brsort="${k}">${s.label}${brSortKey === k ? (brSortDir === -1 ? ' ▼' : ' ▲') : ''}</button>`
     ).join('') + `</div>`;
   if (!rows.length){
-    html += '<div class="empty">No ranked breaks for ' + esc(B.marketDate || 'today') + '.</div>';
+    html += staleDay
+      ? '<div class="empty">No ranked breaks yet for ' + esc(fmtMonD(nyMarketDate())) + ' — the first 15m candle closes at 9:45 AM ET. A prior day\'s ranking is never shown as today\'s.</div>'
+      : '<div class="empty">No ranked breaks for ' + esc(B.marketDate || 'today') + '.</div>';
   } else {
     const pages = Math.max(1, Math.ceil(rows.length / BR_PAGE));
     if (brPage > pages - 1) brPage = pages - 1;
@@ -2571,7 +2585,17 @@ function paintWatchCharts(root){
   (root || document).querySelectorAll('canvas.wchart').forEach(cv => {
     const parts = (cv.dataset.wc || '').split('|');
     const ch = WCHARTS[parts[0]];
-    const series = watchTrendSeries(ch, parts[1]);
+    let series = watchTrendSeries(ch, parts[1]);
+    if (series.length < 2){
+      // Fallback: derive the series from the live bars this page already has
+      // (same aggregation as the regime strip) before declaring it missing.
+      const q = Q.get(parts[0]);
+      if (q && q.bars){
+        const h1 = hourlyCloses(q.bars);
+        const fb = parts[1] === 'h1' ? h1 : bucket4h(h1);
+        if (fb && fb.length >= 2) series = fb;
+      }
+    }
     if (series.length < 2){
       // honest blank state: draw "Chart unavailable" instead of hiding the canvas
       const dpr = Math.min(2, window.devicePixelRatio || 1);
