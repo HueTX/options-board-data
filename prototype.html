@@ -1,0 +1,191 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Options Board — Prototype</title><style>
+*{box-sizing:border-box} body{margin:0;font-family:-apple-system,'SF Pro Text',system-ui,sans-serif;background:#f5f4f0;color:#1d2530;}
+.wrap{max-width:1060px;margin:0 auto;padding:22px 18px 40px}
+header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px}
+h1{font-size:22px;margin:0} .proto{font-size:11px;color:#8a8f98;font-weight:600;letter-spacing:.05em}
+.live{color:#178a50;font-weight:700;font-size:12px} h2{font-size:13px;letter-spacing:.07em;color:#6b7280;margin:26px 0 10px;text-transform:uppercase}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px} .magrow{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-top:8px}
+.card{background:#fff;border:1px solid #e6e3dc;border-radius:16px;padding:14px;box-shadow:0 1px 2px rgba(20,30,40,.04)}
+.lab{font-size:11px;font-weight:700;color:#8a8f98;letter-spacing:.06em} .big{font-size:30px;font-weight:800;margin:2px 0}
+.chg{font-size:13px;font-weight:700} .sub{font-size:11px;color:#8a8f98;margin-top:4px}
+.rangebar{height:5px;background:#eee9df;border-radius:99px;margin-top:8px} .rangebar .fill{height:5px;background:#5b6472;border-radius:99px}
+.spark{margin-top:8px} .mag{background:#fff;border:1px solid #e6e3dc;border-radius:14px;padding:10px}
+.mp{font-size:16px;font-weight:800;margin:1px 0} 
+table{width:100%;border-collapse:collapse;font-size:13px;font-variant-numeric:tabular-nums}
+th{text-align:left;font-size:11px;letter-spacing:.05em;color:#8a8f98;padding:8px 8px;border-bottom:1px solid #e6e3dc;cursor:pointer;user-select:none;white-space:nowrap}
+th:hover{color:#1d2530} td{padding:8px;border-bottom:1px solid #f0ede6} .tk{font-weight:800}
+.sortnote{font-size:11px;color:#8a8f98;margin:6px 2px 0}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px} .closecard{padding:14px}
+.cc-top{display:flex;justify-content:space-between;align-items:baseline} .cc-top .tk{font-size:19px} .cc-close{font-size:19px;font-weight:800}
+.banner{color:#fff;font-weight:800;font-size:12px;letter-spacing:.05em;border-radius:8px;padding:5px 10px;margin-top:8px;display:inline-block}
+.cc-spark{margin-top:10px} .chips{margin-top:6px} .chip{font-size:11px;font-weight:700;background:#f0ede6;border-radius:6px;padding:2px 7px;margin-right:5px}
+.insight{background:#fff;border:1px solid #e6e3dc;border-radius:14px;padding:12px 14px;font-size:13px;line-height:1.6}
+.frow{padding:8px 0;border-bottom:1px solid #f0ede6} .frow:last-child{border-bottom:none} .frow-top{display:flex;gap:8px;align-items:baseline} .fname{color:#8a8f98;font-size:11.5px;flex:1;white-space:nowrap;overflow:hidden} .fprice{font-weight:700} .fdet{font-size:11px;color:#8a8f98;margin-top:2px}
+footer{margin-top:26px;font-size:12px;color:#8a8f98;line-height:1.7;border-top:1px solid #e6e3dc;padding-top:12px}
+@media(max-width:760px){.grid3,.grid2{grid-template-columns:1fr} .magrow{grid-template-columns:repeat(2,1fr)}}
+</style></head><body><div class="wrap">
+<header><div><h1>Options Board</h1><div class="proto">PROTOTYPE · FRIDAY, OCTOBER 16 · CLOSE DATA</div></div><div class="live">● 6/6 FEEDS LIVE</div></header>
+
+<h2>Market — SPY · QQQ · IWM</h2>
+<div class="grid3"><div class="card idx"><div class="lab">SPY</div><div class="big">763.23</div>
+    <div class="chg" style="color:#cf3f38">-1.11%</div>
+    <div class="rangebar"><div class="fill" style="width:21%"></div></div>
+    <div class="sub">760.64 – 773.23 · near low</div>
+    <div class="spark"><svg width="150" height="30" viewBox="0 0 150 30"><polyline points="0.0,2.8 3.1,2.8 6.2,2.1 9.4,2.4 12.5,2.7 15.6,2.3 18.8,2.4 21.9,3.2 25.0,4.3 28.1,3.3 31.2,2.6 34.4,3.4 37.5,3.3 40.6,3.9 43.8,4.4 46.9,3.8 50.0,3.9 53.1,2.5 56.2,3.6 59.4,3.0 62.5,4.6 65.6,5.5 68.8,6.8 71.9,7.5 75.0,8.0 78.1,5.7 81.2,6.9 84.4,10.1 87.5,11.7 90.6,11.1 93.8,12.5 96.9,15.3 100.0,14.2 103.1,15.8 106.2,17.0 109.4,18.4 112.5,22.7 115.6,21.3 118.8,19.1 121.9,22.6 125.0,23.6 128.1,25.1 131.2,24.7 134.4,26.3 137.5,27.9 140.6,23.9 143.8,24.2 146.9,24.2 150.0,24.4" fill="none" stroke="#5b6472" stroke-width="1.6"/></svg></div></div><div class="card idx"><div class="lab">QQQ</div><div class="big">709.80</div>
+    <div class="chg" style="color:#cf3f38">-2.50%</div>
+    <div class="rangebar"><div class="fill" style="width:14%"></div></div>
+    <div class="sub">707.23 – 725.94 · near low</div>
+    <div class="spark"><svg width="150" height="30" viewBox="0 0 150 30"><polyline points="0.0,2.1 3.0,2.2 6.0,2.1 9.0,2.1 12.0,2.9 15.0,2.3 18.0,2.2 21.0,3.4 24.0,4.8 27.0,3.6 30.0,3.4 33.0,3.7 36.0,4.5 39.0,3.7 42.0,4.5 45.0,4.8 48.0,4.0 51.0,4.3 54.0,3.8 57.0,5.1 60.0,5.3 63.0,5.0 66.0,5.7 69.0,10.8 72.0,11.6 75.0,11.7 78.0,11.3 81.0,10.6 84.0,9.3 87.0,13.5 90.0,16.0 93.0,15.9 96.0,15.3 99.0,18.1 102.0,16.7 105.0,17.0 108.0,18.6 111.0,19.4 114.0,21.9 117.0,23.5 120.0,22.0 123.0,22.9 126.0,24.8 129.0,25.6 132.0,24.8 135.0,26.5 138.0,26.7 141.0,25.7 144.0,25.8 147.0,27.9 150.0,25.4" fill="none" stroke="#5b6472" stroke-width="1.6"/></svg></div></div><div class="card idx"><div class="lab">IWM</div><div class="big">270.45</div>
+    <div class="chg" style="color:#cf3f38">-1.68%</div>
+    <div class="rangebar"><div class="fill" style="width:9%"></div></div>
+    <div class="sub">269.88 – 275.91 · near low</div>
+    <div class="spark"><svg width="150" height="30" viewBox="0 0 150 30"><polyline points="0.0,4.4 2.9,4.3 5.9,3.8 8.8,2.9 11.8,2.4 14.7,2.1 17.6,2.2 20.6,4.2 23.5,2.9 26.5,2.4 29.4,4.2 32.4,5.1 35.3,6.0 38.2,5.4 41.2,6.0 44.1,4.7 47.1,5.9 50.0,5.6 52.9,5.7 55.9,6.2 58.8,7.4 61.8,7.9 64.7,9.3 67.6,9.8 70.6,9.8 73.5,10.9 76.5,11.9 79.4,13.3 82.4,15.2 85.3,15.7 88.2,17.7 91.2,19.7 94.1,20.0 97.1,20.7 100.0,21.8 102.9,23.3 105.9,25.4 108.8,26.5 111.8,25.3 114.7,22.4 117.6,26.3 120.6,27.9 123.5,27.3 126.5,27.1 129.4,26.5 132.4,27.5 135.3,27.5 138.2,26.4 141.2,25.4 144.1,27.6 147.1,26.7 150.0,26.8" fill="none" stroke="#5b6472" stroke-width="1.6"/></svg></div></div></div>
+<div class="magrow"><div class="mag"><div class="lab">AAPL</div><div class="mp">343.46</div>
+    <div class="chg" style="color:#178a50">+0.43%</div><div class="spark"><svg width="104" height="24" viewBox="0 0 104 24"><polyline points="0.0,20.3 2.2,18.9 4.3,19.7 6.5,19.5 8.7,19.9 10.8,19.9 13.0,19.5 15.2,16.8 17.3,17.6 19.5,17.1 21.7,17.2 23.8,16.3 26.0,12.5 28.2,1.7 30.3,4.9 32.5,5.5 34.7,4.0 36.8,7.5 39.0,15.4 41.2,18.1 43.3,14.5 45.5,13.2 47.7,15.5 49.8,14.1 52.0,13.1 54.2,9.6 56.3,10.7 58.5,13.1 60.7,12.4 62.8,11.8 65.0,15.7 67.2,13.0 69.3,14.9 71.5,13.9 73.7,14.8 75.8,18.7 78.0,16.5 80.2,18.3 82.3,19.5 84.5,17.8 86.7,20.6 88.8,20.5 91.0,22.3 93.2,21.1 95.3,19.6 97.5,18.4 99.7,17.2 101.8,16.0 104.0,17.4" fill="none" stroke="#178a50" stroke-width="1.6"/></svg></div></div><div class="mag"><div class="lab">MSFT</div><div class="mp">529.05</div>
+    <div class="chg" style="color:#cf3f38">-1.93%</div><div class="spark"><svg width="104" height="24" viewBox="0 0 104 24"><polyline points="0.0,1.7 1.3,8.7 2.7,6.3 4.0,6.6 5.3,5.1 6.7,6.0 8.0,6.9 9.3,8.0 10.7,7.3 12.0,6.0 13.3,6.7 14.7,8.9 16.0,9.3 17.3,8.1 18.7,7.9 20.0,6.8 21.3,8.5 22.7,10.0 24.0,10.4 25.3,12.8 26.7,12.8 28.0,13.2 29.3,14.4 30.7,15.2 32.0,14.9 33.3,14.4 34.7,14.3 36.0,15.0 37.3,16.3 38.7,17.8 40.0,17.4 41.3,17.5 42.7,16.3 44.0,17.0 45.3,16.6 46.7,16.9 48.0,17.8 49.3,18.1 50.7,16.9 52.0,17.7 53.3,18.0 54.7,18.3 56.0,19.6 57.3,21.5 58.7,21.6 60.0,22.2 61.3,21.7 62.7,21.2 64.0,19.6 65.3,18.9 66.7,18.5 68.0,19.2 69.3,19.6 70.7,19.7 72.0,20.6 73.3,18.9 74.7,19.2 76.0,19.4 77.3,19.4 78.7,20.1 80.0,19.8 81.3,20.4 82.7,20.4 84.0,20.3 85.3,20.7 86.7,20.6 88.0,22.0 89.3,22.3 90.7,20.3 92.0,21.0 93.3,20.7 94.7,20.6 96.0,20.2 97.3,21.0 98.7,21.3 100.0,19.5 101.3,17.5 102.7,17.1 104.0,17.0" fill="none" stroke="#cf3f38" stroke-width="1.6"/></svg></div></div><div class="mag"><div class="lab">NVDA</div><div class="mp">214.13</div>
+    <div class="chg" style="color:#cf3f38">-1.43%</div><div class="spark"><svg width="104" height="24" viewBox="0 0 104 24"><polyline points="0.0,11.4 1.3,12.3 2.7,10.8 4.0,12.9 5.3,12.0 6.7,11.3 8.0,10.0 9.3,10.5 10.7,10.4 12.0,8.3 13.3,8.0 14.7,5.4 16.0,4.1 17.3,2.0 18.7,1.7 20.0,2.7 21.3,5.9 22.7,5.3 24.0,7.0 25.3,10.7 26.7,9.2 28.0,10.4 29.3,10.8 30.7,10.2 32.0,6.5 33.3,4.4 34.7,5.0 36.0,4.2 37.3,6.5 38.7,6.9 40.0,8.0 41.3,8.3 42.7,5.7 44.0,6.4 45.3,5.1 46.7,5.3 48.0,8.8 49.3,8.1 50.7,9.1 52.0,10.4 53.3,10.8 54.7,11.1 56.0,13.8 57.3,13.6 58.7,13.5 60.0,16.4 61.3,15.6 62.7,14.3 64.0,13.9 65.3,14.4 66.7,12.7 68.0,14.1 69.3,15.3 70.7,15.9 72.0,17.6 73.3,16.4 74.7,16.8 76.0,18.3 77.3,18.6 78.7,19.8 80.0,18.3 81.3,17.9 82.7,17.6 84.0,20.0 85.3,21.9 86.7,21.7 88.0,22.3 89.3,21.5 90.7,18.3 92.0,18.3 93.3,16.9 94.7,15.9 96.0,18.8 97.3,19.4 98.7,20.6 100.0,18.9 101.3,19.3 102.7,20.8 104.0,20.8" fill="none" stroke="#cf3f38" stroke-width="1.6"/></svg></div></div><div class="mag"><div class="lab">AMZN</div><div class="mp">250.00</div>
+    <div class="chg" style="color:#cf3f38">-1.87%</div><div class="spark"><svg width="104" height="24" viewBox="0 0 104 24"><polyline points="0.0,3.0 1.3,7.2 2.7,6.3 4.0,5.4 5.3,5.9 6.7,6.3 8.0,6.8 9.3,7.1 10.7,6.8 12.0,6.7 13.3,7.0 14.7,7.1 16.0,5.6 17.3,4.1 18.7,3.6 20.0,1.7 21.3,3.1 22.7,2.4 24.0,3.8 25.3,4.2 26.7,4.5 28.0,4.5 29.3,5.9 30.7,6.2 32.0,4.0 33.3,5.0 34.7,6.1 36.0,5.8 37.3,6.9 38.7,7.7 40.0,8.9 41.3,7.1 42.7,6.9 44.0,8.8 45.3,8.3 46.7,9.3 48.0,12.2 49.3,13.8 50.7,13.0 52.0,13.6 53.3,13.9 54.7,14.2 56.0,15.8 57.3,17.9 58.7,17.9 60.0,18.8 61.3,19.1 62.7,18.1 64.0,17.4 65.3,17.4 66.7,18.9 68.0,18.9 69.3,19.6 70.7,21.3 72.0,22.3 73.3,20.6 74.7,21.5 76.0,21.4 77.3,21.5 78.7,22.3 80.0,21.5 81.3,22.2 82.7,21.4 84.0,21.0 85.3,21.4 86.7,21.5 88.0,21.8 89.3,22.0 90.7,18.8 92.0,19.2 93.3,19.6 94.7,19.9 96.0,19.1 97.3,19.9 98.7,20.2 100.0,19.9 101.3,19.0 102.7,18.3 104.0,18.1" fill="none" stroke="#cf3f38" stroke-width="1.6"/></svg></div></div><div class="mag"><div class="lab">GOOGL</div><div class="mp">340.59</div>
+    <div class="chg" style="color:#cf3f38">-2.47%</div><div class="spark"><svg width="104" height="24" viewBox="0 0 104 24"><polyline points="0.0,1.7 1.3,8.1 2.7,7.9 4.0,7.9 5.3,10.7 6.7,11.9 8.0,12.6 9.3,13.1 10.7,12.2 12.0,9.9 13.3,10.3 14.7,10.8 16.0,9.6 17.3,9.3 18.7,8.8 20.0,8.3 21.3,11.0 22.7,12.0 24.0,12.1 25.3,13.1 26.7,13.2 28.0,13.0 29.3,14.1 30.7,14.3 32.0,13.3 33.3,12.6 34.7,12.3 36.0,12.5 37.3,13.0 38.7,13.3 40.0,15.0 41.3,14.1 42.7,13.8 44.0,13.8 45.3,14.2 46.7,14.5 48.0,15.6 49.3,16.7 50.7,16.0 52.0,16.2 53.3,16.5 54.7,16.0 56.0,17.6 57.3,18.7 58.7,18.2 60.0,18.7 61.3,18.3 62.7,17.9 64.0,16.9 65.3,17.1 66.7,16.4 68.0,17.1 69.3,17.7 70.7,18.1 72.0,19.0 73.3,19.0 74.7,19.6 76.0,21.5 77.3,21.3 78.7,21.6 80.0,20.3 81.3,21.0 82.7,20.8 84.0,20.9 85.3,21.8 86.7,22.0 88.0,22.3 89.3,22.2 90.7,19.9 92.0,20.5 93.3,20.4 94.7,20.5 96.0,19.9 97.3,20.5 98.7,21.2 100.0,21.2 101.3,20.6 102.7,20.0 104.0,20.0" fill="none" stroke="#cf3f38" stroke-width="1.6"/></svg></div></div><div class="mag"><div class="lab">META</div><div class="mp">709.33</div>
+    <div class="chg" style="color:#cf3f38">-3.72%</div><div class="spark"><svg width="104" height="24" viewBox="0 0 104 24"><polyline points="0.0,4.1 2.0,2.8 4.1,3.2 6.1,3.6 8.2,3.8 10.2,2.3 12.2,1.7 14.3,2.9 16.3,3.2 18.4,2.7 20.4,2.6 22.4,3.3 24.5,3.8 26.5,4.7 28.5,4.4 30.6,6.6 32.6,7.2 34.7,6.8 36.7,10.2 38.7,10.8 40.8,12.0 42.8,12.4 44.9,10.9 46.9,12.3 48.9,12.8 51.0,13.3 53.0,13.1 55.1,13.2 57.1,13.8 59.1,13.8 61.2,13.4 63.2,14.1 65.3,15.1 67.3,15.4 69.3,16.1 71.4,17.9 73.4,18.9 75.5,17.2 77.5,18.3 79.5,20.3 81.6,20.3 83.6,21.0 85.6,21.4 87.7,21.3 89.7,21.0 91.8,22.3 93.8,21.6 95.8,21.0 97.9,22.0 99.9,22.1 102.0,19.1 104.0,19.3" fill="none" stroke="#cf3f38" stroke-width="1.6"/></svg></div></div><div class="mag"><div class="lab">TSLA</div><div class="mp">354.72</div>
+    <div class="chg" style="color:#cf3f38">-2.13%</div><div class="spark"><svg width="104" height="24" viewBox="0 0 104 24"><polyline points="0.0,4.2 1.3,2.3 2.7,1.7 4.0,3.6 5.3,6.4 6.7,4.0 8.0,2.3 9.3,1.9 10.7,1.8 12.0,4.3 13.3,6.9 14.7,6.4 16.0,6.1 17.3,6.3 18.7,7.0 20.0,5.9 21.3,10.9 22.7,9.8 24.0,9.9 25.3,11.5 26.7,11.1 28.0,12.3 29.3,13.3 30.7,13.1 32.0,11.9 33.3,11.2 34.7,12.2 36.0,12.5 37.3,13.1 38.7,13.4 40.0,13.9 41.3,13.6 42.7,12.7 44.0,13.0 45.3,13.7 46.7,14.6 48.0,15.1 49.3,14.7 50.7,14.7 52.0,15.6 53.3,16.3 54.7,16.8 56.0,19.8 57.3,19.3 58.7,19.2 60.0,20.7 61.3,20.2 62.7,18.8 64.0,18.6 65.3,19.3 66.7,17.7 68.0,18.5 69.3,18.6 70.7,18.4 72.0,19.1 73.3,19.4 74.7,19.2 76.0,20.0 77.3,20.1 78.7,20.1 80.0,20.3 81.3,21.1 82.7,21.2 84.0,21.4 85.3,21.9 86.7,21.2 88.0,22.3 89.3,21.7 90.7,19.2 92.0,20.1 93.3,19.5 94.7,20.0 96.0,20.4 97.3,20.3 98.7,20.2 100.0,19.0 101.3,17.3 102.7,17.1 104.0,17.0" fill="none" stroke="#cf3f38" stroke-width="1.6"/></svg></div></div></div>
+<div class="sub" style="margin-top:6px">Mag 7 — AAPL was the only green name Friday (+0.43%); META led the downside (−3.72%).</div>
+
+<h2>1 · Premarket gappers</h2>
+<div class="card" style="padding:6px 14px 10px"><table id="gaptable"><thead><tr>
+<th>Ticker</th><th data-k="gap">Gap % ↕</th><th data-k="price">Price ↕</th><th data-k="cap">Mkt cap ↕</th><th data-k="rv">Rel vol ↕</th><th>P/C</th><th>Flow lean</th><th>PDH</th><th>PDL</th><th>Position</th>
+</tr></thead><tbody><tr data-gap="7.6" data-price="20.34" data-cap="0.3" data-rv="1.4">
+    <td class="tk">BOIL</td><td style="color:#cf3f38;font-weight:700">-7.6%</td>
+    <td>20.34</td><td>0.3B</td><td>1.4x</td>
+    <td>0.47</td><td>calls leaning</td><td>22.65</td><td>21.71</td><td>Below PDL</td></tr><tr data-gap="7.2" data-price="26.68" data-cap="0.1" data-rv="0.9">
+    <td class="tk">KOLD</td><td style="color:#178a50;font-weight:700">+7.2%</td>
+    <td>26.68</td><td>0.1B</td><td>0.9x</td>
+    <td>0.73</td><td>mixed flow</td><td>25.23</td><td>24.20</td><td>Above PDH</td></tr><tr data-gap="4.8" data-price="45.72" data-cap="1.8" data-rv="0.4">
+    <td class="tk">SOXS</td><td style="color:#178a50;font-weight:700">+4.8%</td>
+    <td>45.72</td><td>1.8B</td><td>0.4x</td>
+    <td>0.34</td><td>calls leaning</td><td>48.37</td><td>43.11</td><td>Inside range</td></tr><tr data-gap="4.5" data-price="102.5" data-cap="24.0" data-rv="1.0">
+    <td class="tk">SOXL</td><td style="color:#cf3f38;font-weight:700">-4.5%</td>
+    <td>102.50</td><td>24.0B</td><td>1.0x</td>
+    <td>1.00</td><td>mixed flow</td><td>108.80</td><td>95.23</td><td>Inside range</td></tr><tr data-gap="4.3" data-price="10.61" data-cap="0.5" data-rv="0.7">
+    <td class="tk">UNG</td><td style="color:#cf3f38;font-weight:700">-4.3%</td>
+    <td>10.61</td><td>0.5B</td><td>0.7x</td>
+    <td>0.22</td><td>calls leaning</td><td>11.30</td><td>10.96</td><td>Below PDL</td></tr><tr data-gap="3.5" data-price="70.04" data-cap="292.7" data-rv="0.7">
+    <td class="tk">NFLX</td><td style="color:#cf3f38;font-weight:700">-3.5%</td>
+    <td>70.04</td><td>292.7B</td><td>0.7x</td>
+    <td>0.53</td><td>calls leaning</td><td>73.07</td><td>71.34</td><td>Below PDL</td></tr><tr data-gap="3.5" data-price="33.16" data-cap="16.2" data-rv="0.6">
+    <td class="tk">IONQ</td><td style="color:#cf3f38;font-weight:700">-3.5%</td>
+    <td>33.16</td><td>16.2B</td><td>0.6x</td>
+    <td>0.49</td><td>calls leaning</td><td>34.36</td><td>30.03</td><td>Inside range</td></tr><tr data-gap="3.4" data-price="8.05" data-cap="3.7" data-rv="1.6">
+    <td class="tk">MARA</td><td style="color:#cf3f38;font-weight:700">-3.4%</td>
+    <td>8.05</td><td>3.7B</td><td>1.6x</td>
+    <td>0.20</td><td>calls leaning</td><td>8.36</td><td>7.64</td><td>Inside range</td></tr><tr data-gap="3.2" data-price="146.42" data-cap="61.5" data-rv="1.9">
+    <td class="tk">MSTR</td><td style="color:#cf3f38;font-weight:700">-3.2%</td>
+    <td>146.42</td><td>61.5B</td><td>1.9x</td>
+    <td>0.45</td><td>calls leaning</td><td>151.33</td><td>134.89</td><td>Inside range</td></tr><tr data-gap="3.2" data-price="12.41" data-cap="5.5" data-rv="0.5">
+    <td class="tk">QBTS</td><td style="color:#cf3f38;font-weight:700">-3.2%</td>
+    <td>12.41</td><td>5.5B</td><td>0.5x</td>
+    <td>0.68</td><td>calls leaning</td><td>12.86</td><td>11.35</td><td>Inside range</td></tr><tr data-gap="3.1" data-price="43.1" data-cap="15.3" data-rv="0.7">
+    <td class="tk">ASTS</td><td style="color:#cf3f38;font-weight:700">-3.1%</td>
+    <td>43.10</td><td>15.3B</td><td>0.7x</td>
+    <td>0.46</td><td>calls leaning</td><td>44.94</td><td>39.87</td><td>Inside range</td></tr><tr data-gap="3.0" data-price="115.77" data-cap="22.5" data-rv="0.5">
+    <td class="tk">XLC</td><td style="color:#178a50;font-weight:700">+3.0%</td>
+    <td>115.77</td><td>22.5B</td><td>0.5x</td>
+    <td>1.82</td><td>puts leaning</td><td>112.74</td><td>110.28</td><td>Above PDH</td></tr><tr data-gap="2.9" data-price="24.51" data-cap="0.6" data-rv="1.7">
+    <td class="tk">YINN</td><td style="color:#cf3f38;font-weight:700">-2.9%</td>
+    <td>24.51</td><td>0.6B</td><td>1.7x</td>
+    <td>0.75</td><td>mixed flow</td><td>25.26</td><td>24.43</td><td>Inside range</td></tr><tr data-gap="2.9" data-price="372.8" data-cap="1511.5" data-rv="1.2">
+    <td class="tk">TSLA</td><td style="color:#178a50;font-weight:700">+2.9%</td>
+    <td>372.80</td><td>1,511.5B</td><td>1.2x</td>
+    <td>0.82</td><td>mixed flow</td><td>363.75</td><td>355.23</td><td>Above PDH</td></tr><tr data-gap="2.8" data-price="27.52" data-cap="0.0" data-rv="7.1">
+    <td class="tk">JDST</td><td style="color:#178a50;font-weight:700">+2.8%</td>
+    <td>27.52</td><td>0.0B</td><td>7.1x</td>
+    <td>0.28</td><td>calls leaning</td><td>29.12</td><td>26.65</td><td>Inside range</td></tr></tbody></table>
+<div class="sortnote">Tap Gap %, Price, Mkt cap or Rel vol to sort — tap again to reverse.</div></div>
+
+<h2>2 · First 15-min candle close — morning selection</h2>
+<div class="grid2"><div class="card closecard" style="border-top:3px solid #cf3f38">
+    <div class="cc-top"><span class="tk" style="color:#cf3f38">▼ MSFT</span><span class="cc-close">529.13</span></div>
+    <div class="banner" style="background:#cf3f38">BELOW PDL + PML</div>
+    <div class="spark cc-spark"><svg width="250" height="64" viewBox="0 0 250 64"><polyline points="0.0,4.4 3.2,23.2 6.4,16.8 9.6,17.5 12.8,13.6 16.0,16.0 19.2,18.5 22.4,21.4 25.6,19.4 28.8,15.9 32.1,17.8 35.3,23.7 38.5,24.8 41.7,21.7 44.9,21.2 48.1,18.1 51.3,22.8 54.5,26.6 57.7,27.8 60.9,34.3 64.1,34.2 67.3,35.1 70.5,38.4 73.7,40.4 76.9,39.6 80.1,38.4 83.3,38.2 86.5,40.1 89.7,43.6 92.9,47.5 96.2,46.3 99.4,46.6 102.6,43.6 105.8,45.3 109.0,44.2 112.2,45.1 115.4,47.6 118.6,48.2 121.8,45.1 125.0,47.3 128.2,48.0 131.4,48.7 134.6,52.4 137.8,57.2 141.0,57.6 144.2,59.3 147.4,57.8 150.6,56.6 153.8,52.4 157.1,50.4 160.3,49.4 163.5,51.2 166.7,52.2 169.9,52.4 173.1,55.0 176.3,50.5 179.5,51.2 182.7,51.8 185.9,51.8 189.1,53.5 192.3,52.7 195.5,54.4 198.7,54.4 201.9,54.2 205.1,55.2 208.3,55.0 211.5,58.6 214.7,59.6 217.9,54.2 221.2,56.0 224.4,55.2 227.6,55.0 230.8,54.0 234.0,55.9 237.2,56.9 240.4,52.0 243.6,46.8 246.8,45.7 250.0,45.3" fill="none" stroke="#3c4450" stroke-width="1.6"/></svg></div>
+    <div class="chips"></div><div class="sub">Morning selection · first candle confirmed the downside break</div></div><div class="card closecard" style="border-top:3px solid #178a50">
+    <div class="cc-top"><span class="tk" style="color:#178a50">▲ KOLD</span><span class="cc-close">26.88</span></div>
+    <div class="banner" style="background:#178a50">ABOVE PDH + PMH</div>
+    <div class="spark cc-spark"><svg width="250" height="64" viewBox="0 0 250 64"><line x1="0" y1="51.8" x2="250" y2="51.8" stroke="#178a50" stroke-width="1" stroke-dasharray="3 3" opacity="0.75"/><text x="248" y="49.8" font-size="7.5" fill="#178a50" text-anchor="end" font-weight="700">PDH</text><polyline points="0.0,59.6 5.0,46.6 10.0,43.7 15.0,42.7 20.0,41.8 25.0,42.7 30.0,24.7 35.0,23.2 40.0,20.8 45.0,18.1 50.0,18.6 55.0,13.9 60.0,11.0 65.0,11.7 70.0,10.9 75.0,11.5 80.0,9.5 85.0,10.0 90.0,10.0 95.0,10.4 100.0,9.3 105.0,8.3 110.0,9.8 115.0,11.2 120.0,11.1 125.0,10.8 130.0,10.8 135.0,8.6 140.0,9.3 145.0,11.5 150.0,11.1 155.0,12.5 160.0,14.7 165.0,13.1 170.0,12.5 175.0,13.4 180.0,12.5 185.0,10.9 190.0,11.7 195.0,9.1 200.0,8.3 205.0,6.1 210.0,6.1 215.0,4.7 220.0,5.6 225.0,5.4 230.0,4.4 235.0,5.1 240.0,5.6 245.0,6.4 250.0,4.7" fill="none" stroke="#3c4450" stroke-width="1.6"/></svg></div>
+    <div class="chips"><span class="chip">PDH 25.23</span></div><div class="sub">Premarket gapper that held — above both highs on the first candle</div></div><div class="card closecard" style="border-top:3px solid #cf3f38">
+    <div class="cc-top"><span class="tk" style="color:#cf3f38">▼ BOIL</span><span class="cc-close">20.28</span></div>
+    <div class="banner" style="background:#cf3f38">BELOW PDL + PML</div>
+    <div class="spark cc-spark"><svg width="250" height="64" viewBox="0 0 250 64"><line x1="0" y1="4.4" x2="250" y2="4.4" stroke="#178a50" stroke-width="1" stroke-dasharray="3 3" opacity="0.75"/><text x="248" y="8.0" font-size="7.5" fill="#178a50" text-anchor="end" font-weight="700">PDH</text><line x1="0" y1="24.3" x2="250" y2="24.3" stroke="#cf3f38" stroke-width="1" stroke-dasharray="3 3" opacity="0.75"/><text x="248" y="22.3" font-size="7.5" fill="#cf3f38" text-anchor="end" font-weight="700">PDL</text><polyline points="0.0,25.1 5.1,27.0 10.2,26.2 15.3,26.2 20.4,27.1 25.5,30.3 30.6,30.0 35.7,30.4 40.8,31.3 45.9,32.1 51.0,29.1 56.1,32.3 61.2,40.1 66.3,44.5 71.4,47.3 76.5,49.6 81.6,50.7 86.7,53.8 91.8,54.6 96.9,54.7 102.0,54.9 107.1,56.3 112.2,56.3 117.3,54.6 122.4,56.5 127.6,56.8 132.7,55.6 137.8,52.7 142.9,53.7 148.0,54.3 153.1,56.6 158.2,55.6 163.3,54.7 168.4,54.2 173.5,52.9 178.6,53.0 183.7,53.5 188.8,53.6 193.9,55.4 199.0,54.2 204.1,56.4 209.2,57.5 214.3,58.0 219.4,59.3 224.5,58.5 229.6,58.9 234.7,59.2 239.8,58.8 244.9,58.1 250.0,59.6" fill="none" stroke="#3c4450" stroke-width="1.6"/></svg></div>
+    <div class="chips"><span class="chip">PDH 22.65</span><span class="chip">PDL 21.71</span></div><div class="sub">Biggest down gap (−7.6%) — first candle closed under both lows</div></div><div class="card closecard" style="border-top:3px solid #178a50">
+    <div class="cc-top"><span class="tk" style="color:#178a50">▲ SOXS</span><span class="cc-close">46.42</span></div>
+    <div class="banner" style="background:#178a50">ABOVE PMH</div>
+    <div class="spark cc-spark"><svg width="250" height="64" viewBox="0 0 250 64"><line x1="0" y1="13.5" x2="250" y2="13.5" stroke="#178a50" stroke-width="1" stroke-dasharray="3 3" opacity="0.75"/><text x="248" y="11.5" font-size="7.5" fill="#178a50" text-anchor="end" font-weight="700">PDH</text><polyline points="0.0,57.5 4.9,55.9 9.8,59.0 14.7,59.6 19.6,57.7 24.5,55.4 29.4,56.6 34.3,59.2 39.2,55.2 44.1,49.4 49.0,52.0 53.9,52.3 58.8,52.0 63.7,47.9 68.6,48.8 73.5,46.9 78.4,44.3 83.3,46.4 88.2,48.0 93.1,47.4 98.0,44.5 102.9,40.8 107.8,41.7 112.7,28.9 117.6,28.6 122.5,34.9 127.5,35.1 132.4,42.6 137.3,46.8 142.2,37.7 147.1,30.7 152.0,32.0 156.9,35.4 161.8,32.1 166.7,30.7 171.6,34.1 176.5,35.7 181.4,31.1 186.3,24.8 191.2,20.7 196.1,23.9 201.0,22.1 205.9,15.6 210.8,15.8 215.7,16.0 220.6,14.1 225.5,12.0 230.4,12.6 235.3,15.9 240.2,9.3 245.1,4.4 250.0,4.6" fill="none" stroke="#3c4450" stroke-width="1.6"/></svg></div>
+    <div class="chips"><span class="chip">PDH 48.37</span></div><div class="sub">Cleared the premarket high on the first candle; PDH still overhead</div></div></div>
+
+<h2>3 · Moving intraday — flow</h2>
+<div class="grid2">
+<div class="card"><div class="lab" style="color:#178a50">▲ BULLISH · 25 NAMES</div><div class="frow"><div class="frow-top"><span class="tk" style="color:#178a50">▲ SOXS</span>
+        <span class="fname">Direxion Daily Semiconduct</span><span class="fprice">49.25</span>
+        <span style="color:#178a50;font-weight:800">+12.9%</span></div>
+        <div class="fdet">Opt vol 68,981 · P/C 0.38 · Rel vol 0.43x · Day 45.08–49.36 · above PDH</div></div><div class="frow"><div class="frow-top"><span class="tk" style="color:#178a50">▲ UVXY</span>
+        <span class="fname">ProShares Ultra VIX Short </span><span class="fprice">18.42</span>
+        <span style="color:#178a50;font-weight:800">+11.9%</span></div>
+        <div class="fdet">Opt vol 171,435 · P/C 0.25 · Rel vol 4.52x · Day 15.84–19.57 · above PDH</div></div><div class="frow"><div class="frow-top"><span class="tk" style="color:#178a50">▲ LABD</span>
+        <span class="fname">LABD</span><span class="fprice">9.01</span>
+        <span style="color:#178a50;font-weight:800">+11.9%</span></div>
+        <div class="fdet">Opt vol 2,066 · P/C 0.25 · Rel vol 0.96x · Day 8.03–9.02 · above PDH</div></div><div class="frow"><div class="frow-top"><span class="tk" style="color:#178a50">▲ TECS</span>
+        <span class="fname">TECS</span><span class="fprice">62.58</span>
+        <span style="color:#178a50;font-weight:800">+9.4%</span></div>
+        <div class="fdet">Opt vol 4,551 · P/C 1.09 · Rel vol 8.65x · Day 58.03–63.00 · above PDH</div></div><div class="frow"><div class="frow-top"><span class="tk" style="color:#178a50">▲ KOLD</span>
+        <span class="fname">KOLD</span><span class="fprice">27.12</span>
+        <span style="color:#178a50;font-weight:800">+9.0%</span></div>
+        <div class="fdet">Opt vol 6,985 · P/C 0.81 · Rel vol 1.33x · Day 26.72–27.19 · above PDH</div></div><div class="frow"><div class="frow-top"><span class="tk" style="color:#178a50">▲ VXX</span>
+        <span class="fname">iPath Series B S&P 500 VIX</span><span class="fprice">18.45</span>
+        <span style="color:#178a50;font-weight:800">+8.0%</span></div>
+        <div class="fdet">Opt vol 229,186 · P/C 0.24 · Rel vol 4.33x · Day 16.67–19.26 · above PDH</div></div><div class="frow"><div class="frow-top"><span class="tk" style="color:#178a50">▲ SQQQ</span>
+        <span class="fname">ProShares UltraPro Short Q</span><span class="fprice">38.90</span>
+        <span style="color:#178a50;font-weight:800">+7.6%</span></div>
+        <div class="fdet">Opt vol 136,022 · P/C 0.24 · Rel vol 1.53x · Day 36.51–39.29 · above PDH</div></div><div class="frow"><div class="frow-top"><span class="tk" style="color:#178a50">▲ EDZ</span>
+        <span class="fname">EDZ</span><span class="fprice">17.41</span>
+        <span style="color:#178a50;font-weight:800">+5.8%</span></div>
+        <div class="fdet">Opt vol 397 · P/C 0.54 · Rel vol 1.78x · Day 16.76–17.41 · above PDH</div></div></div>
+<div class="card"><div class="lab" style="color:#cf3f38">▼ BEARISH · 25 NAMES</div><div class="frow"><div class="frow-top"><span class="tk" style="color:#cf3f38">▼ SOXL</span>
+        <span class="fname">Direxion Daily Semiconduct</span><span class="fprice">93.68</span>
+        <span style="color:#cf3f38;font-weight:800">-12.7%</span></div>
+        <div class="fdet">Opt vol 465,121 · P/C 0.84 · Rel vol 1.70x · Day 93.44–103.92 · below PDL</div></div><div class="frow"><div class="frow-top"><span class="tk" style="color:#cf3f38">▼ CLSK</span>
+        <span class="fname">CLSK</span><span class="fprice">8.26</span>
+        <span style="color:#cf3f38;font-weight:800">-11.7%</span></div>
+        <div class="fdet">Opt vol 26,058 · P/C 0.52 · Rel vol 0.42x · Day 8.25–9.15 · below PDL</div></div><div class="frow"><div class="frow-top"><span class="tk" style="color:#cf3f38">▼ LABU</span>
+        <span class="fname">LABU</span><span class="fprice">197.06</span>
+        <span style="color:#cf3f38;font-weight:800">-11.6%</span></div>
+        <div class="fdet">Opt vol 5,563 · P/C 0.44 · Rel vol 1.80x · Day 197.06–221.62 · below PDL</div></div><div class="frow"><div class="frow-top"><span class="tk" style="color:#cf3f38">▼ RIOT</span>
+        <span class="fname">Riot Platforms, Inc.</span><span class="fprice">13.72</span>
+        <span style="color:#cf3f38;font-weight:800">-11.5%</span></div>
+        <div class="fdet">Opt vol 94,486 · P/C 1.31 · Rel vol 1.14x · Day 13.58–15.18 · inside range</div></div><div class="frow"><div class="frow-top"><span class="tk" style="color:#cf3f38">▼ OKTA</span>
+        <span class="fname">OKTA</span><span class="fprice">185.43</span>
+        <span style="color:#cf3f38;font-weight:800">-11.1%</span></div>
+        <div class="fdet">Opt vol 18,763 · P/C 0.96 · Rel vol 1.17x · Day 184.89–212.00 · below PDL</div></div><div class="frow"><div class="frow-top"><span class="tk" style="color:#cf3f38">▼ LCID</span>
+        <span class="fname">LCID</span><span class="fprice">3.14</span>
+        <span style="color:#cf3f38;font-weight:800">-10.1%</span></div>
+        <div class="fdet">Opt vol 38,468 · P/C 0.51 · Rel vol 0.84x · Day 3.11–3.52 · below PDL</div></div><div class="frow"><div class="frow-top"><span class="tk" style="color:#cf3f38">▼ SMCI</span>
+        <span class="fname">Super Micro Computer, Inc.</span><span class="fprice">31.63</span>
+        <span style="color:#cf3f38;font-weight:800">-9.9%</span></div>
+        <div class="fdet">Opt vol 356,748 · P/C 0.54 · Rel vol 1.26x · Day 31.43–34.62 · below PDL</div></div><div class="frow"><div class="frow-top"><span class="tk" style="color:#cf3f38">▼ MARA</span>
+        <span class="fname">MARA Holdings, Inc.</span><span class="fprice">7.53</span>
+        <span style="color:#cf3f38;font-weight:800">-9.6%</span></div>
+        <div class="fdet">Opt vol 244,059 · P/C 0.29 · Rel vol 1.18x · Day 7.42–8.23 · below PDL</div></div></div>
+</div>
+
+<h2>Insights</h2>
+<div class="insight">▼ <b>Downside breaks held Friday</b> — the top break scores were bearish (FAZ 66.0 on 9.8× flow).<br>
+◐ <b>Flow split 25 bullish / 25 bearish</b> on a red tape — rotation, not capitulation.<br>
+✦ <b>SOXL printed the day's heaviest options volume</b> (465,121 contracts); yesterday's ignition TECL faded −6.6%.</div>
+
+<footer>Everything else on the board — full flow lists, break ranking (82 flags), movers (PAYP +6.6% · TLK −12.5%), sector heat, persistence — sits below this in the full design. This prototype carries Friday's real close data; the live build renders from the same feeds every 5 minutes.</footer>
+</div>
+<script>
+const tb = document.querySelector('#gaptable tbody'); let cur = {k:'gap', dir:-1};
+document.querySelectorAll('#gaptable th[data-k]').forEach(th => th.addEventListener('click', () => {
+  const k = th.dataset.k; const dir = (cur.k === k) ? -cur.dir : -1; cur = {k, dir};
+  [...tb.rows].sort((a,b) => dir * (parseFloat(a.dataset[k]) - parseFloat(b.dataset[k]))).forEach(r => tb.appendChild(r));
+}));
+</script></body></html>
