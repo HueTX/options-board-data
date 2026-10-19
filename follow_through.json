@@ -4,54 +4,70 @@
   "ignitions": [
     {
       "ticker": "FDN",
-      "x": 20.6
+      "x": 36.7
     },
     {
       "ticker": "JDST",
-      "x": 11.0
+      "x": 11.2
     },
     {
       "ticker": "FAZ",
-      "x": 10.2
-    },
-    {
-      "ticker": "LIT",
-      "x": 8.1
+      "x": 10.5
     },
     {
       "ticker": "TECS",
-      "x": 7.9
+      "x": 8.7
     },
     {
       "ticker": "EDC",
-      "x": 7.6
+      "x": 7.8
     },
     {
-      "ticker": "RL",
-      "x": 6.9
-    },
-    {
-      "ticker": "DUST",
-      "x": 5.5
-    },
-    {
-      "ticker": "YANG",
-      "x": 4.6
-    },
-    {
-      "ticker": "BX",
-      "x": 3.9
+      "ticker": "LIT",
+      "x": 7.8
     },
     {
       "ticker": "ROK",
-      "x": 3.9
+      "x": 6.0
+    },
+    {
+      "ticker": "DUST",
+      "x": 5.6
+    },
+    {
+      "ticker": "YANG",
+      "x": 5.4
+    },
+    {
+      "ticker": "RL",
+      "x": 5.3
+    },
+    {
+      "ticker": "AI",
+      "x": 5.1
+    },
+    {
+      "ticker": "UVXY",
+      "x": 4.4
     },
     {
       "ticker": "XLRE",
-      "x": 3.8
+      "x": 4.2
+    },
+    {
+      "ticker": "VXX",
+      "x": 4.1
     },
     {
       "ticker": "JNUG",
+      "x": 3.8
+    },
+    {
+      "ticker": "TECL",
+      "x": 3.7
+    },
+    {
+      "ticker": "NOC",
       "x": 3.7
     },
     {
@@ -59,16 +75,12 @@
       "x": 3.4
     },
     {
-      "ticker": "NOC",
-      "x": 3.3
-    },
-    {
       "ticker": "TMO",
-      "x": 3.2
+      "x": 3.0
     },
     {
-      "ticker": "TECL",
-      "x": 3.2
+      "ticker": "BEAM",
+      "x": 3.0
     }
   ]
 }
