@@ -1,22 +1,22 @@
 {
-  "asOf": "2026-10-20T00:00:00Z",
-  "date": "2026-10-19",
+  "asOf": "2026-10-21T00:00:00Z",
+  "date": "2026-10-20",
   "ignitions": [
     {
       "ticker": "FDN",
-      "x": 21.6
+      "x": 21.8
     },
     {
       "ticker": "FAZ",
-      "x": 8.5
+      "x": 9.6
     },
     {
       "ticker": "JDST",
-      "x": 8.0
+      "x": 9.5
     },
     {
       "ticker": "TECS",
-      "x": 7.4
+      "x": 6.6
     },
     {
       "ticker": "LIT",
@@ -24,46 +24,42 @@
     },
     {
       "ticker": "DUST",
-      "x": 5.2
-    },
-    {
-      "ticker": "TSEM",
-      "x": 4.7
-    },
-    {
-      "ticker": "ITA",
-      "x": 4.7
+      "x": 5.0
     },
     {
       "ticker": "YANG",
-      "x": 4.6
+      "x": 4.9
+    },
+    {
+      "ticker": "TMO",
+      "x": 4.8
     },
     {
       "ticker": "RL",
       "x": 4.6
     },
     {
-      "ticker": "TECL",
-      "x": 3.5
+      "ticker": "ITA",
+      "x": 4.4
     },
     {
       "ticker": "NOC",
-      "x": 3.5
+      "x": 3.6
     },
     {
-      "ticker": "XLRE",
-      "x": 3.5
-    },
-    {
-      "ticker": "EDC",
-      "x": 3.2
-    },
-    {
-      "ticker": "CSX",
-      "x": 3.1
+      "ticker": "MMM",
+      "x": 3.4
     },
     {
       "ticker": "JNUG",
+      "x": 3.2
+    },
+    {
+      "ticker": "TECL",
+      "x": 3.1
+    },
+    {
+      "ticker": "EDC",
       "x": 3.1
     }
   ]
