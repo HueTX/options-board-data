@@ -1,61 +1,89 @@
 {
-  "asOf": "2026-10-22T00:00:00Z",
-  "date": "2026-10-21",
+  "asOf": "2026-10-23T00:00:00Z",
+  "date": "2026-10-22",
   "ignitions": [
     {
       "ticker": "FDN",
       "x": 21.9
     },
     {
+      "ticker": "ETN",
+      "x": 12.4
+    },
+    {
       "ticker": "JDST",
-      "x": 9.2
+      "x": 9.4
     },
     {
       "ticker": "FAZ",
-      "x": 8.7
+      "x": 9.0
     },
     {
-      "ticker": "LIT",
-      "x": 7.7
+      "ticker": "PG",
+      "x": 6.9
     },
     {
       "ticker": "TECS",
-      "x": 6.5
+      "x": 6.7
     },
     {
-      "ticker": "YANG",
-      "x": 5.2
+      "ticker": "LIT",
+      "x": 6.6
     },
     {
-      "ticker": "RL",
-      "x": 5.0
+      "ticker": "MRNA",
+      "x": 6.3
+    },
+    {
+      "ticker": "PH",
+      "x": 5.9
+    },
+    {
+      "ticker": "TSEM",
+      "x": 5.5
     },
     {
       "ticker": "DUST",
+      "x": 5.1
+    },
+    {
+      "ticker": "YANG",
+      "x": 5.1
+    },
+    {
+      "ticker": "RL",
       "x": 4.9
     },
     {
-      "ticker": "TMO",
-      "x": 4.4
+      "ticker": "BIIB",
+      "x": 4.0
     },
     {
-      "ticker": "TAN",
-      "x": 4.4
+      "ticker": "NOC",
+      "x": 3.8
     },
     {
-      "ticker": "ITA",
-      "x": 3.5
-    },
-    {
-      "ticker": "KMI",
-      "x": 3.1
+      "ticker": "DECK",
+      "x": 3.7
     },
     {
       "ticker": "JNUG",
-      "x": 3.0
+      "x": 3.6
     },
     {
-      "ticker": "XLRE",
+      "ticker": "CSX",
+      "x": 3.3
+    },
+    {
+      "ticker": "ZBH",
+      "x": 3.3
+    },
+    {
+      "ticker": "TECL",
+      "x": 3.1
+    },
+    {
+      "ticker": "XLP",
       "x": 3.0
     },
     {
