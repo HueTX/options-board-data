@@ -1522,6 +1522,11 @@ function passFilter(r){
   if (flowFilter === 'breakouts') return sigSideOf(r.ticker) != null;
   return true;
 }
+/* The published flow rows carry their total options volume as
+   `optionsVolume` (the old page tested a `volume` field the feed has never
+   carried, which kept flow verification permanently false — grouping,
+   ignited filtering and flow badges were all dead). Accept either field. */
+function rowVol(r){ return r.optionsVolume != null ? r.optionsVolume : r.volume; }
 /* Strict flow verification: snapshot <=35 min old AND every row carries
    finite volume data. Ignited/unusual labels only mean something on
    verified flow — anything older is grouped as standard. */
@@ -1529,7 +1534,7 @@ function flowVerified(){
   if (!isFinite(SNAP_TS) || Date.now() - SNAP_TS > 35*60*1000) return false;
   const rows = (SNAP.bullish||[]).concat(SNAP.bearish||[]);
   if (!rows.length) return false;
-  return rows.every(r => isFinite(r.volume) && isFinite(r.relativeVolume));
+  return rows.every(r => isFinite(rowVol(r)) && isFinite(r.relativeVolume));
 }
 function sigSideOf(t){ const s = signalFor(t); return s ? s.side : null; }
 function flowGroup(r){
@@ -1548,7 +1553,7 @@ function momScore(r){
 function flowSortFn(a, b, dir){
   if (flowSortMode === 'mom') return momScore(b) - momScore(a);
   if (flowSortMode === 'unus') return (b.relativeVolume || 0) - (a.relativeVolume || 0);
-  if (flowSortMode === 'tvol') return (b.volume || 0) - (a.volume || 0);
+  if (flowSortMode === 'tvol') return (rowVol(b) || 0) - (rowVol(a) || 0);
   if (flowSortMode === 'cap'){
     const ca = CAPS.get(a.ticker), cb = CAPS.get(b.ticker);
     return ((cb != null ? cb : -1) - (ca != null ? ca : -1)) || (a.ticker < b.ticker ? -1 : a.ticker > b.ticker ? 1 : 0);
@@ -2001,7 +2006,7 @@ function openDrawer(sym){
   }
   $('dStats').innerHTML =
     st('Day range', (q.low != null ? fmtPx(q.low) : '—') + ' – ' + (q.high != null ? fmtPx(q.high) : '—')) +
-    st('Volume', fmtVol(q.volume != null ? q.volume : r.volume)) +
+    st('Volume', fmtVol(q.volume != null ? q.volume : rowVol(r))) +
     st('Opt vol vs avg', r.relativeVolume != null ? r.relativeVolume.toFixed(1) + 'x' : '—') +
     st('Call / put vol', cpBar) +
     st('Why it\'s ranked here', why) +
