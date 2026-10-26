@@ -60,6 +60,7 @@ a{color:var(--orange); text-decoration:none}
 </div>
 <div class="note">15-minute close line from today's 9:30 ET open &middot; completed candles only<br>Dashed lines: prior-day high/low &middot; Dotted lines: premarket high/low &middot; Gray dashed: session mean</div>
 
+<button id="toTop" type="button" aria-label="Go to bottom" title="Go to bottom">&#8595;</button>
 <script>
 const CHARTS_URL = "https://raw.githubusercontent.com/HueTX/options-board-data/main/fifteen_min_charts.json";
 const sym = new URLSearchParams(location.search).get("t") || "";
@@ -240,6 +241,5 @@ function toggleTheme(){
   });
 })();
 </script>>
-<button id="toTop" type="button" aria-label="Go to bottom" title="Go to bottom">&#8595;</button>
 </body>
 </html>
