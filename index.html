@@ -638,15 +638,15 @@ footer.appfoot{margin:26px 0 0;font-size:12.5px;color:var(--faint);text-align:ce
   <div class="ptr" id="ptr"><span>&#8635; Release to refresh</span></div>
 
   <main id="board">
-    <section class="panel hide" id="secPins">
+    
+<section class="panel hide" id="secPins">
       <div class="sec-head" data-sec="secPins">
         <div class="titles"><h2>Pinned tickers</h2><p class="sub">Your watchlist strip — pins no longer reorder the lists below</p></div>
         <button class="chev" aria-label="Collapse">&#8964;</button>
       </div>
       <div class="sec-body"><div class="pin-strip" id="pinStrip"></div></div>
     </section>
-
-    <section class="panel tint-amber" id="secMorning">
+<section class="panel tint-amber" id="secMorning">
       <div class="sec-head" data-sec="secMorning">
         <div class="titles"><h2>Morning</h2><p class="sub">Gaps &rarr; levels &rarr; breaks — one funnel, best first</p><span class="upd" id="updMorning"></span></div>
         <button class="chev" aria-label="Collapse">&#8964;</button>
@@ -657,38 +657,71 @@ footer.appfoot{margin:26px 0 0;font-size:12.5px;color:var(--faint);text-align:ce
           <button class="mtab" data-mtab="levels" role="tab">Levels</button>
           <button class="mtab" data-mtab="breaks" role="tab">Breaks</button>
         </div>
-        <div class="mpane" id="mpane-gaps" role="tabpanel"></div>
-        <div class="mpane" id="mpane-levels" role="tabpanel"></div>
-        <div class="mpane" id="mpane-breaks" role="tabpanel"></div>
-      </div>
-    </section>
+        <div class="mpane" id="mpane-gaps" role="tabpanel">
+<p class="sub" id="pmSub"></p>
+<span class="upd" id="updPremarket"></span>
+<span class="head-meta" id="pmMeta"></span>
 
-    <section class="panel tint-teal" id="secMovers">
-      <div class="sec-head" data-sec="secMovers">
-        <div class="titles"><h2>Full-market movers</h2><p class="sub" id="moversSub">Price leaders across the 311-ticker universe · computed from live day change</p></div>
-        <span class="head-meta" id="moversMeta"></span>
-        <button class="chev" aria-label="Collapse">&#8964;</button>
-      </div>
-      <div class="sec-body">
-        <div class="fpills" id="mvFilters" role="group" aria-label="Movers filter">
-          <button class="fpill on" data-mvf="u311">311</button>
-          <button class="fpill" data-mvf="rest">Rest of market</button>
-          <button class="fpill" data-mvf="all">All</button>
-          <label class="seg-label" style="display:inline-flex;align-items:center;gap:8px;margin-left:auto">Sort
-            <select id="mvSortSel" aria-label="Movers sort">
-              <option value="chg">% Change</option>
-              <option value="cap">Market cap</option>
+        <div class="pm-legend">
+          <span class="up">&#9650; Bullish first</span>
+          <span class="dn">&#9660; Bearish follows</span>
+        </div>
+        <div class="pm-pills" id="pmPills">
+          <button class="fpill" data-pm="breakout">Breaking out</button>
+          <button class="fpill" data-pm="fav">&#9733; Favorites</button>
+          <button class="fpill" data-pm="mega">&gt;$50B</button>
+          <label class="seg-label" style="display:inline-flex;align-items:center;gap:8px">Sort
+            <select id="pmSortSel" aria-label="Premarket sort">
+              <option value="gap">Biggest gap</option>
+              <option value="cap">Largest cap</option>
+              <option value="strength">Strength (standout)</option>
+              <option value="flow">Most flow</option>
+            </select>
+              <option value="gap">Biggest gap</option>
+              <option value="cap">Largest cap</option>
+              <option value="strength">Strength (standout)</option>
+              <option value="flow">Most flow</option>
             </select>
           </label>
         </div>
-        <div class="movers-cols">
-          <div class="movers-col bull"><h3><span class="tri-up">&#9650;</span> Top movers</h3><div class="mv-chips" id="topMovers"></div><div class="pager" id="gainPager"></div></div>
-          <div class="movers-col bear"><h3><span class="tri-dn">&#9660;</span> Biggest losers</h3><div class="mv-chips" id="bigLosers"></div><div class="pager" id="lossPager"></div></div>
+        <div class="pm-grid" id="pmGrid"></div>
+        <div class="pager" id="pmPager"></div>
+      
+</div>
+        <div class="mpane" id="mpane-levels" role="tabpanel">
+<p class="sub" id="watchSub"></p>
+<span class="upd" id="updWatch"></span>
+<span class="head-meta" id="watchMeta"></span>
+
+        <div class="wsortbar" id="watchChips"><span class="wsort-label">SORT BY</span>
+          <button class="wchip on" data-wsort="rank">Rank</button>
+          <button class="wchip" data-wsort="cap">Market cap</button>
+          <button class="wchip" data-wsort="chg">% change</button>
+          <button class="wchip" data-wsort="dir">Direction</button>
         </div>
+        <div class="wlegend">Dashed line on each chart = series mean · ▲ up / ▼ down from 4H trend, then 1H, then today's move</div>
+        <div class="whead" aria-hidden="true">
+          <span></span><span></span><span>1H</span><span>4H</span><span class="wh-sess">Sessions</span><span class="wh-watch">Watch</span>
+        </div>
+        <div class="watch-grid" id="watchList"><div class="empty">Loading trading-morning watchlist&hellip;</div></div>
+      
+</div>
+        <div class="mpane" id="mpane-breaks" role="tabpanel">
+<p class="sub" id="brSub">First 15m candle breaks, ranked by continuation conviction</p>
+<span class="upd" id="updBreakRank"></span>
+<span class="head-meta" id="brMeta"></span>
+
+        <div class="br-legend">Score = gap move (35) + break depth (35) + unusual flow (30) · levels only, no trade call</div>
+        <div class="br-wrap"><table class="br-table" id="brTable" aria-label="Ranked first-candle breaks">
+          <thead id="brHead"><tr><th>#</th><th>Ticker</th><th>Dir</th><th>Close</th><th>Gap%</th><th>Thru%</th><th>Flow</th><th>Score</th></tr></thead>
+          <tbody id="brBody"><tr><td colspan="9"><div class="empty">Loading break ranking&hellip;</div></td></tr></tbody>
+        </table></div>
+        <div class="pager" id="brPager"></div>
+      
+</div>
       </div>
     </section>
-
-    <section class="panel tint-amber" id="secSignals">
+<section class="panel tint-amber" id="secSignals">
       <div class="sec-head" data-sec="secSignals">
         <div class="titles"><h2><a href="https://huetx.github.io/options-board-data/15m-closes.html" style="color:inherit;text-decoration:none">15m confirmed closes</a> <span class="final-pill" id="sigPill">—</span></h2><p class="sub" id="sigSub">Checking completed candles&hellip;</p><span class="upd" id="updSignals"></span></div>
         <button class="chev" aria-label="Collapse">&#8964;</button>
@@ -706,6 +739,9 @@ footer.appfoot{margin:26px 0 0;font-size:12.5px;color:var(--faint);text-align:ce
               <option value="chg">% Change</option>
               <option value="cap">Market cap</option>
             </select>
+              <option value="chg">% Change</option>
+              <option value="cap">Market cap</option>
+            </select>
           </label>
         </div>
         <div class="sig-cols">
@@ -720,8 +756,7 @@ footer.appfoot{margin:26px 0 0;font-size:12.5px;color:var(--faint);text-align:ce
         </div>
       </div>
     </section>
-
-    <section class="panel" id="secFlow">
+<section class="panel" id="secFlow">
       <div class="sec-head" data-sec="secFlow">
         <div class="titles"><h2>Options-flow movers</h2><p class="sub" id="flowSub"></p><span class="upd" id="updFlow"></span></div>
         <button class="chev" aria-label="Collapse">&#8964;</button>
@@ -766,63 +801,70 @@ footer.appfoot{margin:26px 0 0;font-size:12.5px;color:var(--faint);text-align:ce
         </div>
       </div>
     </section>
-
-    <section class="panel" id="secUFlow">
+<section class="panel" id="secUFlow">
       <div class="sec-head" data-sec="secUFlow">
         <div class="titles"><h2>Unusual flow</h2><p class="sub">Yesterday's ignitions · streaks · first appearances</p><span class="upd" id="updUFlow"></span></div>
         <button class="chev" aria-label="Collapse">&#8964;</button>
       </div>
       <div class="sec-body">
-        <div class="usub" id="uflow-ign"></div>
-        <div class="usub" id="uflow-persist"></div>
+        <div class="usub" id="uflow-ign">
+<div class="usub-label">Yesterday's ignitions</div>
+<span class="upd" id="updIgn"></span>
+<span class="head-meta" id="ignMeta"></span>
+<div class="ig-grid" id="igGrid"><div class="empty">Loading ignition history&hellip;</div></div>
+</div>
+        <div class="usub" id="uflow-persist">
+<div class="usub-label">Flow persistence</div>
+<p class="sub" id="persistSub">Streaks · confirmed ignitions · first appearances</p>
+<span class="upd" id="updPersist"></span>
+<span class="head-meta" id="persistMeta"></span>
+
+        <div class="persist-grid" id="persistConfirmed"><div class="empty">Loading&hellip;</div></div>
+        <div class="persist-grid" id="persistStreaks"></div>
+        <div class="persist-grid" id="persistFirst"></div>
+        <div class="persist-grid" id="persistEcho"></div>
+        <div class="persist-grid" id="persistDead"></div>
+        <div class="persist-grid" id="persistSectors"></div>
+      
+</div>
       </div>
     </section>
-
-    <section class="panel" id="secMarket">
+<section class="panel" id="secMarket">
       <div class="sec-head" data-sec="secMarket">
         <div class="titles"><h2>Market</h2><p class="sub">Movers · sector heat</p><span class="upd" id="updMarket"></span></div>
         <button class="chev" aria-label="Collapse">&#8964;</button>
       </div>
       <div class="sec-body">
-        <div class="usub" id="mkt-movers"></div>
-        <div class="usub" id="mkt-sectors"></div>
-      </div>
-    </section>
+        <div class="usub" id="mkt-movers">
+<div class="usub-label">Full-market movers</div>
+<p class="sub" id="moversSub">Price leaders across the 311-ticker universe · computed from live day change</p>
+<span class="head-meta" id="moversMeta"></span>
 
-    <section class="panel" id="secPremarket">
-      <div class="sec-head" data-sec="secPremarket">
-        <div class="titles"><h2>Premarket watchlist</h2><p class="sub" id="pmSub"></p><span class="upd" id="updPremarket"></span></div>
-        <div class="sec-tools"><span class="head-meta" id="pmMeta"></span><button class="chev" aria-label="Collapse">&#8964;</button></div>
-      </div>
-      <div class="sec-body">
-        <div class="pm-legend">
-          <span class="up">&#9650; Bullish first</span>
-          <span class="dn">&#9660; Bearish follows</span>
-        </div>
-        <div class="pm-pills" id="pmPills">
-          <button class="fpill" data-pm="breakout">Breaking out</button>
-          <button class="fpill" data-pm="fav">&#9733; Favorites</button>
-          <button class="fpill" data-pm="mega">&gt;$50B</button>
-          <label class="seg-label" style="display:inline-flex;align-items:center;gap:8px">Sort
-            <select id="pmSortSel" aria-label="Premarket sort">
-              <option value="gap">Biggest gap</option>
-              <option value="cap">Largest cap</option>
-              <option value="strength">Strength (standout)</option>
-              <option value="flow">Most flow</option>
+        <div class="fpills" id="mvFilters" role="group" aria-label="Movers filter">
+          <button class="fpill on" data-mvf="u311">311</button>
+          <button class="fpill" data-mvf="rest">Rest of market</button>
+          <button class="fpill" data-mvf="all">All</button>
+          <label class="seg-label" style="display:inline-flex;align-items:center;gap:8px;margin-left:auto">Sort
+            <select id="mvSortSel" aria-label="Movers sort">
+              <option value="chg">% Change</option>
+              <option value="cap">Market cap</option>
+            </select>
+              <option value="chg">% Change</option>
+              <option value="cap">Market cap</option>
             </select>
           </label>
         </div>
-        <div class="pm-grid" id="pmGrid"></div>
-        <div class="pager" id="pmPager"></div>
-      </div>
-    </section>
+        <div class="movers-cols">
+          <div class="movers-col bull"><h3><span class="tri-up">&#9650;</span> Top movers</h3><div class="mv-chips" id="topMovers"></div><div class="pager" id="gainPager"></div></div>
+          <div class="movers-col bear"><h3><span class="tri-dn">&#9660;</span> Biggest losers</h3><div class="mv-chips" id="bigLosers"></div><div class="pager" id="lossPager"></div></div>
+        </div>
+      
+</div>
+        <div class="usub" id="mkt-sectors">
+<div class="usub-label">Sector heat</div>
+<p class="sub" id="secSub"></p>
+<button class="pill-solid" id="allSectors">All sectors</button>
 
-    <section class="panel" id="secSectors">
-      <div class="sec-head" data-sec="secSectors">
-        <div class="titles"><h2>Sector heat</h2><p class="sub" id="secSub"></p></div>
-        <div class="sec-tools"><button class="pill-solid" id="allSectors">All sectors</button><button class="chev" aria-label="Collapse">&#8964;</button></div>
-      </div>
-      <div class="sec-body">
         <div class="sec-legend">
           <span class="ld"><span class="dt" style="background:var(--gain)"></span>Best</span>
           <span class="ld"><span class="dt" style="background:var(--gain);opacity:.45"></span>Building</span>
@@ -830,89 +872,21 @@ footer.appfoot{margin:26px 0 0;font-size:12.5px;color:var(--faint);text-align:ce
           <span class="ld"><span class="dt" style="background:var(--loss)"></span>Leaving</span>
         </div>
         <div class="sec-grid" id="sectorGrid"></div>
+      
+</div>
       </div>
     </section>
+<details class="mflow-details"><summary>Morning flow — four-step reference</summary>
 
-    <section class="panel" id="secWatch">
-      <div class="sec-head" data-sec="secWatch">
-        <div class="titles"><h2>Trading-morning watchlist</h2><p class="sub" id="watchSub"></p><span class="upd" id="updWatch"></span></div>
-        <span class="head-meta" id="watchMeta"></span>
-        <button class="chev" aria-label="Collapse">&#8964;</button>
-      </div>
-      <div class="sec-body">
-        <div class="wsortbar" id="watchChips"><span class="wsort-label">SORT BY</span>
-          <button class="wchip on" data-wsort="rank">Rank</button>
-          <button class="wchip" data-wsort="cap">Market cap</button>
-          <button class="wchip" data-wsort="chg">% change</button>
-          <button class="wchip" data-wsort="dir">Direction</button>
-        </div>
-        <div class="wlegend">Dashed line on each chart = series mean · ▲ up / ▼ down from 4H trend, then 1H, then today's move</div>
-        <div class="whead" aria-hidden="true">
-          <span></span><span></span><span>1H</span><span>4H</span><span class="wh-sess">Sessions</span><span class="wh-watch">Watch</span>
-        </div>
-        <div class="watch-grid" id="watchList"><div class="empty">Loading trading-morning watchlist&hellip;</div></div>
-      </div>
-    </section>
-
-    <section class="panel" id="secBreakRank">
-      <div class="sec-head" data-sec="secBreakRank">
-        <div class="titles"><h2>Break ranking</h2><p class="sub" id="brSub">First 15m candle breaks, ranked by continuation conviction</p><span class="upd" id="updBreakRank"></span></div>
-        <span class="head-meta" id="brMeta"></span>
-        <button class="chev" aria-label="Collapse">&#8964;</button>
-      </div>
-      <div class="sec-body">
-        <div class="br-legend">Score = gap move (35) + break depth (35) + unusual flow (30) · levels only, no trade call</div>
-        <div class="br-wrap"><table class="br-table" id="brTable" aria-label="Ranked first-candle breaks">
-          <thead id="brHead"><tr><th>#</th><th>Ticker</th><th>Dir</th><th>Close</th><th>Gap%</th><th>Thru%</th><th>Flow</th><th>Score</th></tr></thead>
-          <tbody id="brBody"><tr><td colspan="9"><div class="empty">Loading break ranking&hellip;</div></td></tr></tbody>
-        </table></div>
-        <div class="pager" id="brPager"></div>
-      </div>
-    </section>
-
-    <section class="panel" id="secIgn">
-      <div class="sec-head" data-sec="secIgn">
-        <div class="titles"><h2>Yesterday's ignitions</h2><p class="sub">Follow-through today</p><span class="upd" id="updIgn"></span></div>
-        <span class="head-meta" id="ignMeta"></span>
-        <button class="chev" aria-label="Collapse">&#8964;</button>
-      </div>
-      <div class="sec-body"><div class="ig-grid" id="igGrid"><div class="empty">Loading ignition history&hellip;</div></div></div>
-    </section>
-
-    <section class="panel" id="secPersist">
-      <div class="sec-head" data-sec="secPersist">
-        <div class="titles"><h2>Flow persistence</h2><p class="sub" id="persistSub">Streaks · confirmed ignitions · first appearances</p><span class="upd" id="updPersist"></span></div>
-        <span class="head-meta" id="persistMeta"></span>
-        <button class="chev" aria-label="Collapse">&#8964;</button>
-      </div>
-      <div class="sec-body">
-        <div class="persist-grid" id="persistConfirmed"><div class="empty">Loading&hellip;</div></div>
-        <div class="persist-grid" id="persistStreaks"></div>
-        <div class="persist-grid" id="persistFirst"></div>
-        <div class="persist-grid" id="persistEcho"></div>
-        <div class="persist-grid" id="persistDead"></div>
-        <div class="persist-grid" id="persistSectors"></div>
-      </div>
-    </section>
-
-    <section class="panel" id="secMFlow">
-      <div class="sec-head" data-sec="secMFlow">
-        <div class="titles"><h2>Morning flow</h2><p class="sub">Your four-step reference</p></div>
-        <button class="chev" aria-label="Collapse">&#8964;</button>
-      </div>
-      <div class="sec-body">
         <ol class="mflow">
           <li><b>Watchlist — where to look.</b> The 22 ranked morning setups are your hunting ground; start every session here.</li>
           <li><b>15-minute closes — when it's happening.</b> A confirmed close through PDH&nbsp;+&nbsp;PMH (bullish) or PDL&nbsp;+&nbsp;PML (bearish) is the timing trigger — nothing counts on a wick.</li>
           <li><b>Flow — whether to believe it.</b> Unusual options flow (≥2x average) behind the move is what separates a real breakout from noise.</li>
           <li><b>Market movers — the safety net.</b> Catches anything hot outside your 22 names so no big move slips past.</li>
         </ol>
-      </div>
-    </section>
-
-  </main>
-
-  <footer class="appfoot">Quotes: Yahoo Finance &middot; Flow snapshot: scanner &middot; Signals need completed 15-minute candles only &middot; <a href="standing-rules.html" style="color:var(--faint)">Standing rules</a></footer>
+      
+</details>
+<footer class="appfoot">Quotes: Yahoo Finance &middot; Flow snapshot: scanner &middot; Signals need completed 15-minute candles only &middot; <a href="standing-rules.html" style="color:var(--faint)">Standing rules</a></footer>
 </div>
 
 <div class="drawer-veil" id="drawerVeil"></div>
@@ -929,208 +903,100 @@ footer.appfoot{margin:26px 0 0;font-size:12.5px;color:var(--faint);text-align:ce
   <p class="d-note" id="dNote"></p>
 </aside>
 
-<script id="ft-data" type="application/json">
-{"asOf":"2026-09-30T00:00:00Z","date":"2026-09-29","ignitions":[{"ticker":"FDN","x":23.3},{"ticker":"FAZ","x":9.5},{"ticker":"EDC","x":7.1},{"ticker":"TECS","x":6.8},{"ticker":"DUST","x":5.8},{"ticker":"JDST","x":5.7},{"ticker":"LIT","x":5.1},{"ticker":"ZBH","x":4.8},{"ticker":"YANG","x":4.0},{"ticker":"BEAM","x":3.9},{"ticker":"JNUG","x":3.8},{"ticker":"AMGN","x":3.4},{"ticker":"BILI","x":3.2},{"ticker":"XLU","x":3.1},{"ticker":"MDB","x":3.1},{"ticker":"CCL","x":3.0},{"ticker":"TECL","x":3.0},{"ticker":"RL","x":3.0}]}
-</script>
-
-<script id="snapshot-data" type="application/json">
-{"marketDate":"2026-09-30","sourceAsOf":"2026-09-30T20:04:14.429181Z","baselineLabel":"90-day average options volume","scanned":311,"covered":74,"bullish":[{"ticker":"AI","name":"AI","price":11.0,"changePct":6.49,"optionsVolume":17125,"callVolume":10541,"putVolume":6584,"pcRatio":0.62,"relativeVolume":0.43,"dayHigh":11.06,"dayLow":10.42,"prevHigh":10.74,"prevLow":10.23,"side":"bull","ignited":false,"breakout":"above"},{"ticker":"SNPS","name":"SNPS","price":435.0,"changePct":4.57,"optionsVolume":8084,"callVolume":5577,"putVolume":2507,"pcRatio":0.45,"relativeVolume":1.36,"dayHigh":445.57,"dayLow":415.24,"prevHigh":null,"prevLow":null,"side":"bull","ignited":false,"breakout":"unknown"},{"ticker":"PS","name":"PS","price":55.74,"changePct":4.07,"optionsVolume":1569,"callVolume":1121,"putVolume":448,"pcRatio":0.4,"relativeVolume":2.71,"dayHigh":57.7,"dayLow":54.34,"prevHigh":59.0,"prevLow":52.93,"side":"bull","ignited":false,"breakout":"inside"},{"ticker":"PATH","name":"PATH","price":12.83,"changePct":4.06,"optionsVolume":14927,"callVolume":11350,"putVolume":3577,"pcRatio":0.32,"relativeVolume":0.28,"dayHigh":13.0,"dayLow":12.32,"prevHigh":12.35,"prevLow":11.99,"side":"bull","ignited":false,"breakout":"above"},{"ticker":"HPE","name":"Hewlett Packard Enterprise Comp","price":63.92,"changePct":3.82,"optionsVolume":71357,"callVolume":54954,"putVolume":16403,"pcRatio":0.3,"relativeVolume":1.07,"dayHigh":67.1,"dayLow":63.59,"prevHigh":63.7,"prevLow":60.68,"side":"bull","ignited":false,"breakout":"above"},{"ticker":"HIMS","name":"Hims & Hers Health, Inc.","price":29.79,"changePct":3.69,"optionsVolume":67351,"callVolume":48436,"putVolume":18915,"pcRatio":0.39,"relativeVolume":0.64,"dayHigh":31.03,"dayLow":29.1,"prevHigh":29.83,"prevLow":28.3,"side":"bull","ignited":false,"breakout":"inside"},{"ticker":"NOW","name":"ServiceNow, Inc.","price":134.01,"changePct":3.66,"optionsVolume":53431,"callVolume":33230,"putVolume":20201,"pcRatio":0.61,"relativeVolume":0.33,"dayHigh":135.06,"dayLow":128.85,"prevHigh":null,"prevLow":null,"side":"bull","ignited":false,"breakout":"unknown"},{"ticker":"MDB","name":"MongoDB, Inc.","price":348.61,"changePct":3.6,"optionsVolume":55829,"callVolume":36377,"putVolume":19452,"pcRatio":0.53,"relativeVolume":3.04,"dayHigh":370.43,"dayLow":340.23,"prevHigh":349.0,"prevLow":321.0,"side":"bull","ignited":true,"breakout":"inside"},{"ticker":"ENPH","name":"ENPH","price":32.99,"changePct":3.55,"optionsVolume":10410,"callVolume":7212,"putVolume":3198,"pcRatio":0.44,"relativeVolume":0.37,"dayHigh":33.9,"dayLow":32.08,"prevHigh":null,"prevLow":null,"side":"bull","ignited":false,"breakout":"unknown"},{"ticker":"U","name":"Unity Software Inc.","price":40.93,"changePct":3.32,"optionsVolume":38393,"callVolume":24622,"putVolume":13771,"pcRatio":0.56,"relativeVolume":1.38,"dayHigh":41.84,"dayLow":39.4,"prevHigh":null,"prevLow":null,"side":"bull","ignited":false,"breakout":"unknown"},{"ticker":"PSKY","name":"Paramount Skydance Corporation","price":10.33,"changePct":3.11,"optionsVolume":17158,"callVolume":12924,"putVolume":4234,"pcRatio":0.33,"relativeVolume":0.61,"dayHigh":10.42,"dayLow":10.06,"prevHigh":null,"prevLow":null,"side":"bull","ignited":false,"breakout":"unknown"},{"ticker":"JDST","name":"JDST","price":25.2,"changePct":3.07,"optionsVolume":1121,"callVolume":875,"putVolume":246,"pcRatio":0.28,"relativeVolume":6.96,"dayHigh":25.25,"dayLow":24.1,"prevHigh":null,"prevLow":null,"side":"bull","ignited":true,"breakout":"unknown"},{"ticker":"INTC","name":"Intel Corporation","price":120.15,"changePct":2.88,"optionsVolume":775227,"callVolume":554697,"putVolume":220530,"pcRatio":0.4,"relativeVolume":0.99,"dayHigh":120.55,"dayLow":116.0,"prevHigh":118.75,"prevLow":113.97,"side":"bull","ignited":false,"breakout":"above"},{"ticker":"FAZ","name":"FAZ","price":39.29,"changePct":2.85,"optionsVolume":3836,"callVolume":1639,"putVolume":2197,"pcRatio":1.34,"relativeVolume":9.47,"dayHigh":39.45,"dayLow":38.22,"prevHigh":null,"prevLow":null,"side":"bull","ignited":true,"breakout":"unknown"},{"ticker":"ADBE","name":"ADBE","price":240.05,"changePct":2.8,"optionsVolume":16856,"callVolume":10647,"putVolume":6209,"pcRatio":0.58,"relativeVolume":0.3,"dayHigh":240.84,"dayLow":231.95,"prevHigh":null,"prevLow":null,"side":"bull","ignited":false,"breakout":"unknown"},{"ticker":"EDZ","name":"EDZ","price":14.53,"changePct":2.75,"optionsVolume":308,"callVolume":163,"putVolume":145,"pcRatio":0.89,"relativeVolume":1.38,"dayHigh":14.57,"dayLow":14.28,"prevHigh":null,"prevLow":null,"side":"bull","ignited":false,"breakout":"unknown"},{"ticker":"SNOW","name":"SNOW","price":339.82,"changePct":2.73,"optionsVolume":24183,"callVolume":13479,"putVolume":10704,"pcRatio":0.79,"relativeVolume":0.46,"dayHigh":348.24,"dayLow":331.0,"prevHigh":null,"prevLow":null,"side":"bull","ignited":false,"breakout":"unknown"},{"ticker":"LABU","name":"LABU","price":267.99,"changePct":2.68,"optionsVolume":2681,"callVolume":1303,"putVolume":1378,"pcRatio":1.06,"relativeVolume":0.87,"dayHigh":276.13,"dayLow":259.33,"prevHigh":null,"prevLow":null,"side":"bull","ignited":false,"breakout":"unknown"},{"ticker":"SOUN","name":"SOUN","price":6.02,"changePct":2.56,"optionsVolume":19931,"callVolume":15075,"putVolume":4856,"pcRatio":0.32,"relativeVolume":0.33,"dayHigh":6.15,"dayLow":5.9,"prevHigh":null,"prevLow":null,"side":"bull","ignited":false,"breakout":"unknown"},{"ticker":"NU","name":"Nu Holdings Ltd.","price":12.66,"changePct":2.5,"optionsVolume":138287,"callVolume":125961,"putVolume":12326,"pcRatio":0.1,"relativeVolume":1.7,"dayHigh":12.76,"dayLow":12.13,"prevHigh":null,"prevLow":null,"side":"bull","ignited":false,"breakout":"unknown"},{"ticker":"RBLX","name":"RBLX","price":42.38,"changePct":2.48,"optionsVolume":12023,"callVolume":8321,"putVolume":3702,"pcRatio":0.44,"relativeVolume":0.38,"dayHigh":42.87,"dayLow":40.75,"prevHigh":null,"prevLow":null,"side":"bull","ignited":false,"breakout":"unknown"},{"ticker":"DUST","name":"DUST","price":39.81,"changePct":2.42,"optionsVolume":4011,"callVolume":2163,"putVolume":1848,"pcRatio":0.85,"relativeVolume":5.79,"dayHigh":39.85,"dayLow":38.15,"prevHigh":null,"prevLow":null,"side":"bull","ignited":true,"breakout":"unknown"},{"ticker":"PANW","name":"PANW","price":397.31,"changePct":2.37,"optionsVolume":38099,"callVolume":19797,"putVolume":18302,"pcRatio":0.92,"relativeVolume":0.86,"dayHigh":404.69,"dayLow":388.89,"prevHigh":391.75,"prevLow":377.8,"side":"bull","ignited":false,"breakout":"above"},{"ticker":"HPQ","name":"HPQ","price":31.3,"changePct":2.22,"optionsVolume":13229,"callVolume":5067,"putVolume":8162,"pcRatio":1.61,"relativeVolume":0.38,"dayHigh":31.69,"dayLow":30.64,"prevHigh":31.35,"prevLow":30.6,"side":"bull","ignited":false,"breakout":"inside"},{"ticker":"ZM","name":"ZM","price":90.77,"changePct":2.21,"optionsVolume":5808,"callVolume":4208,"putVolume":1600,"pcRatio":0.38,"relativeVolume":0.37,"dayHigh":91.66,"dayLow":88.37,"prevHigh":null,"prevLow":null,"side":"bull","ignited":false,"breakout":"unknown"}],"bearish":[{"ticker":"MARA","name":"MARA Holdings, Inc.","price":11.33,"changePct":-5.97,"optionsVolume":111443,"callVolume":71593,"putVolume":39850,"pcRatio":0.56,"relativeVolume":0.54,"dayHigh":12.35,"dayLow":11.3,"prevHigh":null,"prevLow":null,"side":"bear","ignited":false,"breakout":"unknown"},{"ticker":"RIOT","name":"Riot Platforms, Inc.","price":20.15,"changePct":-5.97,"optionsVolume":69438,"callVolume":52742,"putVolume":16696,"pcRatio":0.32,"relativeVolume":0.84,"dayHigh":21.8,"dayLow":20.11,"prevHigh":null,"prevLow":null,"side":"bear","ignited":false,"breakout":"unknown"},{"ticker":"BE","name":"Bloom Energy Corporation","price":276.98,"changePct":-5.87,"optionsVolume":94652,"callVolume":46088,"putVolume":48564,"pcRatio":1.05,"relativeVolume":0.71,"dayHigh":300.35,"dayLow":276.9,"prevHigh":null,"prevLow":null,"side":"bear","ignited":false,"breakout":"unknown"},{"ticker":"APP","name":"APP","price":290.43,"changePct":-5.3,"optionsVolume":35673,"callVolume":20202,"putVolume":15471,"pcRatio":0.77,"relativeVolume":1.04,"dayHigh":303.17,"dayLow":290.4,"prevHigh":313.38,"prevLow":304.84,"side":"bear","ignited":false,"breakout":"below"},{"ticker":"GIS","name":"GIS","price":32.16,"changePct":-5.15,"optionsVolume":13550,"callVolume":4073,"putVolume":9477,"pcRatio":2.33,"relativeVolume":1.24,"dayHigh":33.89,"dayLow":32.0,"prevHigh":null,"prevLow":null,"side":"bear","ignited":false,"breakout":"unknown"},{"ticker":"MRNA","name":"Moderna, Inc.","price":192.57,"changePct":-5.09,"optionsVolume":90914,"callVolume":40633,"putVolume":50281,"pcRatio":1.24,"relativeVolume":1.02,"dayHigh":196.83,"dayLow":184.58,"prevHigh":208.9,"prevLow":190.0,"side":"bear","ignited":false,"breakout":"inside"},{"ticker":"GM","name":"GM","price":77.0,"changePct":-4.44,"optionsVolume":17759,"callVolume":10927,"putVolume":6832,"pcRatio":0.63,"relativeVolume":0.93,"dayHigh":80.77,"dayLow":76.91,"prevHigh":null,"prevLow":null,"side":"bear","ignited":false,"breakout":"unknown"},{"ticker":"CROX","name":"CROX","price":117.31,"changePct":-4.38,"optionsVolume":1829,"callVolume":745,"putVolume":1084,"pcRatio":1.46,"relativeVolume":1.28,"dayHigh":123.52,"dayLow":117.02,"prevHigh":null,"prevLow":null,"side":"bear","ignited":false,"breakout":"unknown"},{"ticker":"HOOD","name":"Robinhood Markets, Inc.","price":112.5,"changePct":-4.26,"optionsVolume":294482,"callVolume":217916,"putVolume":76566,"pcRatio":0.35,"relativeVolume":1.0,"dayHigh":123.49,"dayLow":111.95,"prevHigh":119.19,"prevLow":114.93,"side":"bear","ignited":false,"breakout":"below"},{"ticker":"CEG","name":"CEG","price":254.02,"changePct":-4.19,"optionsVolume":7335,"callVolume":3623,"putVolume":3712,"pcRatio":1.02,"relativeVolume":0.59,"dayHigh":263.71,"dayLow":247.24,"prevHigh":270.11,"prevLow":261.22,"side":"bear","ignited":false,"breakout":"below"},{"ticker":"DKNG","name":"DKNG","price":19.0,"changePct":-3.41,"optionsVolume":24018,"callVolume":15332,"putVolume":8686,"pcRatio":0.57,"relativeVolume":0.6,"dayHigh":19.73,"dayLow":18.95,"prevHigh":null,"prevLow":null,"side":"bear","ignited":false,"breakout":"unknown"},{"ticker":"JNUG","name":"JNUG","price":148.88,"changePct":-3.32,"optionsVolume":2715,"callVolume":1996,"putVolume":719,"pcRatio":0.36,"relativeVolume":3.36,"dayHigh":155.46,"dayLow":148.72,"prevHigh":null,"prevLow":null,"side":"bear","ignited":true,"breakout":"unknown"},{"ticker":"KHC","name":"The Kraft Heinz Company","price":22.73,"changePct":-3.28,"optionsVolume":92711,"callVolume":90311,"putVolume":2400,"pcRatio":0.03,"relativeVolume":2.85,"dayHigh":23.72,"dayLow":22.72,"prevHigh":null,"prevLow":null,"side":"bear","ignited":false,"breakout":"unknown"},{"ticker":"TSEM","name":"TSEM","price":227.33,"changePct":-3.26,"optionsVolume":1759,"callVolume":966,"putVolume":793,"pcRatio":0.82,"relativeVolume":0.39,"dayHigh":236.0,"dayLow":226.05,"prevHigh":null,"prevLow":null,"side":"bear","ignited":false,"breakout":"unknown"},{"ticker":"CLSK","name":"CLSK","price":12.88,"changePct":-3.23,"optionsVolume":18677,"callVolume":13237,"putVolume":5440,"pcRatio":0.41,"relativeVolume":0.3,"dayHigh":13.7,"dayLow":12.87,"prevHigh":null,"prevLow":null,"side":"bear","ignited":false,"breakout":"unknown"},{"ticker":"MRK","name":"MRK","price":145.39,"changePct":-3.07,"optionsVolume":17475,"callVolume":14645,"putVolume":2830,"pcRatio":0.19,"relativeVolume":0.61,"dayHigh":149.27,"dayLow":145.26,"prevHigh":null,"prevLow":null,"side":"bear","ignited":false,"breakout":"unknown"},{"ticker":"ACHR","name":"ACHR","price":4.97,"changePct":-2.99,"optionsVolume":14651,"callVolume":9237,"putVolume":5414,"pcRatio":0.59,"relativeVolume":0.3,"dayHigh":5.25,"dayLow":4.97,"prevHigh":null,"prevLow":null,"side":"bear","ignited":false,"breakout":"unknown"},{"ticker":"BA","name":"Boeing Company (The)","price":186.09,"changePct":-2.98,"optionsVolume":88025,"callVolume":58065,"putVolume":29960,"pcRatio":0.52,"relativeVolume":1.32,"dayHigh":192.99,"dayLow":185.26,"prevHigh":null,"prevLow":null,"side":"bear","ignited":false,"breakout":"unknown"},{"ticker":"EDC","name":"EDC","price":76.38,"changePct":-2.9,"optionsVolume":1472,"callVolume":919,"putVolume":553,"pcRatio":0.6,"relativeVolume":7.36,"dayHigh":77.6,"dayLow":76.19,"prevHigh":null,"prevLow":null,"side":"bear","ignited":true,"breakout":"unknown"},{"ticker":"LUNR","name":"LUNR","price":14.24,"changePct":-2.86,"optionsVolume":12239,"callVolume":9678,"putVolume":2561,"pcRatio":0.26,"relativeVolume":0.43,"dayHigh":15.52,"dayLow":14.22,"prevHigh":null,"prevLow":null,"side":"bear","ignited":false,"breakout":"unknown"},{"ticker":"WMT","name":"Walmart Inc.","price":103.92,"changePct":-2.82,"optionsVolume":100724,"callVolume":72297,"putVolume":28427,"pcRatio":0.39,"relativeVolume":0.72,"dayHigh":107.03,"dayLow":103.92,"prevHigh":null,"prevLow":null,"side":"bear","ignited":false,"breakout":"unknown"},{"ticker":"AMC","name":"AMC Entertainment Holdings, Inc","price":2.99,"changePct":-2.76,"optionsVolume":49780,"callVolume":43763,"putVolume":6017,"pcRatio":0.14,"relativeVolume":0.46,"dayHigh":3.15,"dayLow":2.99,"prevHigh":null,"prevLow":null,"side":"bear","ignited":false,"breakout":"unknown"},{"ticker":"NUGT","name":"NUGT","price":147.9,"changePct":-2.76,"optionsVolume":3459,"callVolume":2191,"putVolume":1268,"pcRatio":0.58,"relativeVolume":1.01,"dayHigh":154.01,"dayLow":147.71,"prevHigh":null,"prevLow":null,"side":"bear","ignited":false,"breakout":"unknown"},{"ticker":"ZBH","name":"ZBH","price":88.83,"changePct":-2.76,"optionsVolume":506,"callVolume":306,"putVolume":200,"pcRatio":0.65,"relativeVolume":1.62,"dayHigh":90.86,"dayLow":88.83,"prevHigh":null,"prevLow":null,"side":"bear","ignited":false,"breakout":"unknown"},{"ticker":"FAS","name":"FAS","price":141.57,"changePct":-2.74,"optionsVolume":3202,"callVolume":2123,"putVolume":1079,"pcRatio":0.51,"relativeVolume":0.88,"dayHigh":145.78,"dayLow":140.88,"prevHigh":null,"prevLow":null,"side":"bear","ignited":false,"breakout":"unknown"}],"premarket":[{"ticker":"MRNA","gap":-9.3,"price":184.61,"quoteAsOf":"2026-09-30T09:27:41-04:00","marketCapB":78.8,"relativeVolume":0.7,"pcRatio":0.67,"lean":"calls leaning","priorDay":"Tue","priorChange":3.1,"priorHigh":208.9,"priorLow":190.0,"position":"below"},{"ticker":"HPE","gap":6.8,"price":65.7,"quoteAsOf":"2026-09-30T09:27:17-04:00","marketCapB":83.1,"relativeVolume":0.3,"pcRatio":0.57,"lean":"calls leaning","priorDay":"Tue","priorChange":-1.8,"priorHigh":63.7,"priorLow":60.68,"position":"above"},{"ticker":"HOOD","gap":5.6,"price":122.75,"quoteAsOf":"2026-09-30T09:27:13-04:00","marketCapB":104.7,"relativeVolume":0.3,"pcRatio":0.52,"lean":"calls leaning","priorDay":"Tue","priorChange":-0.2,"priorHigh":119.19,"priorLow":114.93,"position":"above"},{"ticker":"NOC","gap":-4.3,"price":482.94,"quoteAsOf":"2026-09-30T09:28:10-04:00","marketCapB":71.9,"relativeVolume":2.9,"pcRatio":0.99,"lean":"mixed flow","priorDay":"Tue","priorChange":-0.2,"priorHigh":508.75,"priorLow":502.1,"position":"below"},{"ticker":"MSTR","gap":4.2,"price":161.14,"quoteAsOf":"2026-09-30T09:27:19-04:00","marketCapB":62.7,"relativeVolume":0.4,"pcRatio":0.63,"lean":"calls leaning","priorDay":"Tue","priorChange":-1.6,"priorHigh":161.63,"priorLow":152.34,"position":"inside"},{"ticker":"DUST","gap":-3.2,"price":37.56,"quoteAsOf":"2026-09-30T09:05:00-04:00","marketCapB":0.1,"relativeVolume":5.8,"pcRatio":0.86,"lean":"mixed flow","priorDay":"Tue","priorChange":-2.5,"priorHigh":39.91,"priorLow":38.6,"position":"below"},{"ticker":"SMCI","gap":3.0,"price":42.24,"quoteAsOf":"2026-09-30T09:27:12-04:00","marketCapB":27.0,"relativeVolume":0.2,"pcRatio":0.52,"lean":"calls leaning","priorDay":"Tue","priorChange":-1.8,"priorHigh":42.69,"priorLow":40.86,"position":"inside"},{"ticker":"GME","gap":2.9,"price":24.44,"quoteAsOf":"2026-09-30T09:27:37-04:00","marketCapB":12.1,"relativeVolume":0.8,"pcRatio":0.2,"lean":"calls leaning","priorDay":"Tue","priorChange":-0.8,"priorHigh":24.07,"priorLow":23.3,"position":"above"},{"ticker":"JDST","gap":-2.8,"price":23.8,"quoteAsOf":"2026-09-30T08:58:00-04:00","marketCapB":0.0,"relativeVolume":5.7,"pcRatio":0.34,"lean":"calls leaning","priorDay":"Tue","priorChange":-2.8,"priorHigh":25.34,"priorLow":24.37,"position":"below"},{"ticker":"MARA","gap":2.8,"price":12.33,"quoteAsOf":"2026-09-30T09:27:08-04:00","marketCapB":4.7,"relativeVolume":0.3,"pcRatio":0.55,"lean":"calls leaning","priorDay":"Tue","priorChange":-1.0,"priorHigh":12.41,"priorLow":11.94,"position":"inside"},{"ticker":"CLSK","gap":2.8,"price":13.68,"quoteAsOf":"2026-09-30T09:27:10-04:00","marketCapB":3.4,"relativeVolume":0.3,"pcRatio":0.97,"lean":"mixed flow","priorDay":"Tue","priorChange":-0.2,"priorHigh":13.74,"priorLow":13.22,"position":"inside"},{"ticker":"JNUG","gap":2.7,"price":157.6,"quoteAsOf":"2026-09-30T09:18:08-04:00","marketCapB":0.6,"relativeVolume":3.8,"pcRatio":0.32,"lean":"calls leaning","priorDay":"Tue","priorChange":2.6,"priorHigh":154.03,"priorLow":148.36,"position":"above"},{"ticker":"COIN","gap":2.7,"price":195.13,"quoteAsOf":"2026-09-30T09:26:59-04:00","marketCapB":50.6,"relativeVolume":0.4,"pcRatio":1.05,"lean":"mixed flow","priorDay":"Tue","priorChange":-0.9,"priorHigh":197.63,"priorLow":188.14,"position":"inside"},{"ticker":"YANG","gap":-2.6,"price":31.59,"quoteAsOf":"2026-09-30T09:00:00-04:00","marketCapB":0.1,"relativeVolume":4.0,"pcRatio":0.22,"lean":"calls leaning","priorDay":"Tue","priorChange":2.7,"priorHigh":32.94,"priorLow":32.33,"position":"below"},{"ticker":"YINN","gap":2.5,"price":25.25,"quoteAsOf":"2026-09-30T09:23:30-04:00","marketCapB":0.6,"relativeVolume":1.0,"pcRatio":0.51,"lean":"calls leaning","priorDay":"Tue","priorChange":-2.8,"priorHigh":24.78,"priorLow":24.27,"position":"above"}],"marketRegime":[],"marketMovers":{"asOf":"2026-09-30T20:05:13.948839Z","gainers":[{"t":"UTHR","price":541.89,"chgPct":12.55},{"t":"ROG","price":153.06,"chgPct":10.78},{"t":"FORM","price":149.31,"chgPct":9.59},{"t":"ZETA","price":31.57,"chgPct":9.03},{"t":"NWCL","price":7.85,"chgPct":9.33},{"t":"BRZE","price":25.1,"chgPct":8.42},{"t":"FROG","price":97.04,"chgPct":7.38},{"t":"DOCS","price":28.34,"chgPct":6.86},{"t":"ACMR","price":80.92,"chgPct":7.02},{"t":"SLS","price":12.31,"chgPct":6.95},{"t":"IBRX","price":9.44,"chgPct":6.91},{"t":"EPR-PG","price":19.6,"chgPct":6.58},{"t":"PGEN","price":8.56,"chgPct":6.34},{"t":"IMOS","price":71.77,"chgPct":5.92},{"t":"LEGN","price":19.89,"chgPct":5.69},{"t":"GEN","price":22.02,"chgPct":5.61},{"t":"ITUB","price":8.54,"chgPct":5.62},{"t":"PHI","price":17.88,"chgPct":5.46},{"t":"TRMD","price":38.05,"chgPct":5.26},{"t":"BPYPP","price":15.93,"chgPct":5.15},{"t":"CBOE","price":275.06,"chgPct":5.09},{"t":"SYRE","price":89.03,"chgPct":5.09},{"t":"STUB","price":5.58,"chgPct":5.08},{"t":"QLYS","price":187.2,"chgPct":4.96},{"t":"SNPS","price":434.94,"chgPct":4.78},{"t":"BZ","price":14.8,"chgPct":4.45},{"t":"MH","price":13.13,"chgPct":4.37},{"t":"PARR","price":81.65,"chgPct":4.27},{"t":"SEI","price":71.13,"chgPct":4.08},{"t":"PCOR","price":51.73,"chgPct":4.42},{"t":"FDS","price":270.14,"chgPct":3.91},{"t":"MP","price":47.29,"chgPct":4.09},{"t":"NICE","price":111.27,"chgPct":4.18},{"t":"HPE","price":63.89,"chgPct":3.9},{"t":"INTR","price":5.34,"chgPct":4.09},{"t":"PS","price":55.74,"chgPct":4.07},{"t":"KOD","price":94.8,"chgPct":4.04},{"t":"PATH","price":12.83,"chgPct":4.14},{"t":"ALMR","price":34.07,"chgPct":4.35},{"t":"TTAN","price":65.79,"chgPct":3.57},{"t":"TENB","price":36.39,"chgPct":4.0},{"t":"AVPT","price":14.08,"chgPct":3.76},{"t":"DK","price":71.4,"chgPct":3.88},{"t":"PLNT","price":42.23,"chgPct":3.66},{"t":"TWST","price":193.24,"chgPct":3.82},{"t":"GME","price":24.65,"chgPct":3.75},{"t":"INTC","price":120.23,"chgPct":3.71},{"t":"GKOS","price":164.24,"chgPct":3.59},{"t":"HIMS","price":29.79,"chgPct":3.8},{"t":"ENPH","price":32.99,"chgPct":3.64}],"losers":[{"t":"LQDA","price":30.26,"chgPct":-57.19},{"t":"TRLV","price":10.9,"chgPct":-12.17},{"t":"JBL","price":286.84,"chgPct":-10.04},{"t":"BLLN","price":106.44,"chgPct":-9.93},{"t":"CBRS","price":177.65,"chgPct":-8.87},{"t":"MTG","price":25.84,"chgPct":-8.53},{"t":"NMIH","price":37.32,"chgPct":-8.37},{"t":"ESNT","price":57.91,"chgPct":-8.43},{"t":"SECZ","price":14.64,"chgPct":-7.58},{"t":"HUT","price":86.1,"chgPct":-7.28},{"t":"KMX","price":55.11,"chgPct":-6.96},{"t":"ACT","price":43.26,"chgPct":-6.85},{"t":"RDN","price":30.63,"chgPct":-6.47},{"t":"FNF","price":38.66,"chgPct":-6.07},{"t":"EQPT","price":17.37,"chgPct":-6.11},{"t":"RIOT","price":20.15,"chgPct":-5.8},{"t":"MARA","price":11.33,"chgPct":-5.5},{"t":"MRNA","price":192.57,"chgPct":-5.35},{"t":"WF","price":75.24,"chgPct":-5.57},{"t":"FAF","price":60.78,"chgPct":-5.08},{"t":"INSP","price":69.37,"chgPct":-5.21},{"t":"SHG","price":77.6,"chgPct":-5.12},{"t":"TIGO","price":87.14,"chgPct":-5.01},{"t":"APP","price":290.43,"chgPct":-4.98},{"t":"GIS","price":32.16,"chgPct":-4.9},{"t":"BE","price":276.98,"chgPct":-4.9},{"t":"TRU","price":61.15,"chgPct":-4.88},{"t":"AIR","price":101.48,"chgPct":-4.93},{"t":"TOST","price":28.99,"chgPct":-4.83},{"t":"CAG","price":13.46,"chgPct":-4.71},{"t":"KNF","price":50.4,"chgPct":-4.33},{"t":"WGS","price":72.3,"chgPct":-4.6},{"t":"PLBL","price":5.57,"chgPct":-4.46},{"t":"TRN","price":25.53,"chgPct":-4.42},{"t":"GPCR","price":31.27,"chgPct":-4.34},{"t":"CROX","price":117.31,"chgPct":-4.34},{"t":"GRND","price":15.44,"chgPct":-4.22},{"t":"JBTM","price":105.45,"chgPct":-4.41},{"t":"GM","price":77.0,"chgPct":-4.31},{"t":"MAT","price":12.66,"chgPct":-4.24},{"t":"KALU","price":144.82,"chgPct":-4.2},{"t":"MKC","price":46.38,"chgPct":-4.17},{"t":"AGNC","price":9.07,"chgPct":-4.02},{"t":"NOC","price":483.42,"chgPct":-4.2},{"t":"CIFR","price":15.82,"chgPct":-4.15},{"t":"APLD","price":24.37,"chgPct":-4.09},{"t":"MICC","price":17.77,"chgPct":-4.2},{"t":"VSEC","price":164.7,"chgPct":-4.02},{"t":"BHF","price":49.9,"chgPct":-4.04},{"t":"FICO","price":592.49,"chgPct":-4.11}]},"nextScheduledScanAt":null}
-</script>
-<script id="levels-data" type="application/json">
-{"MDB":{"pdh":349.0,"pdl":321.0},"HPE":{"pdh":63.7,"pdl":60.68},"HIMS":{"pdh":29.83,"pdl":28.3},"AI":{"pdh":10.74,"pdl":10.23},"INTC":{"pdh":118.75,"pdl":113.97},"PS":{"pdh":59.0,"pdl":52.93},"DJT":{"pdh":9.44,"pdl":9.06},"LI":{"pdh":11.39,"pdl":11.09},"VLO":{"pdh":389.4,"pdl":379.57},"DDOG":{"pdh":269.44,"pdl":259.26},"HPQ":{"pdh":31.35,"pdl":30.6},"OKTA":{"pdh":208.69,"pdl":200.59},"GUSH":{"pdh":40.61,"pdl":39.18},"PSX":{"pdh":252.95,"pdl":248.51},"MPC":{"pdh":394.23,"pdl":380.0},"PATH":{"pdh":12.35,"pdl":11.99},"IONQ":{"pdh":45.9,"pdl":43.72},"USO":{"pdh":147.61,"pdl":143.3},"PANW":{"pdh":391.75,"pdl":377.8},"CEG":{"pdh":270.11,"pdl":261.22},"VST":{"pdh":143.51,"pdl":138.85},"MRNA":{"pdh":208.9,"pdl":190.0},"APP":{"pdh":313.38,"pdl":304.84},"HOOD":{"pdh":119.19,"pdl":114.93},"META":{"pdh":740.45,"pdl":715.1},"SPY":{"pdh":766.98,"pdl":762.35},"QQQ":{"pdh":740.58,"pdl":735.34},"IWM":{"pdh":281.05,"pdl":277.41},"CCL":{"pdh":25.29,"pdl":24.0},"BE":{"pdh":302.35,"pdl":271.2},"KOLD":{"pdh":28.51,"pdl":27.38},"RCL":{"pdh":261.99,"pdl":254.21},"PTON":{"pdh":5.09,"pdl":4.76},"AMAT":{"pdh":513.28,"pdl":499.17},"DASH":{"pdh":188.14,"pdl":179.12},"ORCL":{"pdh":143.67,"pdl":132.53},"KLAC":{"pdh":197.47,"pdl":192.57},"NTLA":{"pdh":12.05,"pdl":11.42},"MRVL":{"pdh":264.4,"pdl":256.88},"ASML":{"pdh":1841.77,"pdl":1800.4},"NCLH":{"pdh":15.28,"pdl":14.71},"LRCX":{"pdh":328.32,"pdl":319.15},"CRSP":{"pdh":56.48,"pdl":54.0},"TSEM":{"pdh":237.55,"pdl":228.13},"YANG":{"pdh":32.94,"pdl":32.33},"ENPH":{"pdh":32.01,"pdl":30.54},"ARM":{"pdh":301.0,"pdl":287.06},"SOXL":{"pdh":152.37,"pdl":145.49},"SHOP":{"pdh":149.34,"pdl":142.43},"AFRM":{"pdh":70.31,"pdl":67.83},"LCID":{"pdh":4.08,"pdl":3.85},"BOIL":{"pdh":20.31,"pdl":19.43},"AMC":{"pdh":3.35,"pdl":2.93},"DKNG":{"pdh":21.33,"pdl":19.55},"XPEV":{"pdh":9.65,"pdl":9.44},"NIO":{"pdh":3.46,"pdl":3.38},"LUNR":{"pdh":15.55,"pdl":14.54},"ACHR":{"pdh":5.29,"pdl":5.02},"UNG":{"pdh":10.55,"pdl":10.32},"LULU":{"pdh":100.49,"pdl":96.62},"SLB":{"pdh":50.77,"pdl":49.35},"RKLB":{"pdh":74.25,"pdl":69.4},"YINN":{"pdh":24.78,"pdl":24.27},"SOXS":{"pdh":33.64,"pdl":31.96},"AAPL":{"pdh":337.09,"pdl":328.7},"OPEN":{"pdh":2.45,"pdl":2.35},"JOBY":{"pdh":6.25,"pdl":5.95},"BNTX":{"pdh":99.79,"pdl":97.6},"QBTS":{"pdh":17.21,"pdl":16.36},"MDT":{"pdh":89.22,"pdl":86.38},"BILI":{"pdh":15.02,"pdl":14.73},"ASTS":{"pdh":65.47,"pdl":58.58},"JNUG":{"pdh":154.03,"pdl":148.36},"DRIP":{"pdh":38.6,"pdl":37.41}}
-</script>
-<script id="pmlevels-data" type="application/json">
-{"SPY":{"pmh":768.45,"pml":763.22},"QQQ":{"pmh":741.95,"pml":735.64},"IWM":{"pmh":281.56,"pml":278.17},"CCL":{"pmh":25.54,"pml":24.91},"BE":{"pmh":297.69,"pml":290.7},"KOLD":{"pmh":28.62,"pml":27.5},"RCL":{"pmh":264.2,"pml":257.11},"PTON":{"pmh":5.14,"pml":5.0},"AMAT":{"pmh":516.66,"pml":505.38},"DASH":{"pmh":190.82,"pml":181.05},"ORCL":{"pmh":139.47,"pml":134.62},"KLAC":{"pmh":197.94,"pml":194.0},"NTLA":{"pmh":12.2,"pml":11.75},"MRVL":{"pmh":265.92,"pml":260.7},"ASML":{"pmh":1849.0,"pml":1818.0},"NCLH":{"pmh":15.28,"pml":14.68},"LRCX":{"pmh":327.41,"pml":319.39},"CRSP":{"pmh":56.68,"pml":55.1},"TSEM":{"pmh":238.8,"pml":229.62},"YANG":{"pmh":32.02,"pml":31.5},"ENPH":{"pmh":32.43,"pml":31.5},"ARM":{"pmh":298.25,"pml":289.44},"SOXL":{"pmh":149.75,"pml":142.97},"SHOP":{"pmh":149.99,"pml":147.34},"MRNA":{"pmh":207.47,"pml":184.53},"AFRM":{"pmh":70.23,"pml":69.03},"META":{"pmh":740.27,"pml":727.0},"LCID":{"pmh":4.13,"pml":4.03},"PS":{"pmh":54.68,"pml":53.0},"BOIL":{"pmh":20.15,"pml":19.37},"AMC":{"pmh":3.12,"pml":3.07},"DKNG":{"pmh":19.74,"pml":19.45},"XPEV":{"pmh":9.71,"pml":9.53},"NIO":{"pmh":3.44,"pml":3.37},"LUNR":{"pmh":14.9,"pml":14.54},"LI":{"pmh":11.51,"pml":11.38},"ACHR":{"pmh":5.14,"pml":5.05},"USO":{"pmh":146.45,"pml":142.64},"UNG":{"pmh":10.51,"pml":10.31},"LULU":{"pmh":97.67,"pml":96.66},"SLB":{"pmh":50.23,"pml":50.05},"RKLB":{"pmh":71.48,"pml":69.68},"YINN":{"pmh":25.43,"pml":24.91},"SOXS":{"pmh":34.18,"pml":32.67},"AAPL":{"pmh":331.2,"pml":328.75},"OPEN":{"pmh":2.42,"pml":2.37},"JOBY":{"pmh":6.07,"pml":5.96},"BNTX":{"pmh":99.41,"pml":98.05},"HPQ":{"pmh":31.0,"pml":30.56},"QBTS":{"pmh":16.72,"pml":16.35},"MDT":{"pmh":87.67,"pml":87.0},"HPE":{"pmh":66.02,"pml":61.0},"BILI":{"pmh":15.19,"pml":15.01},"ASTS":{"pmh":60.75,"pml":59.12},"JNUG":{"pmh":159.0,"pml":152.52},"DRIP":{"pmh":37.69,"pml":37.33}}
-</script>
-<script id="caps-data" type="application/json">
-{"SPY":811.9,"QQQ":489.0,"IWM":80.5,"CCL":30.3,"BE":77.4,"KOLD":0.1,"RCL":64.9,"PTON":2.1,"AMAT":386.3,"DASH":77.3,"ORCL":402.0,"KLAC":246.9,"NTLA":1.6,"MRVL":226.4,"ASML":680.4,"NCLH":6.6,"LRCX":393.5,"CRSP":5.2,"TSEM":25.5,"YANG":0.1,"ENPH":4.1,"ARM":302.6,"SOXL":19.3,"SHOP":185.3,"MRNA":78.8,"AFRM":22.7,"META":1823.0,"LCID":1.5,"PS":23.7,"BOIL":0.4,"AMC":2.9,"DKNG":10.5,"XPEV":9.5,"NIO":9.0,"LUNR":2.4,"LI":11.4,"ACHR":4.0,"USO":1.9,"UNG":0.6,"LULU":11.1,"SLB":76.4,"RKLB":46.2,"YINN":0.6,"SOXS":1.4,"AAPL":4938.7,"OPEN":2.3,"JOBY":6.1,"BNTX":24.9,"HPQ":28.2,"QBTS":6.4,"MDT":114.5,"HPE":83.1,"BILI":6.2,"ASTS":18.3,"JNUG":0.6,"DRIP":0.1,"LABU":0.6,"EDC":0.2,"EDZ":0.0,"NRGD":0.0,"XLV":43.9,"XLY":22.7,"XLB":8.8,"XLRE":8.3,"XLC":22.4,"URA":6.4,"TAN":1.1,"CRM":187.0,"ANET":258.5,"NET":126.0,"UPST":2.2,"CLSK":3.4,"SOFI":20.6,"NU":59.1,"SPOT":102.3}
-</script>
-
-<script id="watchlist-data" type="application/json">
-{"marketDate":"2026-09-30","builtAt":"2026-09-30T13:58:47.456455-05:00","rows":[{"ticker":"LABU","rank":1,"pdh":265.56,"pdl":249.65,"pmh":265.64,"pml":259.81,"refPx":265.64,"nearName":"PMH","nearDist":0.0,"marketCapB":0.6,"changePct":4.36},{"ticker":"EDC","rank":2,"pdh":78.82,"pdl":77.3,"pmh":78.0,"pml":76.44,"refPx":78.0,"nearName":"PMH","nearDist":0.0,"marketCapB":0.2,"changePct":-2.96},{"ticker":"EDZ","rank":3,"pdh":14.38,"pdl":14.09,"pmh":14.37,"pml":14.37,"refPx":14.37,"nearName":"PMH","nearDist":0.0,"marketCapB":0.0,"changePct":3.11},{"ticker":"DRIP","rank":4,"pdh":38.6,"pdl":37.41,"pmh":37.69,"pml":37.44,"refPx":37.44,"nearName":"PML","nearDist":0.0,"marketCapB":0.1,"changePct":-2.4},{"ticker":"NRGD","rank":5,"pdh":15.16,"pdl":14.65,"pmh":14.76,"pml":14.76,"refPx":14.76,"nearName":"PMH","nearDist":0.0,"marketCapB":0.0,"changePct":-3.41},{"ticker":"XLV","rank":6,"pdh":171.54,"pdl":168.82,"pmh":171.07,"pml":170.32,"refPx":170.32,"nearName":"PML","nearDist":0.0,"marketCapB":43.9,"changePct":-0.74},{"ticker":"XLY","rank":7,"pdh":109.57,"pdl":108.68,"pmh":109.0,"pml":108.92,"refPx":108.92,"nearName":"PML","nearDist":0.0,"marketCapB":22.7,"changePct":-0.14},{"ticker":"XLB","rank":8,"pdh":49.55,"pdl":48.91,"pmh":49.31,"pml":48.95,"refPx":49.31,"nearName":"PMH","nearDist":0.0,"marketCapB":8.8,"changePct":-0.13},{"ticker":"XLRE","rank":9,"pdh":41.52,"pdl":41.07,"pmh":41.58,"pml":41.39,"refPx":41.58,"nearName":"PMH","nearDist":0.0,"marketCapB":8.3,"changePct":-0.74},{"ticker":"XLC","rank":10,"pdh":111.52,"pdl":110.6,"pmh":111.64,"pml":111.47,"refPx":111.64,"nearName":"PMH","nearDist":0.0,"marketCapB":22.4,"changePct":0.22},{"ticker":"UNG","rank":11,"pdh":10.55,"pdl":10.32,"pmh":10.51,"pml":10.31,"refPx":10.32,"nearName":"PDL","nearDist":0.0,"marketCapB":0.6,"changePct":0.49},{"ticker":"URA","rank":12,"pdh":40.74,"pdl":39.75,"pmh":40.67,"pml":39.92,"refPx":40.67,"nearName":"PMH","nearDist":0.0,"marketCapB":6.4,"changePct":0.02},{"ticker":"TAN","rank":13,"pdh":43.49,"pdl":42.84,"pmh":43.44,"pml":43.43,"refPx":43.44,"nearName":"PMH","nearDist":0.0,"marketCapB":1.1,"changePct":1.5},{"ticker":"CRM","rank":14,"pdh":228.98,"pdl":223.43,"pmh":227.0,"pml":224.5,"refPx":227.0,"nearName":"PMH","nearDist":0.0,"marketCapB":187.0,"changePct":1.49},{"ticker":"ARM","rank":15,"pdh":301.0,"pdl":287.06,"pmh":296.46,"pml":289.44,"refPx":296.46,"nearName":"PMH","nearDist":0.0,"marketCapB":302.6,"changePct":-2.12},{"ticker":"ANET","rank":16,"pdh":207.48,"pdl":201.35,"pmh":205.0,"pml":202.0,"refPx":205.0,"nearName":"PMH","nearDist":0.0,"marketCapB":258.5,"changePct":0.75},{"ticker":"NET","rank":17,"pdh":356.72,"pdl":348.01,"pmh":355.07,"pml":352.71,"refPx":355.07,"nearName":"PMH","nearDist":0.0,"marketCapB":126.0,"changePct":-0.53},{"ticker":"UPST","rank":18,"pdh":23.68,"pdl":22.91,"pmh":23.5,"pml":23.01,"refPx":23.5,"nearName":"PMH","nearDist":0.0,"marketCapB":2.2,"changePct":-0.95},{"ticker":"CLSK","rank":19,"pdh":13.74,"pdl":13.22,"pmh":13.67,"pml":13.24,"refPx":13.67,"nearName":"PMH","nearDist":0.0,"marketCapB":3.4,"changePct":-1.77},{"ticker":"SOFI","rank":20,"pdh":16.21,"pdl":15.86,"pmh":16.07,"pml":15.36,"refPx":15.86,"nearName":"PDL","nearDist":0.0,"marketCapB":20.6,"changePct":-0.66},{"ticker":"NU","rank":21,"pdh":12.5,"pdl":12.27,"pmh":12.57,"pml":12.34,"refPx":12.57,"nearName":"PMH","nearDist":0.0,"marketCapB":59.1,"changePct":2.0},{"ticker":"SPOT","rank":22,"pdh":501.0,"pdl":488.52,"pmh":494.83,"pml":494.57,"refPx":494.57,"nearName":"PML","nearDist":0.0,"marketCapB":102.3,"changePct":-1.14}]}
-</script>
 
 <script>
-'use strict';
-// Capture any JS failure for the header heartbeat (ERROR state) as early as possible.
-let jsErr = null;
-window.addEventListener('error', function(e){
-  try { jsErr = String((e && e.message) || 'script error').slice(0, 60); } catch(_){ jsErr = 'script error'; }
-  try { if (typeof renderHeartbeat === 'function') renderHeartbeat(); } catch(_){}
-});
-/* ================= UTILITIES ================= */
+"use strict";
+/* =====================================================================
+   Options Flow Board — standalone index, rebuilt 2026-10-26.
+   One fetch layer with per-feed failure isolation; every section renders
+   from the published feeds only — no embedded data snapshots. A failed
+   feed leaves its section on last-good data with an honest empty/error
+   state; it never blanks the page or other sections.
+   ===================================================================== */
 const $ = id => document.getElementById(id);
 const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-/* ============ SECTION CONSOLIDATION (runs first) ============
-   Morning funnel -> one tabbed panel (Gaps | Levels | Breaks);
-   ignitions+persistence -> Unusual flow; movers+sectors -> Market;
-   static Morning-flow reference -> collapsed <details>. All inner IDs are
-   preserved, so every renderer keeps working untouched. */
-let mornTabManual = false;
-function selectMornTab(name){
-  document.querySelectorAll('#mornTabs .mtab').forEach(t => t.classList.toggle('on', t.dataset.mtab === name));
-  ['gaps','levels','breaks'].forEach(k => { const p = $('mpane-' + k); if (p) p.classList.toggle('on', k === name); });
-  try { localStorage.setItem('ofb_mtab', name); } catch(e){}
-}
-(function consolidate(){
-  function moveBody(oldSecId, targetId, label){
-    const old = $(oldSecId);
-    if (!old) return;
-    const target = $(targetId);
-    const body = old.querySelector('.sec-body');
-    const head = old.querySelector('.sec-head');
-    if (target && body){
-      if (label){
-        const h = document.createElement('div');
-        h.className = 'usub-label';
-        h.textContent = label;
-        target.appendChild(h);
-      }
-      // Preserve the old head's identified elements (meta/upd spans, tool buttons)
-      // so every renderer keeps working against the same IDs after the move.
-      if (head){
-        head.querySelectorAll('[id]').forEach(el => {
-          el.classList.add('moved-head-el');
-          target.appendChild(el);
-        });
-      }
-      while (body.firstChild) target.appendChild(body.firstChild);
-    }
-    old.remove();
-  }
-  moveBody('secPremarket', 'mpane-gaps');
-  moveBody('secWatch', 'mpane-levels');
-  moveBody('secBreakRank', 'mpane-breaks');
-  moveBody('secIgn', 'uflow-ign', "Yesterday's ignitions");
-  moveBody('secPersist', 'uflow-persist', 'Flow persistence');
-  moveBody('secMovers', 'mkt-movers', 'Full-market movers');
-  moveBody('secSectors', 'mkt-sectors', 'Sector heat');
-  const mf = $('secMFlow');
-  if (mf){
-    const det = document.createElement('details');
-    det.className = 'mflow-details';
-    const sum = document.createElement('summary');
-    sum.textContent = 'Morning flow — four-step reference';
-    det.appendChild(sum);
-    const body = mf.querySelector('.sec-body');
-    if (body){ while (body.firstChild) det.appendChild(body.firstChild); }
-    mf.replaceWith(det);
-  }
-  document.querySelectorAll('#mornTabs .mtab').forEach(t =>
-    t.addEventListener('click', () => { mornTabManual = true; selectMornTab(t.dataset.mtab); }));
-  let def = 'gaps';
-  try { def = localStorage.getItem('ofb_mtab') || def; } catch(e){}
-  selectMornTab(def);
-})();
-/* Auto-select the most relevant morning tab on fresh data (until the user picks one). */
-function autoMornTab(){
-  if (mornTabManual) return;
-  const hr = new Date().getHours(), min = new Date().getMinutes();
-  const ctMin = hr * 60 + min; // approx local; good enough for tab default
-  if (typeof BREAKRANK !== 'undefined' && BREAKRANK && BREAKRANK.rows && BREAKRANK.rows.length) selectMornTab('breaks');
-  else if (typeof wlLive !== 'undefined' && wlLive) selectMornTab('levels');
-  else selectMornTab('gaps');
-}
 const fmtPct = (v, d=2) => (v == null || !isFinite(v)) ? '—' : ((v >= 0 ? '+' : '') + v.toFixed(d) + '%');
 const fmtVol = v => (v == null) ? '—' : v >= 1e9 ? (v/1e9).toFixed(2)+'B' : v >= 1e6 ? (v/1e6).toFixed(1)+'M' : v >= 1e3 ? (v/1e3).toFixed(0)+'K' : String(Math.round(v));
 const fmtPx = p => (p == null || !isFinite(p)) ? '—' : '$' + p.toFixed(2);
+const fmtCapB = v => { if (v == null || !isFinite(v)) return '—'; const s = v >= 100 ? Math.round(v).toLocaleString('en-US') : String(Math.round(v * 10) / 10); return '$' + s + 'B'; };
+const fmtMonD = ymd => { const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(ymd || ''); if (!m) return ymd || ''; return ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][+m[2] - 1] + ' ' + (+m[3]) + ', ' + m[1]; };
 const cssVar = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 const etFmt = new Intl.DateTimeFormat('en-US',{timeZone:'America/New_York',hour:'numeric',minute:'2-digit',second:'2-digit',hour12:true});
 const etFmtShort = new Intl.DateTimeFormat('en-US',{timeZone:'America/New_York',hour:'numeric',minute:'2-digit',hour12:true});
-
-/* ================= SNAPSHOT ================= */
-let SNAP = JSON.parse(document.getElementById('snapshot-data').textContent);
-let snapLive = false;   // true once a remote snapshot.json has been adopted
-let SNAP_TS = 0, SNAP_D = new Date(), SNAP_FRESH = false;
-const LEVELS = new Map();   // ticker -> {pdh, pdl}
-const NAMES  = new Map();   // ticker -> company name
-const CAPS   = new Map();   // ticker -> marketCapB
-const SECTORS= new Map();   // ticker -> sector
-const ALL_NAMES = [];
-const LVL_EMBED = JSON.parse(document.getElementById('levels-data').textContent || '{}');
-const PM_EMBED = JSON.parse(document.getElementById('pmlevels-data').textContent || '{}');
-const CAP_EMBED = JSON.parse(document.getElementById('caps-data').textContent || '{}');
-function seedSnapshot(){
-  SNAP_TS = Date.parse(SNAP.sourceAsOf || SNAP.generatedAt || SNAP.asOf || '');
-  SNAP_D = isNaN(SNAP_TS) ? new Date() : new Date(SNAP_TS);
-  SNAP_FRESH = !isNaN(SNAP_TS) && Date.now() - SNAP_TS < 1000*60*60*20;
-  LEVELS.clear(); NAMES.clear(); CAPS.clear(); SECTORS.clear(); ALL_NAMES.length = 0;
-  // Embedded reference levels seed first: yesterday's PDH/PDL for 74 priority tickers
-  // plus market caps ($B) — the page works even before quotes arrive.
-  for (const [t, v] of Object.entries(LVL_EMBED))
-    if (v && v.pdh != null && v.pdl != null) LEVELS.set(t, {pdh: v.pdh, pdl: v.pdl});
-  for (const [t, v] of Object.entries(CAP_EMBED))
-    if (v != null && isFinite(v)) CAPS.set(t, v);
-  for (const r of (SNAP.bullish||[]).concat(SNAP.bearish||[], SNAP.premarket||[])) {
-    if (r.marketCapB != null && !CAPS.has(r.ticker)) CAPS.set(r.ticker, r.marketCapB);  // outside first-seen guard: bullish/bearish rows carry no marketCapB
-    if (!LEVELS.has(r.ticker)) {
-      LEVELS.set(r.ticker, {pdh: r.prevHigh, pdl: r.prevLow});
-      NAMES.set(r.ticker, r.name || '');
-      if (r.sector) SECTORS.set(r.ticker, r.sector);
-      ALL_NAMES.push(r.ticker);
-    }
-  }
-  // The 15m confirmed-closes panel evaluates the full priority set, not just the
-  // snapshot's unusual-flow rows — SPY/QQQ/IWM and the other priority tickers get
-  // cards whenever their latest completed 15m candle closes through a level pair.
-  for (const t of Object.keys(LVL_EMBED)) if (!ALL_NAMES.includes(t)) ALL_NAMES.push(t);
-}
-seedSnapshot();
-const WL_EMBED = JSON.parse(document.getElementById('watchlist-data').textContent);
-let WL = WL_EMBED, wlLive = false;   // morning watchlist {marketDate, rows:[...]}; live watchlist.json overrides when valid, embedded is the fallback
-function seedWatchlist(){
-  for (const w of ((WL && WL.rows) || [])){
-    // Backfill: the snapshot leaves prevHigh/prevLow null on most rows, so a
-    // watchlist row upgrades an existing null entry (real snapshot levels win).
-    const cur = LEVELS.get(w.ticker);
-    if (w.pdh != null && (!cur || cur.pdh == null || cur.pdl == null))
-      LEVELS.set(w.ticker, {pdh: w.pdh, pdl: w.pdl});
-    if (w.marketCapB != null && !CAPS.has(w.ticker)) CAPS.set(w.ticker, w.marketCapB);
-    if (!NAMES.has(w.ticker)) NAMES.set(w.ticker, '');
-    if (!ALL_NAMES.includes(w.ticker)) ALL_NAMES.push(w.ticker);
-  }
-}
-seedWatchlist();
-const UNISET = new Set((SNAP.universe||[]).map(x => x.ticker || x));  // full watch universe; universe feed adds its tickers on each poll
-const PRISET = new Set();  // the 56 priority names from quotes.json; "rest of market" = UNISET minus these
-const COMPANIES = new Map();
-for (const u of (SNAP.universe||[])) if (u.ticker) COMPANIES.set(u.ticker, u.name || NAMES.get(u.ticker) || '');
-
-/* ================= QUOTE STORE ================= */
-const Q = new Map();        // ticker -> {price, prevClose, chgPct, high, low, volume, bars, pmh, pml, ts}
-let feedAsOf = null, lastErr = null;
-let FT = JSON.parse(document.getElementById('ft-data').textContent), ftErr = null, ftLive = false;  // yesterday's ignitions sidecar {asOf, date, ignitions:[{ticker,x}]} — embedded fallback; remote follow_through.json overrides when reachable
-const FT_URL = "https://raw.githubusercontent.com/HueTX/options-board-data/main/follow_through.json";   // live sidecar: yesterday's ignitions, refreshed market hours; embedded ft-data is the fallback
-const SNAPSHOT_URL = "https://raw.githubusercontent.com/HueTX/options-board-data/main/snapshot.json";   // live sidecar: premarket + flow snapshot, refreshed premarket + market hours; adopted when its marketDate is >= the embedded snapshot's
-const QUOTES_URL = "https://raw.githubusercontent.com/HueTX/options-board-data/main/quotes.json";
-const QUOTES_UNI_URL = "https://raw.githubusercontent.com/HueTX/options-board-data/main/quotes_universe.json";
-const WATCHLIST_URL = "https://raw.githubusercontent.com/HueTX/options-board-data/main/watchlist.json";
-const BREAKRANK_URL = "https://raw.githubusercontent.com/HueTX/options-board-data/main/break_ranking.json"; // ranked first-15m break table {marketDate, asOf, rows:[rank,ticker,side,close,gapPct,thruPct,flowX,score]}
-const WCHARTS_URL = "https://raw.githubusercontent.com/HueTX/options-board-data/main/wcharts.json";   // live 1H/4H trend series for the watchlist; merged into WCHARTS when its marketDate is >= the current rows'
-const MOVERS_URL = "https://raw.githubusercontent.com/HueTX/options-board-data/main/market_movers.json";
-const DBARS_URL = "https://raw.githubusercontent.com/HueTX/options-board-data/main/dbars.json";   // 5m drawer bars for flow/mover tickers outside the 56-ticker quotes feed
-const REGIME1H_URL = "https://raw.githubusercontent.com/HueTX/options-board-data/main/regime1h.json"; // 1H regime bars, same h1 semantics as the watchlist charts
-const CLOSES15_URL = "https://raw.githubusercontent.com/HueTX/options-board-data/main/fifteen_min_closes.json"; // 15m confirmed closes feed; its asOf drives the "15m closes" health chip
-const PERSIST_URL = "https://raw.githubusercontent.com/HueTX/options-board-data/main/persistence.json"; // flow persistence: streaks, confirmed ignitions, first appearances
-const FEED_OK = !/PUT-YOUR/.test(QUOTES_URL + QUOTES_UNI_URL + WATCHLIST_URL);   // replace-all safe: true once the placeholder is gone from the URLs
-// Per-feed heartbeat: last SUCCESSFUL fetch time (epoch ms). A failed fetch leaves the
-// previous timestamp alone, so the chip ages honestly toward STALE while the section
-// keeps rendering its last-good data.
-const HB = { quotes: null, universe: null, snapshot: null, watchlist: null, ignitions: null, movers: null, breakrank: null };
-let lastPollT = 0;   // epoch ms of the last successful quote poll (drives the 60s refresh countdown)
-let pollDone = false;  // true once the first poll has finished (success or failure)
 const ctFmtT = new Intl.DateTimeFormat('en-US',{timeZone:'America/Chicago',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false});
-function ctTime(ms){ return ms ? ctFmtT.format(new Date(ms)) + ' CT' : '—'; }
+const ctFmtHM = new Intl.DateTimeFormat('en-US',{timeZone:'America/Chicago',hour:'numeric',minute:'2-digit',hour12:true});
+const ctFmtShort = new Intl.DateTimeFormat('en-US',{timeZone:'America/Chicago',hour:'numeric',minute:'2-digit',hour12:true});
+const ctTime = ms => ms ? ctFmtT.format(new Date(ms)) + ' CT' : '—';
+function durHM(m){ m = Math.max(0, Math.round(m)); return Math.floor(m/60) + 'h ' + String(m%60).padStart(2,'0') + 'm'; }
+function etParts(){ const p = new Intl.DateTimeFormat('en-US',{timeZone:'America/New_York',weekday:'short',hour:'numeric',minute:'numeric',hour12:false}).formatToParts(new Date()); const g = k => (p.find(x => x.type === k) || {}).value; return {wd: g('weekday'), min: ((+g('hour')) % 24) * 60 + (+g('minute'))}; }
+function isMarketOpen(){ const {wd, min} = etParts(); return !['Sat','Sun'].includes(wd) && min >= 570 && min < 960; }
+function etDayMin(ts){ const d = new Date(ts*1000); const parts = new Intl.DateTimeFormat('en-US',{timeZone:'America/New_York',hour:'numeric',minute:'numeric',hour12:false}).formatToParts(d); const g = k => (parts.find(p=>p.type===k)||{}).value; return (+g('hour')%24)*60 + (+g('minute')); }
+function etDateOfMs(ms){ const fmt = new Intl.DateTimeFormat('en-CA', {timeZone: 'America/New_York', year: 'numeric', month: '2-digit', day: '2-digit'}); return fmt.format(new Date(ms)); }
+/* The NYSE market date the board should expect: rolls back before 8 AM ET
+   and to Friday on weekends, so the board never demands a date whose data
+   cannot exist yet. */
+function nyMarketDate(){
+  const parts = new Intl.DateTimeFormat('en-CA', {timeZone: 'America/New_York', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', hour12: false}).formatToParts(new Date());
+  const get = t => (parts.find(p => p.type === t) || {}).value;
+  const d = new Date(Date.UTC(+get('year'), +get('month') - 1, +get('day'), 12));
+  if ((parseInt(get('hour'), 10) % 24) < 8) d.setUTCDate(d.getUTCDate() - 1);
+  const wd = d.getUTCDay();
+  if (wd === 0) d.setUTCDate(d.getUTCDate() - 2);
+  else if (wd === 6) d.setUTCDate(d.getUTCDate() - 1);
+  return d.toISOString().slice(0, 10);
+}
+
+/* ================= STATE ================= */
+let SNAP = {marketDate: null, bullish: [], bearish: [], premarket: []};
+let SNAP_TS = 0, SNAP_D = new Date(), SNAP_FRESH = false;
+let WL = {marketDate: null, rows: []};
+let MV = null, PERSIST = null, BREAKRANK = null, FT = {date: '', ignitions: []};
+let CLOSES15 = null;
+const Q = new Map();        // ticker -> {price, prevClose, chgPct, high, low, volume, bars, pmh, pml, ts}
+const LEVELS = new Map();   // ticker -> {pdh, pdl} from published levels only
+const NAMES = new Map();    // ticker -> company name (names_cache.json + snapshot rows)
+const CAPS = new Map();     // ticker -> marketCapB (market_caps.json + row values)
+const SECTORS = new Map();  // ticker -> sector (snapshot rows)
+const COMPANIES = new Map();// ticker -> name (snapshot universe rows when present)
+const UNISET = new Set();   // tracked universe (quotes_universe + quotes + dbars)
+const PRISET = new Set();   // priority names from quotes.json
+let WCHARTS = {};           // ticker -> {h1:[], h4:[]} (wcharts.json + regime1h.json)
+const HB = { quotes: null, universe: null, snapshot: null, watchlist: null, ignitions: null, movers: null, breakrank: null };
+let feedAsOf = null, lastErr = null, lastPollT = 0, pollDone = false;
+let quotesDate = null, uniDate = null, mvDate = null;
+let quotesAsOfMs = null, uniAsOfMs = null, closes15AsOfMs = null, mvAsOfMs = null;
+let ftLive = false, ftErr = null, wlLive = false;
+let pins = new Set(); try { pins = new Set(JSON.parse(localStorage.getItem('ofb_pins') || '[]')); } catch(e){}
+let watchStars = new Set(); try { watchStars = new Set(JSON.parse(localStorage.getItem('ofb_watch') || '[]')); } catch(e){}
+
+/* ================= FETCH LAYER ================= */
+const RAW = 'https://raw.githubusercontent.com/HueTX/options-board-data/main/';
+const FEED_URLS = {
+  quotes: RAW + 'quotes.json', universe: RAW + 'quotes_universe.json',
+  snapshot: RAW + 'snapshot.json', movers: RAW + 'market_movers.json',
+  watchlist: RAW + 'watchlist.json', breakrank: RAW + 'break_ranking.json',
+  wcharts: RAW + 'wcharts.json', dbars: RAW + 'dbars.json',
+  regime1h: RAW + 'regime1h.json', closes15: RAW + 'fifteen_min_closes.json',
+  persist: RAW + 'persistence.json', follow: RAW + 'follow_through.json',
+  caps: RAW + 'market_caps.json', names: RAW + 'names_cache.json'
+};
+async function fetchFeed(url, ms){
+  const ctl = new AbortController();
+  const to = setTimeout(() => { try { ctl.abort(); } catch(e){} }, ms || 20000);
+  try {
+    const r = await fetch(url + '?t=' + Math.floor(Date.now()/15000), {signal: ctl.signal, cache: 'no-store'});
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    return await r.json();
+  } finally { clearTimeout(to); }
+}
+const grab = name => fetchFeed(FEED_URLS[name]).catch(() => null);
 
 function pmhPmlFromBars(bars){
   if (!bars || !bars.length) return [null, null];
   let pmh = null, pml = null;
   for (const b of bars){
     const [t,, h, l] = b;
-    if (etDayMin(t) < 570){
-      pmh = pmh == null ? h : Math.max(pmh, h);
-      pml = pml == null ? l : Math.min(pml, l);
-    }
+    if (etDayMin(t) < 570){ pmh = pmh == null ? h : Math.max(pmh, h); pml = pml == null ? l : Math.min(pml, l); }
   }
   return [pmh, pml];
 }
@@ -1148,282 +1014,103 @@ function ingestEntry(sym, e){
   rec.chgPct = (rec.price != null && rec.prevClose) ? (rec.price - rec.prevClose) / rec.prevClose * 100 : (prev ? prev.chgPct : null);
   if (rec.bars){ const [pmh, pml] = pmhPmlFromBars(rec.bars); rec.pmh = pmh; rec.pml = pml; }
   else if (prev && prev.bars){ rec.bars = prev.bars; rec.pmh = prev.pmh; rec.pml = prev.pml; }
-  if (rec.pmh == null && PM_EMBED[sym] && PM_EMBED[sym].pmh != null){ rec.pmh = PM_EMBED[sym].pmh; rec.pml = PM_EMBED[sym].pml; }
   Q.set(sym, rec);
 }
-// Live display values: a quote only counts as live when it is fresh AND stamped on
-// the current market date. A carried-forward prior-session quote (e.g. MRNA from
-// yesterday) must never masquerade as today's price — sections fall back to the
-// row's own snapshot/file value instead.
-function quoteFresh(q){
-  if (!q || q.price == null || !q.ts) return false;
-  return etDateOfMs(q.ts*1000) === nyMarketDate();
-}
+/* A quote only counts as live when fresh AND stamped on the current market
+   date — a carried-forward prior-session quote never masquerades as today's. */
+function quoteFresh(q){ if (!q || q.price == null || !q.ts) return false; return etDateOfMs(q.ts*1000) === nyMarketDate(); }
 function livePrice(t){ const q = Q.get(t); return quoteFresh(q) ? q.price : null; }
 function liveChg(t){ const q = Q.get(t); return (quoteFresh(q) && q.chgPct != null) ? q.chgPct : null; }
 
-/* ================= FEED ================= */
+function seedSnapshot(){
+  SNAP_TS = Date.parse(SNAP.sourceAsOf || SNAP.generatedAt || SNAP.asOf || '');
+  SNAP_D = isNaN(SNAP_TS) ? new Date() : new Date(SNAP_TS);
+  SNAP_FRESH = !isNaN(SNAP_TS) && Date.now() - SNAP_TS < 1000*60*60*20;
+  for (const r of (SNAP.bullish||[]).concat(SNAP.bearish||[], SNAP.premarket||[])){
+    if (!r.ticker) continue;
+    if (r.marketCapB != null && !CAPS.has(r.ticker)) CAPS.set(r.ticker, r.marketCapB);
+    const ph = r.prevHigh != null ? r.prevHigh : r.priorHigh;
+    const pl = r.prevLow != null ? r.prevLow : r.priorLow;
+    if (!LEVELS.has(r.ticker) && ph != null && pl != null) LEVELS.set(r.ticker, {pdh: ph, pdl: pl});
+    if (r.name && !NAMES.has(r.ticker)) NAMES.set(r.ticker, r.name);
+    if (r.sector) SECTORS.set(r.ticker, r.sector);
+  }
+  for (const u of (SNAP.universe || [])) if (u.ticker) COMPANIES.set(u.ticker, u.name || NAMES.get(u.ticker) || '');
+}
+function seedWatchlist(){
+  for (const w of ((WL && WL.rows) || [])){
+    const cur = LEVELS.get(w.ticker);
+    if (w.pdh != null && (!cur || cur.pdh == null || cur.pdl == null)) LEVELS.set(w.ticker, {pdh: w.pdh, pdl: w.pdl});
+    if (w.marketCapB != null && !CAPS.has(w.ticker)) CAPS.set(w.ticker, w.marketCapB);
+  }
+}
+
 async function refreshQuotes(){
-  if (!FEED_OK) return;
-  try{
-    const bust = '?t=' + Math.floor(Date.now()/15000);
-    // A hung feed must never stall the board: 20s timeout per fetch, then null (embedded fallback).
-    const fetchTO = (url, ms) => {
-      const c = new AbortController();
-      const t = setTimeout(() => { try { c.abort(); } catch(e){} }, ms || 20000);
-      return fetch(url, {signal: c.signal}).finally(() => clearTimeout(t));
-    };
-    for (const [k] of DS_DEFS) DS[k] = {state:'checking', asOf:null, sub:''};
-    dsPaint();
-    const [r1, r2, r4, r5, r6, r7, r8, r9, r10, r11, r12, r13] = await Promise.all([
-      fetchTO(QUOTES_URL + bust).then(r => { if(!r.ok) throw new Error('quotes '+r.status); return r.json(); }).catch(() => null),
-      fetchTO(QUOTES_UNI_URL + bust).then(r => { if(!r.ok) throw new Error('uni '+r.status); return r.json(); }).catch(() => null),
-      fetchTO(FT_URL + bust).then(r => { if(!r.ok) throw new Error('ft '+r.status); return r.json(); }).catch(() => null),
-      fetchTO(WATCHLIST_URL + bust).then(r => { if(!r.ok) throw new Error('wl '+r.status); return r.json(); }).catch(() => null),
-      fetchTO(SNAPSHOT_URL + bust).then(r => { if(!r.ok) throw new Error('snap '+r.status); return r.json(); }).catch(() => null),
-      fetchTO(MOVERS_URL + bust).then(r => { if(!r.ok) throw new Error('mv '+r.status); return r.json(); }).catch(() => null),
-      fetchTO(WCHARTS_URL + bust).then(r => { if(!r.ok) throw new Error('wc '+r.status); return r.json(); }).catch(() => null),
-      fetchTO(DBARS_URL + bust).then(r => { if(!r.ok) throw new Error('db '+r.status); return r.json(); }).catch(() => null),
-      fetchTO(REGIME1H_URL + bust).then(r => { if(!r.ok) throw new Error('r1h '+r.status); return r.json(); }).catch(() => null),
-      fetchTO(CLOSES15_URL + bust).then(r => { if(!r.ok) throw new Error('15m '+r.status); return r.json(); }).catch(() => null),
-      fetchTO(PERSIST_URL + bust).then(r => { if(!r.ok) throw new Error('persist '+r.status); return r.json(); }).catch(() => null),
-      fetchTO(BREAKRANK_URL + bust).then(r => { if(!r.ok) throw new Error('breakrank '+r.status); return r.json(); }).catch(() => null)
-    ]);
-    const now = Date.now();
-    if (r1){
-      PRISET.clear(); for (const sym of Object.keys(r1.tickers || {})) PRISET.add(sym);
-      for (const [sym, e] of Object.entries(r1.tickers || {})) ingestEntry(sym, e);
+  for (const [k] of DS_DEFS) DS[k] = {state:'checking', asOf:null, sub:''};
+  dsPaint();
+  const [rQuotes, rUni, rFollow, rWl, rSnap, rMv, rWc, rDb, rR1h, rC15, rPersist, rBr, rCaps, rNames] = await Promise.all([
+    grab('quotes'), grab('universe'), grab('follow'), grab('watchlist'), grab('snapshot'),
+    grab('movers'), grab('wcharts'), grab('dbars'), grab('regime1h'), grab('closes15'),
+    grab('persist'), grab('breakrank'), grab('caps'), grab('names')
+  ]);
+  const now = Date.now();
+  try {
+    if (rNames && rNames.names) for (const [t, n] of Object.entries(rNames.names)) if (n && !NAMES.has(t)) NAMES.set(t, n);
+    if (rCaps && rCaps.caps) for (const [t, v] of Object.entries(rCaps.caps)) if (v != null && isFinite(v)) CAPS.set(t, v);
+    if (rQuotes){
+      PRISET.clear(); for (const sym of Object.keys(rQuotes.tickers || {})) PRISET.add(sym);
+      for (const [sym, e] of Object.entries(rQuotes.tickers || {})) ingestEntry(sym, e);
       HB.quotes = now;
-      if (r1.asOf){ const ms = Date.parse(r1.asOf); if (isFinite(ms)) quotesAsOfMs = ms; const d = etDateOfMs(ms); if (/^\d{4}-\d{2}-\d{2}$/.test(d)) quotesDate = d; }
+      if (rQuotes.asOf){ const ms = Date.parse(rQuotes.asOf); if (isFinite(ms)) quotesAsOfMs = ms; const d = etDateOfMs(ms); if (/^\d{4}-\d{2}-\d{2}$/.test(d)) quotesDate = d; }
     }
     lastPollT = now;
-    if (r2){
-      for (const [sym, e] of Object.entries(r2.tickers || {})){ ingestEntry(sym, e); UNISET.add(sym); }
+    if (rUni){
+      for (const [sym, e] of Object.entries(rUni.tickers || {})){ ingestEntry(sym, e); UNISET.add(sym); }
       HB.universe = now;
-      if (r2.asOf){ const ms = Date.parse(r2.asOf); if (isFinite(ms)) uniAsOfMs = ms; const d = etDateOfMs(ms); if (/^\d{4}-\d{2}-\d{2}$/.test(d)) uniDate = d; }
+      if (rUni.asOf){ const ms = Date.parse(rUni.asOf); if (isFinite(ms)) uniAsOfMs = ms; const d = etDateOfMs(ms); if (/^\d{4}-\d{2}-\d{2}$/.test(d)) uniDate = d; }
     }
-    if (r4 && Array.isArray(r4.ignitions)){ FT = r4; ftErr = null; ftLive = true; HB.ignitions = now; }
-    else if (!FT.ignitions.length){ ftErr = 'ignition history unavailable'; }
-    if (r5 && r5.marketDate && Array.isArray(r5.rows) && r5.rows.length){ WL = r5; wlLive = true; seedWatchlist(); HB.watchlist = now; }
-    if (r8 && r8.marketDate && r8.charts && typeof r8.charts === 'object'
-        && (!WL.marketDate || r8.marketDate >= WL.marketDate)){
-      // Live 1H/4H trend series for the current watchlist rows; the embedded
-      // WCHARTS object stays as the fallback when the feed is missing or stale.
-      Object.assign(WCHARTS, r8.charts);
+    if (rFollow && Array.isArray(rFollow.ignitions)){ FT = rFollow; ftErr = null; ftLive = true; HB.ignitions = now; }
+    else if (!(FT.ignitions || []).length) ftErr = 'ignition history unavailable';
+    if (rWl && rWl.marketDate && Array.isArray(rWl.rows) && rWl.rows.length){ WL = rWl; wlLive = true; seedWatchlist(); HB.watchlist = now; }
+    if (rWc && rWc.marketDate && rWc.charts && typeof rWc.charts === 'object' && (!WL.marketDate || rWc.marketDate >= WL.marketDate)){
+      Object.assign(WCHARTS, rWc.charts);
       if ($('watchList')) paintWatchCharts($('watchList'));
       if ($('mpane-breaks')) paintWatchCharts($('mpane-breaks'));
       if ($('pmGrid')) paintWatchCharts($('pmGrid'));
     }
-    // watchlist fetch failure is non-fatal: the embedded rows keep the panel working
-    if (r6 && r6.marketDate && Array.isArray(r6.bullish) && Array.isArray(r6.bearish)
-        && (!SNAP.marketDate || r6.marketDate >= SNAP.marketDate)){
-      SNAP = r6; snapLive = true; seedSnapshot(); seedWatchlist();
+    if (rSnap && rSnap.marketDate && Array.isArray(rSnap.bullish) && Array.isArray(rSnap.bearish)
+        && (!SNAP.marketDate || rSnap.marketDate >= SNAP.marketDate)){
+      SNAP = rSnap; seedSnapshot(); seedWatchlist();
       for (const u of (SNAP.universe || [])) UNISET.add(u.ticker || u);
       HB.snapshot = now;
     }
-    if (r7 && r7.asOf && (Array.isArray(r7.gainers) || Array.isArray(r7.losers))){
-      MV = r7; HB.movers = now;
-      const ms7 = Date.parse(r7.asOf); if (isFinite(ms7)) mvAsOfMs = ms7;
+    if (rMv && rMv.asOf && (Array.isArray(rMv.gainers) || Array.isArray(rMv.losers))){
+      MV = rMv; HB.movers = now;
+      const ms7 = Date.parse(rMv.asOf); if (isFinite(ms7)) mvAsOfMs = ms7;
       const d = etDateOfMs(ms7); if (/^\d{4}-\d{2}-\d{2}$/.test(d)) mvDate = d;
     }
-    if (r9 && r9.bars && typeof r9.bars === 'object'){
-      // 5m drawer bars for flow/mover tickers outside the priority 56: ingested
-      // into the same quote map (priority entries never overwritten), so the
-      // drawer chart, day range, volume and premarket H/L work for them too.
-      for (const [sym, e] of Object.entries(r9.bars)){
-        if (!PRISET.has(sym)) ingestEntry(sym, e);
-      }
+    if (rDb && rDb.bars && typeof rDb.bars === 'object'){
+      for (const [sym, e] of Object.entries(rDb.bars)) if (!PRISET.has(sym)) ingestEntry(sym, e);
     }
-    if (r10 && r10.charts && typeof r10.charts === 'object'){
-      // 1H regime bars (same h1 semantics as the watchlist charts): the regime
-      // strip plots the identical 1-hour history as the trading watchlist.
-      Object.assign(WCHARTS, r10.charts);
-    }
-    if (r11 && r11.asOf){
-      const ms11 = Date.parse(r11.asOf); if (isFinite(ms11)) closes15AsOfMs = ms11;
-      CLOSES15 = r11;
-    }
-    if (r9 && r9.bars){ DBARS = r9.bars; }
-    if (r12 && r12.marketDate){ PERSIST = r12; renderPersist(); }
-    if (r13 && r13.marketDate && Array.isArray(r13.rows)){ BREAKRANK = r13; renderBreakRank(); HB.breakrank = now; }
+    if (rR1h && rR1h.charts && typeof rR1h.charts === 'object') Object.assign(WCHARTS, rR1h.charts);
+    if (rC15 && rC15.asOf){ const ms11 = Date.parse(rC15.asOf); if (isFinite(ms11)) closes15AsOfMs = ms11; CLOSES15 = rC15; }
+    if (rPersist && rPersist.marketDate){ PERSIST = rPersist; renderPersist(); }
+    if (rBr && rBr.marketDate && Array.isArray(rBr.rows)){ BREAKRANK = rBr; renderBreakRank(); HB.breakrank = now; }
     autoMornTab();
-    // live movers feed failure is non-fatal: universe-computed movers remain the fallback
-    // snapshot fetch failure / older file is non-fatal: the embedded snapshot keeps the page working
     feedAsOf = now; lastErr = null; pollDone = true;
-    renderAll();
-  }catch(err){
+  } catch(err){
     lastErr = String(err && err.message ? err.message : err).replace(/</g,'&lt;').slice(0,60);
     pollDone = true;
-    renderAll();   // poll failed: still paint embedded/last-good data and settle the chips honestly
   }
+  renderAll();
 }
 
-/* ================= SIGNALS (completed 15m candles only) ================= */
-// ET offset for America/New_York, cached per calendar day. Market bars are Mon–Fri and
-// US DST transitions always land on a Sunday, so the offset at "now" is valid for every
-// bar in the current trading week — no per-bar formatToParts needed.
-let _etOff = null, _etOffKey = '';
-function etOffsetMs(){
-  const key = new Date().toDateString();
-  if (_etOff == null || _etOffKey !== key){
-    const now = new Date();
-    const parts = new Intl.DateTimeFormat('en-US',{timeZone:'America/New_York',year:'numeric',month:'numeric',day:'numeric',hour:'numeric',minute:'numeric',second:'numeric',hour12:false}).formatToParts(now);
-    const g = k => (parts.find(p=>p.type===k)||{}).value;
-    // Truncate to whole seconds: bar timestamps land exactly on minute boundaries, and a
-    // sub-second slop here would shift every wall-clock read up to ~1s early (e.g. the 09:30
-    // bar would read as 09:29:59 and be mis-bucketed / dropped by the 15m aggregation).
-    _etOff = Date.UTC(+g('year'), +g('month')-1, +g('day'), (+g('hour'))%24, +g('minute'), +g('second')) - Math.floor(now.getTime()/1000)*1000;
-    _etOffKey = key;
-  }
-  return _etOff;
-}
-function candles15All(bars){
-  const out = []; let cur = null;
-  const off = etOffsetMs();
-  for (const b of bars){
-    const t = b[0], o = b[1], h = b[2], l = b[3], c = b[4];
-    const d = new Date(t*1000 + off);   // shifted so the UTC fields read as ET wall-clock
-    const wd = d.getUTCDay();
-    if (wd === 0 || wd === 6) continue;
-    const mins = d.getUTCHours()*60 + d.getUTCMinutes();
-    if (mins < 570 || mins >= 960) continue;
-    const bk = Math.floor((mins - 570) / 15);
-    if (!cur || cur.bk !== bk){
-      // Exact finalized instant for this bucket: ET wall-clock midnight + (570+15*(bk+1)) minutes,
-      // converted back to real epoch seconds with the same offset used for the wall-clock read.
-      // A bucket [T, T+900) is eligible only once now >= T+900 — never an in-progress candle,
-      // and the latest finalized candle is never skipped (hosted parity).
-      const etMid = Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
-      const endS = (etMid + (570 + 15*(bk+1))*60000 - off) / 1000;
-      cur = {bk, o, h, l, c, t, end: endS}; out.push(cur);
-    }
-    else { cur.h = Math.max(cur.h, h); cur.l = Math.min(cur.l, l); cur.c = c; cur.t = t; }
-  }
-  return out;
-}
-// Memoized per ticker: the 15m aggregation only changes when new 1m bars arrive, so
-// repeat renders between polls reuse the last computation. The completed-candle filter
-// stays live (it depends on "now"), applied fresh on every call.
-const C15 = new Map();   // sym -> {n, lastT, off, all}
-function candles15(bars, sym){
-  const n = bars.length, lastT = n ? bars[n-1][0] : 0;
-  const off = etOffsetMs();
-  const hit = sym != null ? C15.get(sym) : null;
-  let all;
-  if (hit && hit.n === n && hit.lastT === lastT && hit.off === off) all = hit.all;
-  else {
-    all = candles15All(bars);
-    if (sym != null) C15.set(sym, {n, lastT, off, all});
-  }
-  // completed candles only: the bucket's exact finalized instant (end) must be in the past.
-  // The completed-candle filter stays live (it depends on "now"), applied fresh on every call.
-  const nowS = Math.floor(Date.now()/1000);
-  return all.filter(c => c.end <= nowS);
-}
-const SIGSTATE = new Map();   // ticker -> 'bull' | 'bear' | null (last evaluated side)
-const SIGSTART = new Map();   // ticker -> 15m bucket index when the current signal streak started
-function signalFor(sym, now){
-  const q = Q.get(sym); const lv = LEVELS.get(sym);
-  if (!q || !q.bars || !lv || (lv.pdh == null && lv.pdl == null)) return null;
-  const cs = candles15(q.bars, sym);   // completed 15m candles only (memoized per ticker)
-  if (!cs.length) return null;
-  const last = cs[cs.length - 1];
-  // Hosted parity: only the latest finalized candle of the CURRENT session is eligible.
-  // Prior-session candles, stale bars, and carried-forward quote-only data can never
-  // confirm a signal — the panel shows the honest empty state instead.
-  if (etDateOfMs(last.t*1000) !== nyMarketDate()){ SIGSTATE.delete(sym); SIGSTART.delete(sym); return null; }
-  let side = null, lvls = [];
-  // A confirmed close through ANY marked level qualifies. lvls names exactly
-  // which levels the candle closed through; clearing BOTH levels of the pair
-  // is the strongest form and sorts to the front of the grid.
-  const up = [];
-  if (lv.pdh != null && last.c > lv.pdh) up.push('PDH');
-  if (q.pmh != null && last.c > q.pmh) up.push('PMH');
-  const dn = [];
-  if (lv.pdl != null && last.c < lv.pdl) dn.push('PDL');
-  if (q.pml != null && last.c < q.pml) dn.push('PML');
-  if (up.length){ side = 'bull'; lvls = up; }
-  else if (dn.length){ side = 'bear'; lvls = dn; }
-  const prev = SIGSTATE.has(sym) ? SIGSTATE.get(sym) : undefined;
-  SIGSTATE.set(sym, side);
-  if (side !== prev){
-    if (side) SIGSTART.set(sym, last.bk);   // a new signal streak starts on this candle
-    else SIGSTART.delete(sym);
-  }
-  // FADING: three-candle monotonic decay of closes after the signal's start candle,
-  // evaluated on completed 15m candles — not a flip between page renders.
-  let fading = false;
-  if (side){
-    const bk0 = SIGSTART.get(sym);
-    const streak = (bk0 == null ? cs : cs.filter(c => c.bk >= bk0)).slice(-3);
-    if (streak.length >= 3){
-      const c = streak.map(x => x.c);
-      fading = side === 'bull'
-        ? (c[0] > c[1] && c[1] > c[2])
-        : (c[0] < c[1] && c[1] < c[2]);
-    }
-  }
-  return {side, close: last.c, open: last.o, t: last.t, fading, lvls, both: lvls.length === 2};
-}
-function quoteAgeMs(){
-  let best = null;
-  for (const q of Q.values()) if (q.ts){ const age = Date.now() - q.ts*1000; if (best == null || age < best) best = age; }
-  return best;
-}
-
-/* ================= MARKET TIME ================= */
-function etParts(d){
-  const parts = new Intl.DateTimeFormat('en-US',{timeZone:'America/New_York',weekday:'short',hour:'numeric',minute:'numeric',hour12:false}).formatToParts(d || new Date());
-  const g = k => (parts.find(p=>p.type===k)||{}).value;
-  return {wd: g('weekday'), min: (+g('hour')%24)*60 + (+g('minute'))};
-}
-function isMarketOpen(){ const {wd, min} = etParts(); return !['Sat','Sun'].includes(wd) && min >= 570 && min < 960; }
-function etDayMin(ts){
-  const d = new Date(ts*1000);
-  const parts = new Intl.DateTimeFormat('en-US',{timeZone:'America/New_York',hour:'numeric',minute:'numeric',hour12:false}).formatToParts(d);
-  const g = k => (parts.find(p=>p.type===k)||{}).value;
-  return (+g('hour')%24)*60 + (+g('minute'));
-}
-function durHM(m){ m = Math.max(0, Math.round(m)); return Math.floor(m/60) + 'h ' + String(m%60).padStart(2,'0') + 'm'; }
-function nextEventMin(){
-  const now = new Date();
-  const {wd, min} = etParts(now);
-  if (isMarketOpen()) return 960 - min;               // to close
-  for (let off = 0; off < 8; off++){
-    const d = new Date(now.getTime() + off*86400000);
-    const p = etParts(d);
-    if (['Sat','Sun'].includes(p.wd)) continue;
-    if (off === 0 && p.min >= 570) continue;           // today's open passed
-    return off*1440 + 570 - min;
-  }
-  return 0;
-}
-
-/* ================= SPARKLINES ================= */
-function drawSpark(cv, bars, up){
-  if (!bars || bars.length < 2) return;
-  const dpr = Math.min(2, window.devicePixelRatio || 1);
-  const W = cv.clientWidth || cv.width, H = cv.clientHeight || cv.height;
-  if (!W || !H) return;
-  cv.width = W*dpr; cv.height = H*dpr;
-  const ctx = cv.getContext('2d'); ctx.scale(dpr, dpr);
-  const closes = bars.map(b => b[4]);
-  const lo = Math.min(...closes), hi = Math.max(...closes);
-  const col = up ? cssVar('--gain') : cssVar('--loss');
-  const n = closes.length, px = i => (i/(n-1))*W, py = v => H-3 - ((v-lo)/((hi-lo)||1))*(H-8);
-  ctx.strokeStyle = col; ctx.lineWidth = 1.5; ctx.lineJoin = 'round'; ctx.beginPath();
-  closes.forEach((v,i) => i ? ctx.lineTo(px(i),py(v)) : ctx.moveTo(px(i),py(v)));
-  ctx.stroke();
-  const last = closes[n-1];
-  ctx.fillStyle = col; ctx.beginPath(); ctx.arc(px(n-1), py(last), 2.2, 0, 7); ctx.fill();
-}
-
-/* ================= STATUS ================= */
+/* ================= STATUS / SESSION / REGIME ================= */
 function renderStatus(){
   const note = $('quotesNote'), txt = $('quotesText');
   note.classList.remove('live','delayed','stale');
-  if (!FEED_OK){ txt.textContent = 'SETUP NEEDED — see README step 3'; return; }
-  const age = feedAsOf ? Date.now()-feedAsOf : quoteAgeMs(), open = isMarketOpen();
+  const age = feedAsOf ? Date.now()-feedAsOf : (quotesAsOfMs ? Date.now()-quotesAsOfMs : null);
+  const open = isMarketOpen();
   if (age == null){ txt.textContent = 'CONNECTING…'; if (lastErr) txt.textContent += ' · ' + lastErr; return; }
   const asof = etFmt.format(new Date(Date.now()-age));
   if (!open){ note.classList.add('stale'); txt.textContent = 'Quotes · session closed'; }
@@ -1432,129 +1119,16 @@ function renderStatus(){
   else { note.classList.add('stale'); txt.textContent = 'Quotes · stale ' + asof + ' ET'; }
   if (lastErr) txt.textContent += ' · ' + lastErr;
 }
-
-/* ================= HEALTH STRIP (big pill + 6 dataset chips) ================= */
-// One chip per dataset; the Regime chip reads the same SPY/QQQ/IWM quotes the
-// regime strip renders (one data path). Chips fill left-to-right while checking,
-// then settle green/amber/red. The big pill fills green only when all six verify
-// on the same NYSE market date. Stale data is never called live: a failed poll
-// leaves last-good data aging honestly toward DELAYED/STALE instead of a phantom ERROR.
-const DS_DEFS = [
-  ['flow','Flow'], ['prices','Prices'], ['regime','Regime'],
-  ['movers','Movers'], ['closes','15m closes'], ['plan','Morning plan']
-];
-const DS = {};
-for (const [k] of DS_DEFS) DS[k] = {state:'checking', asOf:null, sub:''};
-let quotesDate = null, uniDate = null;   // YYYY-MM-DD (ET) of the live quote feeds
-let quotesAsOfMs = null, uniAsOfMs = null, closes15AsOfMs = null;   // epoch ms of the feeds' own timestamps (freshness is measured on data age, not poll time)
-let CLOSES15 = null, DBARS = null;   // full 15m closes feed + 5m bars, for the ETF radar
-let MV = null, mvDate = null, mvAsOfMs = null;   // live market_movers.json feed {asOf, gainers:[], losers:[]}
-const ctFmtHM = new Intl.DateTimeFormat('en-US',{timeZone:'America/Chicago',hour:'numeric',minute:'2-digit',hour12:true});
-function mvCount(){ let n = 0; for (const s of UNISET){ const q = Q.get(s); if (q && q.chgPct != null) n++; } return n; }
-function dsPaint(){
-  for (const [key, label] of DS_DEFS){
-    const d = DS[key];
-    const el = document.querySelector('.hchip[data-ds="'+key+'"]');
-    if (!el) continue;
-    el.classList.remove('checking','ok','warn','bad','done');
-    el.classList.add(d.state);
-    if (d.state !== 'checking') el.classList.add('done');
-    el.querySelector('[data-t]').textContent = d.asOf ? ctFmtHM.format(new Date(d.asOf)) : (d.sub || '\u2014');
-    el.title = label + ': ' + d.state + (d.asOf ? ' \u00b7 as of ' + ctTime(d.asOf) : (d.sub ? ' \u00b7 ' + d.sub : ''));
-  }
-  const big = $('hpBig'), txt = $('hpBigTxt');
-  if (!big || !txt) return;
-  const states = DS_DEFS.map(([k]) => DS[k].state);
-  const nOk = states.filter(s => s === 'ok').length;
-  const today = nyMarketDate();
-  const dates = [SNAP.marketDate || null, quotesDate, quotesDate, mvDate || uniDate, quotesDate, (WL && WL.marketDate) || null];
-  const allOk = nOk === 6 && dates.every(x => x === today);
-  big.classList.remove('checking','ok','warn','bad','done');
-  if (states.includes('checking')){ big.classList.add('checking'); txt.textContent = 'Verifying \u00b7 ' + nOk + '/6 matched'; }
-  else if (allOk){ big.classList.add('done','ok'); txt.textContent = 'Up to date (' + fmtMonD(today) + ' \u00b7 ' + ctFmtHM.format(new Date()) + ' CT)'; }
-  else if (states.includes('bad')){ big.classList.add('done','bad'); txt.textContent = 'DATA ERROR \u00b7 ' + nOk + '/6 matched'; }
-  else if (!HB.quotes && pollDone){ big.classList.add('done','warn'); txt.textContent = 'OFFLINE \u00b7 ' + nOk + '/6 on embedded data'; }
-  else if (!isMarketOpen()){ big.classList.add('done','warn'); txt.textContent = 'Session closed \u00b7 ' + fmtMonD(today) + ' final data'; }
-  else { big.classList.add('done','warn'); txt.textContent = 'Stale \u00b7 ' + nOk + '/6 live'; }
-  big.title = DS_DEFS.map(([k], i) => DS_DEFS[i][1] + ' ' + DS[k].state).join(' \u00b7 ');
+function renderSession(){
+  const pill = $('sessionPill'), txt = $('sessionText'), cd = $('countdown');
+  if (!pill || !txt || !cd) return;
+  const open = isMarketOpen();
+  txt.textContent = open ? 'LIVE' : 'SESSION CLOSED';
+  pill.classList.toggle('live', open);
+  pill.classList.toggle('closed', !open);
+  cd.textContent = lastPollT ? 'REFRESH ' + Math.max(0, 60 - Math.floor((Date.now()-lastPollT)/1000)) + 's' : 'REFRESH —';
 }
-function evalHealth(){
-  const today = nyMarketDate();
-  const qAge = quotesAsOfMs ? Date.now() - quotesAsOfMs : Infinity;
-  const qFresh = quotesDate === today;
-  const qLive = qFresh && qAge < 1800000;   // today's data, published within 30 min — anything older is stale, never live
-  if (!HB.quotes) DS.prices = pollDone ? {state:'warn', asOf:null, sub:'offline'} : {state:'checking', asOf:null, sub:''};
-  else if (qLive) DS.prices = {state:'ok', asOf:quotesAsOfMs, sub:''};
-  else DS.prices = {state:'warn', asOf:quotesAsOfMs || HB.quotes, sub:''};
-  const rOk = qLive && ['SPY','QQQ','IWM'].every(s => { const q = Q.get(s); return q && q.price != null; });
-  if (!HB.quotes) DS.regime = pollDone ? {state:'warn', asOf:null, sub:'offline'} : {state:'checking', asOf:null, sub:''};
-  else DS.regime = rOk ? {state:'ok', asOf:quotesAsOfMs, sub:''} : {state:'warn', asOf:quotesAsOfMs || HB.quotes, sub:''};
-  const uAge = uniAsOfMs ? Date.now() - uniAsOfMs : Infinity;
-  const mvAge = mvAsOfMs ? Date.now() - mvAsOfMs : Infinity;
-  const mvFeedOk = mvDate === today && mvAge < 3600000 && MV && ((MV.gainers||[]).length + (MV.losers||[]).length > 0);
-  const mLive = uniDate === today && uAge < 3600000 && mvCount() > 0;
-  if (HB.movers) DS.movers = mvFeedOk ? {state:'ok', asOf:mvAsOfMs, sub:''} : {state:'warn', asOf:mvAsOfMs || HB.movers, sub:''};
-  else if (!HB.universe) DS.movers = pollDone ? {state:'warn', asOf:null, sub:'offline'} : {state:'checking', asOf:null, sub:''};
-  else DS.movers = mLive ? {state:'ok', asOf:uniAsOfMs, sub:''} : {state:'warn', asOf:uniAsOfMs || HB.universe, sub:''};
-  // Zero signals is a valid evaluated result, not an error — the chip tracks feed state.
-  if (!closes15AsOfMs) DS.closes = pollDone ? {state:'warn', asOf:null, sub:'offline'} : {state:'checking', asOf:null, sub:''};
-  else DS.closes = qLive ? {state:'ok', asOf:closes15AsOfMs, sub:''} : {state:'warn', asOf:closes15AsOfMs, sub:''};
-  const snapAge = SNAP_TS ? Date.now() - SNAP_TS : Infinity;
-  if (!SNAP.marketDate) DS.flow = {state:'warn', asOf:null, sub:'no date'};
-  else if (SNAP.marketDate === today && snapAge < 1800000) DS.flow = {state:'ok', asOf:SNAP_TS, sub:''};
-  else DS.flow = {state:'warn', asOf:SNAP_TS || null, sub:''};
-  const wlD = (WL && WL.marketDate) || null;
-  const wlTs = WL && WL.builtAt ? Date.parse(WL.builtAt) : NaN;
-  if (!wlD) DS.plan = {state:'warn', asOf:null, sub:'no date'};
-  else if (wlD === today) DS.plan = {state:'ok', asOf:isFinite(wlTs) ? wlTs : null, sub:''};
-  else DS.plan = {state:'warn', asOf:null, sub:wlD};
-  dsPaint();
-}
-/* ================= PER-SECTION UPDATED LABELS ================= */
-// Each label names the data actually rendered: quotes-fetch time for price-driven
-// sections, the daily file's own date for daily parts, "embedded" when the
-// inlined fallback is what's on screen.
-function renderUpdated(){
-  const set = (id, txt) => { const el = $(id); if (el) el.textContent = txt; };
-  const q = HB.quotes ? 'updated ' + ctTime(HB.quotes)
-        : (SNAP_FRESH ? 'snapshot ' + etFmtShort.format(SNAP_D) + ' ET' : 'snapshot data stale');
-  set('updBull', q); set('updBear', q); set('updPremarket', q);
-  set('updSignals', q); set('updFlow', q);
-  // Regime timestamp: explicitly name the prior session when the index quotes
-  // are from yesterday's close (premarket), so "As of 3:00 PM" is never ambiguous.
-  const today = nyMarketDate();
-  const regimeQ = (HB.quotes && quotesDate && quotesDate !== today && quotesAsOfMs)
-        ? 'Prior session \u00b7 ' + ctFmtHM.format(new Date(quotesAsOfMs)) + ' CT'
-        : q;
-  set('updRegime', regimeQ);
-  set('updWatch', (wlLive && HB.watchlist) ? 'updated ' + ctTime(HB.watchlist)
-        : 'levels ' + (WL.marketDate || '') + ' (embedded)');
-  set('updIgn', (ftLive && HB.ignitions) ? 'updated ' + ctTime(HB.ignitions)
-        : 'ignitions ' + (FT.date || '') + ' (embedded)');
-  set('updBreakRank', (BREAKRANK && HB.breakrank) ? 'updated ' + ctTime(HB.breakrank)
-        : (BREAKRANK ? 'ranking ' + (BREAKRANK.marketDate || '') : ''));
-}
-
-/* ================= HEARTBEAT ================= */
-// Expected feed cadence: refreshQuotes() runs every 60s. The heartbeat measures the
-// time since the last SUCCESSFUL update against that interval:
-//   LIVE    — last update within 3x the interval; shows the data age
-//   STALLED — no successful update for 3+ intervals (polls stopped or silently dying)
-//   ERROR   — the last fetch failed, or a JS error was captured on the page
-const HB_INTERVAL = 60000;
-const HB_STALL_AFTER = 3 * HB_INTERVAL;
-function fmtAge(ms){
-  const s = Math.max(0, Math.round(ms/1000));
-  if (s < 60) return s + 's';
-  const m = Math.floor(s/60);
-  if (m < 60) return m + 'm ' + String(s%60).padStart(2,'0') + 's';
-  return Math.floor(m/60) + 'h ' + String(m%60).padStart(2,'0') + 'm';
-}
-
-/* ================= STRIP: regime / session ================= */
 function hourlyCloses(bars){
-  // Aggregate intraday bars into completed regular-session hourly closes (ET),
-  // matching the watchlist h1 semantics. The still-forming hour is excluded.
   const out = []; let curH = -1, curStart = 0, last = null;
   const nowSec = Date.now() / 1000;
   for (const b of (bars || [])){
@@ -1563,8 +1137,7 @@ function hourlyCloses(bars){
     const h = Math.floor((m - 570) / 60);
     if (h !== curH){
       if (last != null && curStart + 3600 <= nowSec) out.push(last);
-      curH = h;
-      curStart = Number(b[0]);
+      curH = h; curStart = Number(b[0]);
     }
     last = b[4];
   }
@@ -1572,16 +1145,45 @@ function hourlyCloses(bars){
   return out;
 }
 function bucket4h(closes){
-  // Last close of each consecutive 4-point group — the wcharts h4 semantics
-  // applied to an hourly series (fallback use only).
   const out = [];
   for (let i = 3; i < (closes || []).length; i += 4) out.push(closes[i]);
   return out;
 }
+const WATCH_TREND_SPEC = Object.freeze({ h1Bars: 107, h4Bars: 27, session: 'regular' });
+function watchTrendSeries(chart, key){
+  const limit = key === 'h1' ? WATCH_TREND_SPEC.h1Bars : WATCH_TREND_SPEC.h4Bars;
+  const series = chart && chart[key];
+  return Array.isArray(series) ? series.slice(-limit) : [];
+}
+function wTrendOf(series){
+  if (!series || series.length < 2) return 'up';
+  let s = 0; for (const v of series) s += v;
+  return series[series.length - 1] >= s / series.length ? 'up' : 'down';
+}
+function drawWChart(cv, series, up){
+  if (!cv || !series || series.length < 2) return;
+  const dpr = Math.min(2, window.devicePixelRatio || 1);
+  const W = cv.clientWidth || 170, H = cv.clientHeight || 76;
+  if (!W || !H) return;
+  cv.width = W * dpr; cv.height = H * dpr;
+  const ctx = cv.getContext('2d'); ctx.scale(dpr, dpr);
+  const n = series.length;
+  let lo = series[0], hi = series[0], sum = 0;
+  for (const v of series){ if (v < lo) lo = v; if (v > hi) hi = v; sum += v; }
+  const mean = sum / n;
+  const px = i => 2 + (i / (n - 1)) * (W - 4);
+  const py = v => (H - 4) - ((v - lo) / ((hi - lo) || 1)) * (H - 10);
+  ctx.strokeStyle = cssVar('--faint') || '#666'; ctx.lineWidth = 1;
+  ctx.setLineDash([5, 4]); ctx.globalAlpha = .6;
+  ctx.beginPath(); ctx.moveTo(0, py(mean)); ctx.lineTo(W, py(mean)); ctx.stroke();
+  ctx.setLineDash([]); ctx.globalAlpha = 1;
+  ctx.strokeStyle = up ? (cssVar('--gain') || '#22c55e') : (cssVar('--loss') || '#ef4444');
+  ctx.lineWidth = 1.6; ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+  ctx.beginPath();
+  series.forEach((v, i) => { i ? ctx.lineTo(px(i), py(v)) : ctx.moveTo(px(i), py(v)); });
+  ctx.stroke();
+}
 function regimeSeries(sym){
-  // Same 1-hour history as the trading-morning watchlist: the published h1
-  // series when available, else today's intraday bars aggregated to hourly
-  // closes (identical semantics) so the strip never goes blank.
   const h1 = watchTrendSeries(WCHARTS[sym], 'h1');
   if (h1.length > 1) return h1;
   const q = Q.get(sym);
@@ -1599,44 +1201,190 @@ function renderRegime(){
   el.querySelectorAll('.sq').forEach(a => {
     const cv = a.querySelector('canvas.q-spark'); if (!cv) return;
     const series = regimeSeries(a.dataset.sym);
-    // drawWChart + wTrendOf: the exact watchlist 1H rendering (line + dashed
-    // series-mean, direction from last close vs mean).
     if (series.length > 1) drawWChart(cv, series, wTrendOf(series) === 'up');
   });
 }
-function renderSession(){
-  const pill = $('sessionPill'), txt = $('sessionText'), cd = $('countdown');
-  if (!pill || !txt || !cd) return;
-  const open = isMarketOpen();
-  txt.textContent = open ? 'LIVE' : 'SESSION CLOSED';
-  pill.classList.toggle('live', open);
-  pill.classList.toggle('closed', !open);
-  cd.textContent = lastPollT ? 'REFRESH ' + Math.max(0, 60 - Math.floor((Date.now()-lastPollT)/1000)) + 's' : 'REFRESH —';
+
+/* ================= HEALTH STRIP ================= */
+/* One chip per dataset; the big pill fills green only when all six verify on
+   the same NYSE market date. Stale data is never called live. */
+const DS_DEFS = [
+  ['flow','Flow'], ['prices','Prices'], ['regime','Regime'],
+  ['movers','Movers'], ['closes','15m closes'], ['plan','Morning plan']
+];
+const DS = {};
+for (const [k] of DS_DEFS) DS[k] = {state:'checking', asOf:null, sub:''};
+function mvCount(){ let n = 0; for (const s of UNISET){ const q = Q.get(s); if (q && q.chgPct != null) n++; } return n; }
+function dsPaint(){
+  for (const [key, label] of DS_DEFS){
+    const d = DS[key];
+    const el = document.querySelector('.hchip[data-ds="'+key+'"]');
+    if (!el) continue;
+    el.classList.remove('checking','ok','warn','bad','done');
+    el.classList.add(d.state);
+    if (d.state !== 'checking') el.classList.add('done');
+    el.querySelector('[data-t]').textContent = d.asOf ? ctFmtHM.format(new Date(d.asOf)) : (d.sub || '—');
+    el.title = label + ': ' + d.state + (d.asOf ? ' · as of ' + ctTime(d.asOf) : (d.sub ? ' · ' + d.sub : ''));
+  }
+  const big = $('hpBig'), txt = $('hpBigTxt');
+  if (!big || !txt) return;
+  const states = DS_DEFS.map(([k]) => DS[k].state);
+  const nOk = states.filter(s => s === 'ok').length;
+  const today = nyMarketDate();
+  const dates = [SNAP.marketDate || null, quotesDate, quotesDate, mvDate || uniDate, quotesDate, (WL && WL.marketDate) || null];
+  const allOk = nOk === 6 && dates.every(x => x === today);
+  big.classList.remove('checking','ok','warn','bad','done');
+  if (states.includes('checking')){ big.classList.add('checking'); txt.textContent = 'Verifying · ' + nOk + '/6 matched'; }
+  else if (allOk){ big.classList.add('done','ok'); txt.textContent = 'Up to date (' + fmtMonD(today) + ' · ' + ctFmtHM.format(new Date()) + ' CT)'; }
+  else if (states.includes('bad')){ big.classList.add('done','bad'); txt.textContent = 'DATA ERROR · ' + nOk + '/6 matched'; }
+  else if (!HB.quotes && pollDone){ big.classList.add('done','warn'); txt.textContent = 'OFFLINE · ' + nOk + '/6 matched'; }
+  else if (!isMarketOpen()){ big.classList.add('done','warn'); txt.textContent = 'Session closed · ' + fmtMonD(today) + ' final data'; }
+  else { big.classList.add('done','warn'); txt.textContent = 'Stale · ' + nOk + '/6 live'; }
+  big.title = DS_DEFS.map(([k], i) => DS_DEFS[i][1] + ' ' + DS[k].state).join(' · ');
+}
+function evalHealth(){
+  const today = nyMarketDate();
+  const qAge = quotesAsOfMs ? Date.now() - quotesAsOfMs : Infinity;
+  const qFresh = quotesDate === today;
+  const qLive = qFresh && qAge < 1800000;
+  if (!HB.quotes) DS.prices = pollDone ? {state:'warn', asOf:null, sub:'offline'} : {state:'checking', asOf:null, sub:''};
+  else if (qLive) DS.prices = {state:'ok', asOf:quotesAsOfMs, sub:''};
+  else DS.prices = {state:'warn', asOf:quotesAsOfMs || HB.quotes, sub:''};
+  const rOk = qLive && ['SPY','QQQ','IWM'].every(s => { const q = Q.get(s); return q && q.price != null; });
+  if (!HB.quotes) DS.regime = pollDone ? {state:'warn', asOf:null, sub:'offline'} : {state:'checking', asOf:null, sub:''};
+  else DS.regime = rOk ? {state:'ok', asOf:quotesAsOfMs, sub:''} : {state:'warn', asOf:quotesAsOfMs || HB.quotes, sub:''};
+  const uAge = uniAsOfMs ? Date.now() - uniAsOfMs : Infinity;
+  const mvAge = mvAsOfMs ? Date.now() - mvAsOfMs : Infinity;
+  const mvFeedOk = mvDate === today && mvAge < 3600000 && MV && ((MV.gainers||[]).length + (MV.losers||[]).length > 0);
+  const mLive = uniDate === today && uAge < 3600000 && mvCount() > 0;
+  if (HB.movers) DS.movers = mvFeedOk ? {state:'ok', asOf:mvAsOfMs, sub:''} : {state:'warn', asOf:mvAsOfMs || HB.movers, sub:''};
+  else if (!HB.universe) DS.movers = pollDone ? {state:'warn', asOf:null, sub:'offline'} : {state:'checking', asOf:null, sub:''};
+  else DS.movers = mLive ? {state:'ok', asOf:uniAsOfMs, sub:''} : {state:'warn', asOf:uniAsOfMs || HB.universe, sub:''};
+  if (!closes15AsOfMs) DS.closes = pollDone ? {state:'warn', asOf:null, sub:'offline'} : {state:'checking', asOf:null, sub:''};
+  else DS.closes = qLive ? {state:'ok', asOf:closes15AsOfMs, sub:''} : {state:'warn', asOf:closes15AsOfMs, sub:''};
+  const snapAge = SNAP_TS ? Date.now() - SNAP_TS : Infinity;
+  if (!SNAP.marketDate) DS.flow = {state:'warn', asOf:null, sub:'no date'};
+  else if (SNAP.marketDate === today && snapAge < 1800000) DS.flow = {state:'ok', asOf:SNAP_TS, sub:''};
+  else DS.flow = {state:'warn', asOf:SNAP_TS || null, sub:''};
+  const wlD = (WL && WL.marketDate) || null;
+  const wlTs = WL && WL.builtAt ? Date.parse(WL.builtAt) : NaN;
+  if (!wlD) DS.plan = {state:'warn', asOf:null, sub:'no date'};
+  else if (wlD === today) DS.plan = {state:'ok', asOf:isFinite(wlTs) ? wlTs : null, sub:''};
+  else DS.plan = {state:'warn', asOf:null, sub:wlD};
+  dsPaint();
+}
+/* Per-section updated labels — each names the data actually rendered. */
+function renderUpdated(){
+  const set = (id, txt) => { const el = $(id); if (el) el.textContent = txt; };
+  const q = HB.quotes ? 'updated ' + ctTime(HB.quotes)
+        : (SNAP_FRESH ? 'snapshot ' + etFmtShort.format(SNAP_D) + ' ET' : 'snapshot data stale');
+  set('updBull', q); set('updBear', q); set('updPremarket', q);
+  set('updSignals', q); set('updFlow', q);
+  const today = nyMarketDate();
+  const regimeQ = (HB.quotes && quotesDate && quotesDate !== today && quotesAsOfMs)
+        ? 'Prior session · ' + ctFmtHM.format(new Date(quotesAsOfMs)) + ' CT' : q;
+  set('updRegime', regimeQ);
+  set('updWatch', (wlLive && HB.watchlist) ? 'updated ' + ctTime(HB.watchlist) : 'levels ' + (WL.marketDate || ''));
+  set('updIgn', (ftLive && HB.ignitions) ? 'updated ' + ctTime(HB.ignitions) : 'ignitions ' + (FT.date || ''));
+  set('updBreakRank', (BREAKRANK && HB.breakrank) ? 'updated ' + ctTime(HB.breakrank)
+        : (BREAKRANK ? 'ranking ' + (BREAKRANK.marketDate || '') : ''));
 }
 
-/* ================= 15M SIGNALS (card grids, 4 cols per side) ================= */
-// Hubert's buckets (marketCapB is in $ billions): Small = below $2B (micro-caps count as Small),
-// Mid = $2B-$10B, Large = over $10B (mega-caps count as Large). Unknown cap always passes the filter.
-function capBucket(s){
-  const c = CAPS.get(s);
-  if (c == null) return 'unknown';
-  if (c < 2) return 'small';
-  if (c <= 10) return 'mid';
-  return 'large';
+/* ================= 15M SIGNALS ================= */
+/* Completed 15m candles only, aggregated from 1-minute bars. ET offset is
+   cached per calendar day (US DST transitions land on Sundays, so the
+   offset at "now" is valid for every bar in the current trading week). */
+let _etOff = null, _etOffKey = '';
+function etOffsetMs(){
+  const key = new Date().toDateString();
+  if (_etOff == null || _etOffKey !== key){
+    const now = new Date();
+    const parts = new Intl.DateTimeFormat('en-US',{timeZone:'America/New_York',year:'numeric',month:'numeric',day:'numeric',hour:'numeric',minute:'numeric',second:'numeric',hour12:false}).formatToParts(now);
+    const g = k => (parts.find(p=>p.type===k)||{}).value;
+    _etOff = Date.UTC(+g('year'), +g('month')-1, +g('day'), (+g('hour'))%24, +g('minute'), +g('second')) - Math.floor(now.getTime()/1000)*1000;
+    _etOffKey = key;
+  }
+  return _etOff;
 }
-function capRank(s){
-  // order: Small -> Mid -> Large -> Unknown, then ticker alphabetical
-  const b = capBucket(s);
-  return (b === 'small' ? 0 : b === 'mid' ? 1 : b === 'large' ? 2 : 3);
+function candles15All(bars){
+  const out = []; let cur = null;
+  const off = etOffsetMs();
+  for (const b of bars){
+    const t = b[0], o = b[1], h = b[2], l = b[3], c = b[4];
+    const d = new Date(t*1000 + off);
+    const wd = d.getUTCDay();
+    if (wd === 0 || wd === 6) continue;
+    const mins = d.getUTCHours()*60 + d.getUTCMinutes();
+    if (mins < 570 || mins >= 960) continue;
+    const bk = Math.floor((mins - 570) / 15);
+    if (!cur || cur.bk !== bk){
+      const etMid = Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
+      const endS = (etMid + (570 + 15*(bk+1))*60000 - off) / 1000;
+      cur = {bk, o, h, l, c, t, end: endS}; out.push(cur);
+    }
+    else { cur.h = Math.max(cur.h, h); cur.l = Math.min(cur.l, l); cur.c = c; cur.t = t; }
+  }
+  return out;
 }
-let capSel = new Set(['small', 'mid', 'large']);   // default: all selected
-let sigSort = 'chg';   // 'chg' = % change (default) | 'cap' = market cap
+const C15 = new Map();
+function candles15(bars, sym){
+  const n = bars.length, lastT = n ? bars[n-1][0] : 0;
+  const off = etOffsetMs();
+  const hit = sym != null ? C15.get(sym) : null;
+  let all;
+  if (hit && hit.n === n && hit.lastT === lastT && hit.off === off) all = hit.all;
+  else { all = candles15All(bars); if (sym != null) C15.set(sym, {n, lastT, off, all}); }
+  const nowS = Math.floor(Date.now()/1000);
+  return all.filter(c => c.end <= nowS);
+}
+const SIGSTATE = new Map();   // ticker -> 'bull' | 'bear' | null (last evaluated side)
+const SIGSTART = new Map();   // ticker -> bucket index when the current streak started
+function signalFor(sym){
+  const q = Q.get(sym); const lv = LEVELS.get(sym);
+  if (!q || !q.bars || !lv || (lv.pdh == null && lv.pdl == null)) return null;
+  const cs = candles15(q.bars, sym);
+  if (!cs.length) return null;
+  const last = cs[cs.length - 1];
+  /* Hosted parity: only the latest finalized candle of the CURRENT session is
+     eligible — prior-session candles can never confirm a signal. */
+  if (etDateOfMs(last.t*1000) !== nyMarketDate()){ SIGSTATE.delete(sym); SIGSTART.delete(sym); return null; }
+  let side = null, lvls = [];
+  const up = [];
+  if (lv.pdh != null && last.c > lv.pdh) up.push('PDH');
+  if (q.pmh != null && last.c > q.pmh) up.push('PMH');
+  const dn = [];
+  if (lv.pdl != null && last.c < lv.pdl) dn.push('PDL');
+  if (q.pml != null && last.c < q.pml) dn.push('PML');
+  if (up.length){ side = 'bull'; lvls = up; }
+  else if (dn.length){ side = 'bear'; lvls = dn; }
+  const prev = SIGSTATE.has(sym) ? SIGSTATE.get(sym) : undefined;
+  SIGSTATE.set(sym, side);
+  if (side !== prev){
+    if (side) SIGSTART.set(sym, last.bk);
+    else SIGSTART.delete(sym);
+  }
+  let fading = false;
+  if (side){
+    const bk0 = SIGSTART.get(sym);
+    const streak = (bk0 == null ? cs : cs.filter(c => c.bk >= bk0)).slice(-3);
+    if (streak.length >= 3){
+      const c = streak.map(x => x.c);
+      fading = side === 'bull' ? (c[0] > c[1] && c[1] > c[2]) : (c[0] < c[1] && c[1] < c[2]);
+    }
+  }
+  return {side, close: last.c, open: last.o, t: last.t, fading, lvls, both: lvls.length === 2};
+}
+/* Cap buckets (marketCapB in $B): Small < $2B, Mid $2B–$10B, Large > $10B.
+   Unknown cap always passes the All filter. */
+function capBucket(s){ const c = CAPS.get(s); if (c == null) return 'unknown'; if (c < 2) return 'small'; if (c <= 10) return 'mid'; return 'large'; }
+let capSel = new Set(['small', 'mid', 'large']);
+let sigSort = 'chg';
 function capPass(s){
   const b = capBucket(s);
-  if (capSel.size === 3) return true;              // All: every tier (and unknown caps) passes
-  if (b === 'unknown') return false;              // a subset selection excludes unknown caps
+  if (capSel.size === 3) return true;
+  if (b === 'unknown') return false;
   const mcb = CAPS.get(s);
-  if (mcb != null && mcb < 0.25) return false;     // ...and sub-$250M micro-caps
+  if (mcb != null && mcb < 0.25) return false;
   return capSel.has(b);
 }
 function paintCapChips(){
@@ -1656,11 +1404,7 @@ function sigCard(s, sig){
   const cap = CAPS.get(s);
   const capTxt = (cap == null || !isFinite(cap)) ? 'Cap unavailable' : fmtCapB(cap);
   const cmv = (sig.open != null && sig.open) ? (sig.close - sig.open) / sig.open * 100 : null;
-  const cmvTxt = (cmv == null || !isFinite(cmv)) ? 'candle move —'
-    : `candle ${(cmv >= 0 ? '+' : '') + cmv.toFixed(2)}%`;
-  // Prominent level readout: a banner naming exactly which level(s) the candle
-  // closed through, plus a pill per level with its price — cleared levels lit
-  // solid, the not-yet-cleared level of the pair shown muted as the next mark.
+  const cmvTxt = (cmv == null || !isFinite(cmv)) ? 'candle move —' : `candle ${(cmv >= 0 ? '+' : '') + cmv.toFixed(2)}%`;
   const lv = LEVELS.get(s) || {};
   const pair = bull ? [['PDH', lv.pdh], ['PMH', q.pmh]] : [['PDL', lv.pdl], ['PML', q.pml]];
   const cleared = new Set(sig.lvls || []);
@@ -1680,6 +1424,11 @@ const PRI15 = ["SPY","QQQ","IWM","AAPL","MSFT","GOOGL","AMZN","NVDA","META","TSL
 const sigPage = { bull: 1, bear: 1 };
 const SIG_PAGE = 5;
 function priTier(s){ const i = PRI15.indexOf(s); return i === -1 ? 999 : i; }
+function sigCandidates(){
+  const out = [];
+  for (const s of Q.keys()) if (LEVELS.has(s)) out.push(s);
+  return out;
+}
 function renderSignals(){
   const bullGrid = $('bullSigGrid'), bearGrid = $('bearSigGrid');
   if (!pollDone){
@@ -1695,16 +1444,15 @@ function renderSignals(){
     return;
   }
   const bull = [], bear = [];
-  for (const s of ALL_NAMES){
-    if (!LEVELS.has(s) || !Q.has(s)) continue;
+  const cand = sigCandidates();
+  for (const s of cand){
     if (!capPass(s)) continue;
     const sig = signalFor(s);
     if (sig && sig.side === 'bull') bull.push([s, sig]);
     else if (sig && sig.side === 'bear') bear.push([s, sig]);
   }
   if ($('sigSortSel')) $('sigSortSel').value = sigSort;
-  // Cards that closed through BOTH levels of the pair come to the front; then
-  // SPY/QQQ/IWM + the other 7 priority tickers; within a tier, by cap or % change.
+  /* Both-levels clears come first; then the priority tickers; then cap/%chg. */
   const alpha = (a,b) => (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0);
   const bothK = e => (e[1].both ? 0 : 1);
   if (sigSort === 'cap'){
@@ -1744,11 +1492,10 @@ function renderSignals(){
   $('bearSigPager').innerHTML = pager('bear', bear);
   $('bullSigCount').textContent = bull.length;
   $('bearSigCount').textContent = bear.length;
-  // Live header: "N active · M checked", countdown during hours, FINAL only after close.
   const pill = $('sigPill'), sub = $('sigSub');
   if (pill && sub){
     const open = isMarketOpen();
-    const checked = ALL_NAMES.filter(s => LEVELS.has(s) && Q.has(s) && capPass(s)).length;
+    const checked = cand.filter(s => capPass(s)).length;
     let txt = `${bull.length + bear.length} active · ${checked} checked · ${fmtMonD(nyMarketDate())}`;
     if (open){
       pill.textContent = 'LIVE';
@@ -1767,6 +1514,7 @@ function renderSignals(){
 let flowFilter = 'all', flowSortMode = 'chg';
 let flowPage = {bull: 1, bear: 1};
 const FLOW_PAGE = 10;
+let PREV_SIG = new Map();   // signal sides as of the previous flow render ("• New" badges)
 function passFilter(r){
   if (flowFilter === 'calls') return (r.callVolume||0) > (r.putVolume||0);
   if (flowFilter === 'puts') return (r.putVolume||0) > (r.callVolume||0);
@@ -1774,9 +1522,9 @@ function passFilter(r){
   if (flowFilter === 'breakouts') return sigSideOf(r.ticker) != null;
   return true;
 }
-// Strict flow verification: the snapshot must be <=35 minutes old AND every flow
-// row must carry finite volume data. Ignited / unusual labels only mean something
-// on verified flow — anything older is grouped as standard.
+/* Strict flow verification: snapshot <=35 min old AND every row carries
+   finite volume data. Ignited/unusual labels only mean something on
+   verified flow — anything older is grouped as standard. */
 function flowVerified(){
   if (!isFinite(SNAP_TS) || Date.now() - SNAP_TS > 35*60*1000) return false;
   const rows = (SNAP.bullish||[]).concat(SNAP.bearish||[]);
@@ -1784,9 +1532,6 @@ function flowVerified(){
   return rows.every(r => isFinite(r.volume) && isFinite(r.relativeVolume));
 }
 function sigSideOf(t){ const s = signalFor(t); return s ? s.side : null; }
-// Signal-group ordering applied before the selected sort, from the LIVE 15m
-// breakout-signal map (not the snapshot's flags):
-// above-breakout > ignited > unusual (>=2x) > below-breakout > standard
 function flowGroup(r){
   if (!flowVerified()) return 4;
   const side = sigSideOf(r.ticker);
@@ -1796,8 +1541,6 @@ function flowGroup(r){
   if (side === 'bear') return 3;
   return 4;
 }
-// Momentum score: |% change| weighted by capped relative volume —
-// abs(change) * (0.6 + 0.4 * min(relativeVolume, 5) / 5)
 function momScore(r){
   const rv = Math.min(r.relativeVolume || 0, 5);
   return Math.abs(r.changePct || 0) * (0.6 + 0.4 * rv / 5);
@@ -1806,29 +1549,23 @@ function flowSortFn(a, b, dir){
   if (flowSortMode === 'mom') return momScore(b) - momScore(a);
   if (flowSortMode === 'unus') return (b.relativeVolume || 0) - (a.relativeVolume || 0);
   if (flowSortMode === 'tvol') return (b.volume || 0) - (a.volume || 0);
-  if (flowSortMode === 'cap'){   // market cap: marketCapB desc, unknown caps last, ticker alpha tiebreak
+  if (flowSortMode === 'cap'){
     const ca = CAPS.get(a.ticker), cb = CAPS.get(b.ticker);
     return ((cb != null ? cb : -1) - (ca != null ? ca : -1)) || (a.ticker < b.ticker ? -1 : a.ticker > b.ticker ? 1 : 0);
   }
-  // 'chg': directional — bullish biggest gain first, bearish biggest loss first
   const echg = r => { const l = liveChg(r.ticker); return l != null ? l : (r.changePct || 0); };
   const ea = echg(a), eb = echg(b);
   return dir === 'bear' ? ea - eb : eb - ea;
 }
-function pctDist(px, lvl){
-  const d = (px - lvl) / lvl * 100;
-  return (d >= 0 ? '+' : '') + d.toFixed(1) + '%';
-}
+function pctDist(px, lvl){ const d = (px - lvl) / lvl * 100; return (d >= 0 ? '+' : '') + d.toFixed(1) + '%'; }
 function lvlBadge(r){
-  // Show BOTH PDH and PDL badges whenever their level data is fresh (<24h, i.e. this snapshot)
   if (!SNAP_FRESH) return '';
   const lv = LEVELS.get(r.ticker); if (!lv || !lv.pdh || !lv.pdl) return '';
   const q = Q.get(r.ticker);
   const px = (q && q.price != null) ? q.price : r.price;
   if (px == null) return '';
-  let b = `<span class="sig-badge lv bull">PDH ${pctDist(px, lv.pdh)}</span>` +
-          `<span class="sig-badge lv bear">PDL ${pctDist(px, lv.pdl)}</span>`;
-  return b;
+  return `<span class="sig-badge lv bull">PDH ${pctDist(px, lv.pdh)}</span>` +
+         `<span class="sig-badge lv bear">PDL ${pctDist(px, lv.pdl)}</span>`;
 }
 function flowBadge(r){
   if (!flowVerified() || r.relativeVolume == null || r.relativeVolume < 2) return '';
@@ -1847,6 +1584,23 @@ function sig15Badge(r, sig){
   const lg = bull ? `▲ 15m close above ${lvTxt}` : `▼ 15m close below ${lvTxt}`;
   const sm = bull ? `▲ 15m ${lvTxt}` : `▼ 15m ${lvTxt}`;
   return `<span class="sig-badge sig15 ${bull ? 'bull' : 'bear'}"><span class="lg">${lg}</span><span class="sm">${sm}</span></span>`;
+}
+function drawSpark(cv, bars, up){
+  if (!bars || bars.length < 2) return;
+  const dpr = Math.min(2, window.devicePixelRatio || 1);
+  const W = cv.clientWidth || cv.width, H = cv.clientHeight || cv.height;
+  if (!W || !H) return;
+  cv.width = W*dpr; cv.height = H*dpr;
+  const ctx = cv.getContext('2d'); ctx.scale(dpr, dpr);
+  const closes = bars.map(b => b[4]);
+  const lo = Math.min(...closes), hi = Math.max(...closes);
+  const col = up ? cssVar('--gain') : cssVar('--loss');
+  const n = closes.length, px = i => (i/(n-1))*W, py = v => H-3 - ((v-lo)/((hi-lo)||1))*(H-8);
+  ctx.strokeStyle = col; ctx.lineWidth = 1.5; ctx.lineJoin = 'round'; ctx.beginPath();
+  closes.forEach((v,i) => i ? ctx.lineTo(px(i),py(v)) : ctx.moveTo(px(i),py(v)));
+  ctx.stroke();
+  const last = closes[n-1];
+  ctx.fillStyle = col; ctx.beginPath(); ctx.arc(px(n-1), py(last), 2.2, 0, 7); ctx.fill();
 }
 function runnerRow(r, prevSig){
   const q = Q.get(r.ticker);
@@ -1883,9 +1637,8 @@ function pagerHTML(key, total){
          `<span>${flowPage[key]} / ${pages}</span>` +
          `<button data-pg="${key}|1" ${flowPage[key] >= pages ? 'disabled' : ''} aria-label="Next page">›</button>`;
 }
-function renderFlow(prevSig){
-  const prev = prevSig || new Map(SIGSTATE);
-  // pins live in the dedicated strip now — they never reorder these lists
+function renderFlow(){
+  const prev = PREV_SIG;
   const prep = (rows, dir) => rows.filter(passFilter)
     .sort((a, b) => (flowGroup(a) - flowGroup(b)) || flowSortFn(a, b, dir));
   const bull = prep(SNAP.bullish || [], 'bull');
@@ -1906,19 +1659,16 @@ function renderFlow(prevSig){
   $('flowSub').textContent = `${bull.length} bullish · ${bear.length} bearish · ${fmtMonD(SNAP.marketDate)} · ${etFmtShort.format(SNAP_D)} ET`;
   const flt = {all:'All', calls:'Calls', puts:'Puts', ignited:'Ignited', breakouts:'Breakouts'}[flowFilter];
   $('flowCount').textContent = `· ${bull.length + bear.length} shown (${flt})`;
+  PREV_SIG = new Map(SIGSTATE);
 }
 
 /* ================= PREMARKET ================= */
-let pmBreakout = false, pmMega = false, pmFav = false, pmSort = 'gap'; // pmSort: 'gap' | 'cap' | 'strength' | 'flow'
+let pmBreakout = false, pmMega = false, pmFav = false, pmSort = 'gap';
 let pmPage = 1;
 const PM_PAGE = 5;
-const ctFmtShort = new Intl.DateTimeFormat('en-US',{timeZone:'America/Chicago',hour:'numeric',minute:'2-digit',hour12:true});
-function pmCapLabel(mcb){
-  if (mcb == null || !isFinite(mcb)) return '';
-  return '$' + mcb.toFixed(1) + 'B cap';
-}
-// Breakout state with level priority PMH -> PDH -> PML -> PDL (live levels first,
-// snapshot prior-day levels next, snapshot position flag as the last fallback).
+function pmCapLabel(mcb){ if (mcb == null || !isFinite(mcb)) return ''; return '$' + mcb.toFixed(1) + 'B cap'; }
+/* Breakout state with level priority PMH -> PDH -> PML -> PDL (live levels
+   first, snapshot prior-day levels next, snapshot position flag last). */
 function pmBreakoutOf(r){
   const q = Q.get(r.ticker);
   const pmh = q && q.pmh != null ? q.pmh : null;
@@ -1931,27 +1681,44 @@ function pmBreakoutOf(r){
   if (r.position === 'below') return {state: 'dn', label: 'Breaking down'};
   return {state: 'flat', label: `Inside ${r.priorDay || ''} range`};
 }
-// Breakout-status rank for the "Breaking out" sort: up, then down, then flat.
 function pmBoRank(r){
-  const st = pmBreakoutOf(r).state;
-  return st === 'up' ? 0 : st === 'dn' ? 1 : 2;
+  const s = pmBreakoutOf(r).state;
+  return s === 'up' ? 0 : s === 'dn' ? 1 : 2;
 }
-// STRENGTH badge: |gap %| x relativeVolume — how much gap is backed by unusual flow
 function pmStrength(r){
-  // 0–100 composite standout score: gap 40 + flow 35 + breakout-proximity 25
-  const gap = Math.min(40, Math.abs(r.gap || 0) * 4);       // a 10% gap maxes the gap slice
-  const flow = Math.min(35, (r.relativeVolume || 0) * 7);   // 5x flow maxes the flow slice
-  const prox = pmBreakoutOf(r).state === 'flat' ? 0 : 25;   // breaking out/down takes the full 25
+  const gap = Math.min(40, Math.abs(r.gap || 0) * 4);
+  const flow = Math.min(35, (r.relativeVolume || 0) * 7);
+  const prox = pmBreakoutOf(r).state === 'flat' ? 0 : 25;
   return Math.round((gap + flow + prox) * 10) / 10;
 }
 function pmStrengthTier(s){ return s >= 70 ? 'hot' : s >= 40 ? 'warm' : 'mild'; }
+function tileHead(rank, ticker, side, name, price, chgPct, mcapB){
+  const t = side === 'bull' ? 'up' : side === 'bear' ? 'dn' : '';
+  const tri = side === 'bull' ? '▲' : side === 'bear' ? '▼' : '';
+  const chgCls = (chgPct == null || !isFinite(chgPct)) ? 'na' : (chgPct > 0 ? 'up' : chgPct < 0 ? 'dn' : 'na');
+  const chgTxt = (chgPct == null || !isFinite(chgPct)) ? '—' : ((chgPct >= 0 ? '+' : '') + chgPct.toFixed(2) + '%');
+  return `<span class="wr-rank">#${rank}</span>` +
+    `<div class="wr-id"><div class="wr-tkline">${tri ? `<span class="wr-tri ${t}">${tri}</span>` : ''}` +
+    `<span class="wr-tk ${t}">${esc(ticker)}</span></div>` +
+    (name ? `<div class="wr-name">${esc(name)}</div>` : '') +
+    `<div class="wr-sub">${price != null && isFinite(price) ? `<span class="wr-px">${fmtPx(price)}</span><span class="sep">·</span>` : ''}<span class="chg ${chgCls}">${chgTxt}</span><span class="sep">·</span>` +
+    `<span class="cap">${(mcapB == null || !isFinite(mcapB)) ? 'cap —' : fmtCapB(mcapB)}</span></div></div>`;
+}
+function tileCharts(ticker){
+  return `<div class="wr-c1"><canvas class="wchart" data-wc="${esc(ticker)}|h1" title="1H closes · dashed line = series mean"></canvas></div>` +
+         `<div class="wr-c2"><canvas class="wchart" data-wc="${esc(ticker)}|h4" title="4H closes · dashed line = series mean"></canvas></div>`;
+}
+function tileStar(ticker){
+  const starred = watchStars.has(ticker);
+  return `<div class="wr-watch"><button class="wr-star${starred ? ' on' : ''}" data-wstar="${esc(ticker)}" aria-label="Watch ${esc(ticker)}">${starred ? '★' : '☆'}</button></div>`;
+}
 function pmCard(r, idx){
   const bo = pmBreakoutOf(r);
   const badge = bo.state === 'up' ? '▲' : bo.state === 'dn' ? '▼' : '—';
   const st = pmStrength(r);
   const side = (r.gap || 0) >= 0 ? 'bull' : 'bear';
   const t4 = side === 'bull' ? 'up' : 'dn';
-  const name = (typeof NAMES !== 'undefined' && NAMES.get(r.ticker)) || '';
+  const name = NAMES.get(r.ticker) || '';
   const rel = r.relativeVolume;
   const lp = livePrice(r.ticker);
   const px = lp != null ? lp : r.price;
@@ -1970,10 +1737,10 @@ function pmCard(r, idx){
     `<div class="wr-watch"><button class="wr-star pin${pins.has(r.ticker) ? ' on' : ''}" data-pin="${esc(r.ticker)}" aria-label="Pin ${esc(r.ticker)}">${pins.has(r.ticker) ? '★' : '☆'}</button></div></div>`;
 }
 const PM_SORTS = {
-  gap:      {label: 'Biggest gap',       fn: (a,b) => (((a.gap||0) >= 0 ? 0 : 1) - ((b.gap||0) >= 0 ? 0 : 1)) || (Math.abs(b.gap||0) - Math.abs(a.gap||0))},
-  cap:      {label: 'Largest cap',       fn: (a,b) => (b.marketCapB || 0) - (a.marketCapB || 0)},
+  gap:      {label: 'Biggest gap',         fn: (a,b) => (((a.gap||0) >= 0 ? 0 : 1) - ((b.gap||0) >= 0 ? 0 : 1)) || (Math.abs(b.gap||0) - Math.abs(a.gap||0))},
+  cap:      {label: 'Largest cap',         fn: (a,b) => (b.marketCapB || 0) - (a.marketCapB || 0)},
   strength: {label: 'Strength (standout)', fn: (a,b) => pmStrength(b) - pmStrength(a)},
-  flow:     {label: 'Most flow',         fn: (a,b) => (b.relativeVolume || 0) - (a.relativeVolume || 0)},
+  flow:     {label: 'Most flow',           fn: (a,b) => (b.relativeVolume || 0) - (a.relativeVolume || 0)}
 };
 function pmPagerHTML(total){
   const pages = Math.max(1, Math.ceil(total / PM_PAGE));
@@ -1998,31 +1765,22 @@ function renderPremarket(){
   pills.querySelector('[data-pm="mega"]').classList.toggle('on', pmMega);
   if ($('pmSortSel')) $('pmSortSel').value = pmSort;
   const list = rows.filter(r => {
-    if (!isFinite(r.relativeVolume) || r.relativeVolume <= 0) return false;  // flow data required
-    if (pmBreakout && pmBreakoutOf(r).state === 'flat') return false;   // real breakout state, not the raw flag
-    if (pmFav && !pins.has(r.ticker)) return false;                     // favorites only (same pins as the rest of the board)
+    if (!isFinite(r.relativeVolume) || r.relativeVolume <= 0) return false;
+    if (pmBreakout && pmBreakoutOf(r).state === 'flat') return false;
+    if (pmFav && !pins.has(r.ticker)) return false;
     if (pmMega && !((r.marketCapB || 0) > 50)) return false;
     return true;
   });
-  // The "Breaking out" control sorts by breakout status: breaking out first,
-  // breaking down next, then flat — |gap| breaks ties.
   if (pmBreakout) list.sort((a,b) => pmBoRank(a) - pmBoRank(b) || (Math.abs(b.gap||0) - Math.abs(a.gap||0)));
   else list.sort(PM_SORTS[pmSort].fn);
   const pages = Math.max(1, Math.ceil(list.length / PM_PAGE));
   if (pmPage > pages) pmPage = pages;
   $('pmGrid').innerHTML = list.slice((pmPage-1)*PM_PAGE, pmPage*PM_PAGE).map(pmCard).join('') || '<div class="empty">Premarket watchlist is empty.</div>';
-  if (typeof paintWatchCharts === 'function') paintWatchCharts($('pmGrid'));
+  paintWatchCharts($('pmGrid'));
   $('pmPager').innerHTML = pmPagerHTML(list.length);
-  placePremarket();
-}
-function placePremarket(){
-  // Retired 2026-10-09: the morning funnel is one tabbed panel (secMorning),
-  // statically positioned after pins. No DOM reordering needed.
 }
 
 /* ================= SECTORS ================= */
-// Static GICS reference map for the quote universe (ETFs/leveraged products -> "ETF / Fund").
-// Tickers not listed here are omitted from the aggregation, never guessed.
 const SECTORMAP = (() => {
   const groups = {
     "ETF / Fund": "SPY QQQ IWM DIA TQQQ SQQQ SOXL SOXS UVXY VXX SPXL SPXU TNA TZA FAS FAZ TECL TECS FNGU FNGD LABU LABD BOIL KOLD YINN YANG EDC EDZ NUGT DUST JNUG JDST GUSH DRIP NRGU NRGD XLF XLK XLE XLV XLI XLP XLU XLY XLB XLRE XLC SMH SOXX ARKK TLT HYG GLD SLV USO UNG KRE XBI XOP GDX GDXJ URA TAN LIT XRT ITA JETS IGV FDN PS",
@@ -2040,25 +1798,18 @@ const SECTORMAP = (() => {
   for (const sec of Object.keys(groups)) for (const t of groups[sec].split(' ')) m.set(t, sec);
   return m;
 })();
-let secView = null;   // sector drill-down: null = grid, otherwise the sector name
-function pctFor(t){
-  // % move for a ticker: live quote first, snapshot change as fallback
-  const q = Q.get(t);
-  if (q && q.chgPct != null && isFinite(q.chgPct)) return q.chgPct;
-  const r = (SNAP.bullish || []).concat(SNAP.bearish || []).find(x => x.ticker === t);
-  return r && r.changePct != null && isFinite(r.changePct) ? r.changePct : null;
-}
+
+let secView = null;
 function renderSectors(){
-  // Sector heat is computed from the live options-flow rows only (not the whole
-  // 311 universe): each flow ticker maps to a GICS sector and contributes its
-  // live % change.
+  /* Sector heat is computed from the live options-flow rows only: each flow
+     ticker maps to a GICS sector and contributes its live % change. */
   const cards = [];
   {
-    const agg = new Map(); // sector -> [{t, pct, rv}]
+    const agg = new Map();
     for (const r of (SNAP.bullish || []).concat(SNAP.bearish || [])){
       const s = r.ticker; if (!s) continue;
       const sec = SECTORS.get(s) || SECTORMAP.get(s);
-      if (!sec) continue;   // unmapped tickers stay excluded, never guessed
+      if (!sec) continue;
       const pct = liveChg(s) != null ? liveChg(s) : (r.changePct != null && isFinite(r.changePct) ? r.changePct : null);
       if (pct == null) continue;
       if (!agg.has(sec)) agg.set(sec, []);
@@ -2070,13 +1821,9 @@ function renderSectors(){
     }
   }
   cards.sort((x, y) => y.mean - x.mean);
-  // heat semantics: best = top-3 positive sectors; building = mean >= +1%;
-  // leaving = mean <= -1%; anything between is neutral
   const bestSet = new Set(cards.filter(c => c.mean > 0).slice(0, 3).map(c => c.sec));
   const grid = $('sectorGrid');
   if (secView){
-    // Top-15 drill-down for one sector, ranked by % move in the sector's direction:
-    // strongest gains first when the sector is up, deepest losses first when down.
     const c = cards.find(x => x.sec === secView);
     grid.className = '';
     const rows = c ? [...c.rows].sort((a, b) => c.mean >= 0 ? b.pct - a.pct : a.pct - b.pct) : [];
@@ -2109,11 +1856,10 @@ function renderSectors(){
 /* ================= MOVERS ================= */
 const MV_PAGE = 5;
 let mvPage = {gain: 1, loss: 1};
-let mvFilter = 'u311';   // 'u311' = tracked 311 universe (default) | 'rest' = rest of market (universe ex-priority) | 'all' = merged
-let mvSort = 'chg';      // 'chg' = % change (default) | 'cap' = market cap, within each side
-function mvMcOf(s){ const c = CAPS.get(s); return c != null ? c * 1e9 : null; }  // marketCapB -> dollars
+let mvFilter = 'u311';
+let mvSort = 'chg';
+function mvMcOf(s){ const c = CAPS.get(s); return c != null ? c * 1e9 : null; }
 function mvUniverse(){
-  // 311 filter: the old behavior — tracked universe ranked by live % change from quotes
   const arr = [];
   for (const s of UNISET){ const q = Q.get(s); if (q && q.chgPct != null) arr.push({t: s, price: q.price, chgPct: q.chgPct, mc: mvMcOf(s)}); }
   return arr;
@@ -2122,10 +1868,6 @@ function splitMv(list, src, label){
   return {gain: [...list].sort((a,b) => b.chgPct - a.chgPct), loss: [...list].sort((a,b) => a.chgPct - b.chgPct), src, label};
 }
 function mvScopeRows(){
-  // Three scopes, all from real data:
-  // 311 = tracked universe (pre-ranked live feed when available, else universe quotes);
-  // Rest of market = tracked universe outside the 56 priority names;
-  // All = universe merged with the pre-ranked movers feed, deduped.
   if (mvFilter === 'rest'){
     const list = [];
     for (const s of UNISET){ if (PRISET.has(s)) continue; const q = Q.get(s); if (q && q.chgPct != null) list.push({t: s, price: q.price, chgPct: q.chgPct, mc: mvMcOf(s)}); }
@@ -2171,7 +1913,7 @@ function renderMovers(){
   };
   paintMvFilters();
   if ($('mvSortSel')) $('mvSortSel').value = mvSort;
-  if (!Q.size && !feedAsOf){   // first load still in flight: skeleton, not an error
+  if (!Q.size && !feedAsOf){
     $('topMovers').innerHTML = skel; $('bigLosers').innerHTML = skel;
     $('gainPager').innerHTML = ''; $('lossPager').innerHTML = '';
     $('moversMeta').textContent = '';
@@ -2198,11 +1940,6 @@ function renderMovers(){
   const sub = $('moversSub');
   if (sub) sub.textContent = 'Price leaders across the 311-ticker universe · computed from ' + (isMarketOpen() ? 'live day change' : 'final day change');
 }
-
-$('mvSortSel').addEventListener('change', e => {
-  mvSort = e.target.value; mvPage = {gain:1, loss:1};
-  renderMovers();
-});
 
 /* ================= DRAWER ================= */
 function drawChart(cv, bars, lv, pmh, pml){
@@ -2312,7 +2049,7 @@ function renderIgnitions(){
     el.innerHTML = (!feedAsOf && !ftErr)
       ? '<div class="empty">Loading ignition history&hellip;</div>'
       : ftErr
-        ? `<div class="empty">Ignition history unavailable — ${esc(ftErr)}. Place follow_through.json next to this page.</div>`
+        ? `<div class="empty">Ignition history unavailable — ${esc(ftErr)}.</div>`
         : '<div class="empty">No ignitions recorded yesterday.</div>';
     return;
   }
@@ -2331,39 +2068,68 @@ function renderIgnitions(){
 }
 
 /* ================= FLOW PERSISTENCE ================= */
-let PERSIST = null;
-/* ================= BREAK RANKING ================= */
-let BREAKRANK = null;
-/* ============ BREAK RANKING (tiles, sortable, paginated) ============ */
+function renderPersist(){
+  const P = PERSIST || {};
+  const confirmed = P.confirmed || [], streaks = P.streaks || [], first = P.firstAppearance || [];
+  $('persistMeta').textContent = P.marketDate ? `${confirmed.length} confirmed · ${streaks.length} streaks · ${first.length} first-timers · ${fmtMonD(P.marketDate)}` : '';
+  $('persistConfirmed').innerHTML = confirmed.length
+    ? '<div class="persist-label">✓ Confirmed ignitions <span>ignited yesterday, broke out today</span></div>' +
+      confirmed.map(c => `<div class="ig-card" data-sym="${esc(c.ticker)}">` +
+        `<div class="tk">${esc(c.ticker)}</div>` +
+        `<div class="ix">${esc(String(c.ignitionX))}× → ${esc(c.breakoutSide)} ${esc(c.breakoutCandle || '')}</div></div>`).join('')
+    : '<div class="empty">No confirmed ignitions today.</div>';
+  const top = streaks.slice(0, 10);
+  $('persistStreaks').innerHTML = top.length
+    ? '<div class="persist-label">🔥 Persistence streaks <span>consecutive days of unusual flow</span></div>' +
+      top.map(s => {
+        const f = s.priceFollow == null ? '' : s.priceFollow ? '<span class="sig-badge">✓ price followed</span>' : '<span class="sig-badge noq">✗ price diverged</span>';
+        return `<div class="ig-card" data-sym="${esc(s.ticker)}">` +
+          `<div class="tk">${esc(s.ticker)}</div>` +
+          `<div class="ix">${s.streakDays}d streak · ${esc(String(s.lastX))}× ${esc(s.side)}</div>${f}</div>`;
+      }).join('')
+    : '';
+  $('persistFirst').innerHTML = first.length
+    ? '<div class="persist-label">✨ First appearance <span>unusual flow, first time in 30 days</span></div>' +
+      first.map(f => `<div class="ig-card" data-sym="${esc(f.ticker)}">` +
+        `<div class="tk">${esc(f.ticker)}</div>` +
+        `<div class="ix">${esc(String(f.x))}× ${esc(f.side)}</div></div>`).join('')
+    : '';
+  const echo = P.echo || [];
+  $('persistEcho').innerHTML = echo.length
+    ? '<div class="persist-label">🔁 Flow echo <span>unusual again after 5+ quiet days</span></div>' +
+      echo.slice(0, 8).map(e => `<div class="ig-card" data-sym="${esc(e.ticker)}">` +
+        `<div class="tk">${esc(e.ticker)}</div>` +
+        `<div class="ix">${esc(String(e.x))}× ${esc(e.side)} · back after ${e.lastSeenDaysAgo}d</div></div>`).join('')
+    : '';
+  const dead = P.deadMoney || [];
+  $('persistDead').innerHTML = dead.length
+    ? '<div class="persist-label">💤 Dead money <span>5+ days of unusual flow, price flat — coiled spring</span></div>' +
+      dead.slice(0, 8).map(x => `<div class="ig-card" data-sym="${esc(x.ticker)}">` +
+        `<div class="tk">${esc(x.ticker)}</div>` +
+        `<div class="ix">${x.streakDays}d · ${esc(String(x.lastX))}× flow · ${esc(String(x.changePct))}% today</div></div>`).join('')
+    : '';
+  const rot = P.sectorRotation || [];
+  const movers = rot.filter(r => Math.abs(r.deltaPct) >= 1).slice(0, 8);
+  $('persistSectors').innerHTML = movers.length
+    ? '<div class="persist-label">🔄 Sector rotation <span>share of unusual flow, this week vs last</span></div>' +
+      movers.map(r => {
+        const up = r.deltaPct >= 0;
+        return `<div class="ig-card"><div class="tk" style="font-size:12px">${esc(r.sector)}</div>` +
+          `<div class="ix ${up ? 'up' : 'dn'}">${up ? '▲' : '▼'} ${Math.abs(r.deltaPct).toFixed(1)}% <span style="color:var(--muted)">${r.lastWeekPct.toFixed(0)}→${r.thisWeekPct.toFixed(0)}%</span></div></div>`;
+      }).join('')
+    : '';
+  if (P.asOf) $('updPersist').textContent = 'updated ' + ctTime(Date.parse(P.asOf));
+}
+
+/* ================= BREAK RANKING (tiles in the Morning Breaks pane) ================= */
 let brSortKey = 'score', brSortDir = -1, brPage = 0;
 const BR_PAGE = 10;
 const BR_SORTS = {
   score:  {label: 'Score',      get: r => r.score},
   side:   {label: 'Direction',  get: r => r.side === 'bull' ? 0 : 1},
   mcap:   {label: 'Market cap', get: r => { const c = CAPS.get(r.ticker); return (c == null || !isFinite(c)) ? -1 : c; }},
-  gapPct: {label: 'Gap %',      get: r => r.gapPct},
+  gapPct: {label: 'Gap %',      get: r => r.gapPct}
 };
-/* Shared morning-tile header: identical look across Gaps / Levels / Breaks. */
-function tileHead(rank, ticker, side, name, price, chgPct, mcapB){
-  const t = side === 'bull' ? 'up' : side === 'bear' ? 'dn' : '';
-  const tri = side === 'bull' ? '▲' : side === 'bear' ? '▼' : '';
-  const chgCls = (chgPct == null || !isFinite(chgPct)) ? 'na' : (chgPct > 0 ? 'up' : chgPct < 0 ? 'dn' : 'na');
-  const chgTxt = (chgPct == null || !isFinite(chgPct)) ? '—' : ((chgPct >= 0 ? '+' : '') + chgPct.toFixed(2) + '%');
-  return `<span class="wr-rank">#${rank}</span>` +
-    `<div class="wr-id"><div class="wr-tkline">${tri ? `<span class="wr-tri ${t}">${tri}</span>` : ''}` +
-    `<span class="wr-tk ${t}">${esc(ticker)}</span></div>` +
-    (name ? `<div class="wr-name">${esc(name)}</div>` : '') +
-    `<div class="wr-sub">${price != null && isFinite(price) ? `<span class="wr-px">${fmtPx(price)}</span><span class="sep">·</span>` : ''}<span class="chg ${chgCls}">${chgTxt}</span><span class="sep">·</span>` +
-    `<span class="cap">${(mcapB == null || !isFinite(mcapB)) ? 'cap —' : fmtCapB(mcapB)}</span></div></div>`;
-}
-function tileStar(ticker){
-  const starred = (typeof watchStars !== 'undefined' && watchStars.has(ticker));
-  return `<div class="wr-watch"><button class="wr-star${starred ? ' on' : ''}" data-wstar="${esc(ticker)}" aria-label="Watch ${esc(ticker)}">${starred ? '★' : '☆'}</button></div>`;
-}
-function tileCharts(ticker){
-  return `<div class="wr-c1"><canvas class="wchart" data-wc="${esc(ticker)}|h1" title="1H closes · dashed line = series mean"></canvas></div>` +
-         `<div class="wr-c2"><canvas class="wchart" data-wc="${esc(ticker)}|h4" title="4H closes · dashed line = series mean"></canvas></div>`;
-}
 function brRows(){
   const B = BREAKRANK || {}, rows = (B.rows || []).slice();
   const {get} = BR_SORTS[brSortKey] || BR_SORTS.score;
@@ -2375,7 +2141,7 @@ function brRows(){
 }
 function breakTile(r){
   const cap = CAPS.get(r.ticker);
-  const name = (typeof NAMES !== 'undefined' && NAMES.get(r.ticker)) || '';
+  const name = NAMES.get(r.ticker) || '';
   const bull = r.side === 'bull';
   const t4 = bull ? 'up' : 'dn';
   const score = Number(r.score).toFixed(1);
@@ -2396,15 +2162,14 @@ function breakTile(r){
 }
 function renderBreakRank(){
   const B = BREAKRANK || {};
-  // A ranking from any day other than today is never rendered as today's
-  // table: before the first-candle ranking publishes, show the waiting state.
+  /* A ranking from any day other than today is never rendered as today's
+     table: before the first-candle ranking publishes, show the waiting state. */
   const staleDay = !!(B.marketDate && B.marketDate !== nyMarketDate());
   const m = $('brMeta');
   if (m) m.textContent = staleDay ? `Waiting for ${fmtMonD(nyMarketDate())}`
     : (B.marketDate ? `${(B.rows || []).length} flags · ${fmtMonD(B.marketDate)}` : '');
   const rows = staleDay ? [] : brRows();
   const host = $('mpane-breaks');
-  // sort chips row (same language as the Levels tab)
   let html = `<div class="msortbar"><span class="wsort-label">SORT BY</span>` +
     Object.entries(BR_SORTS).map(([k, s]) =>
       `<button class="wchip${brSortKey === k ? ' on' : ''}" data-brsort="${k}">${s.label}${brSortKey === k ? (brSortDir === -1 ? ' ▼' : ' ▲') : ''}</button>`
@@ -2424,129 +2189,18 @@ function renderBreakRank(){
   }
   if (host){
     host.innerHTML = html;
-    if (typeof paintWatchCharts === 'function') paintWatchCharts(host);
+    paintWatchCharts(host);
   }
 }
-function renderPersist(){
-  const P = PERSIST || {};
-  const confirmed = P.confirmed || [], streaks = P.streaks || [], first = P.firstAppearance || [];
-  $('persistMeta').textContent = P.marketDate ? `${confirmed.length} confirmed · ${streaks.length} streaks · ${first.length} first-timers · ${fmtMonD(P.marketDate)}` : '';
-  // Confirmed ignitions: ignited yesterday + broke out today
-  $('persistConfirmed').innerHTML = confirmed.length
-    ? '<div class="persist-label">✓ Confirmed ignitions <span>ignited yesterday, broke out today</span></div>' +
-      confirmed.map(c => `<div class="ig-card" data-sym="${esc(c.ticker)}">` +
-        `<div class="tk">${esc(c.ticker)}</div>` +
-        `<div class="ix">${esc(String(c.ignitionX))}× → ${esc(c.breakoutSide)} ${esc(c.breakoutCandle || '')}</div></div>`).join('')
-    : '<div class="empty">No confirmed ignitions today.</div>';
-  // Streaks: top 10 by streak length
-  const top = streaks.slice(0, 10);
-  $('persistStreaks').innerHTML = top.length
-    ? '<div class="persist-label">🔥 Persistence streaks <span>consecutive days of unusual flow</span></div>' +
-      top.map(s => {
-        const f = s.priceFollow == null ? '' : s.priceFollow ? '<span class="sig-badge">✓ price followed</span>' : '<span class="sig-badge noq">✗ price diverged</span>';
-        return `<div class="ig-card" data-sym="${esc(s.ticker)}">` +
-          `<div class="tk">${esc(s.ticker)}</div>` +
-          `<div class="ix">${s.streakDays}d streak · ${esc(String(s.lastX))}× ${esc(s.side)}</div>${f}</div>`;
-      }).join('')
-    : '';
-  // First appearances
-  $('persistFirst').innerHTML = first.length
-    ? '<div class="persist-label">✨ First appearance <span>unusual flow, first time in 30 days</span></div>' +
-      first.map(f => `<div class="ig-card" data-sym="${esc(f.ticker)}">` +
-        `<div class="tk">${esc(f.ticker)}</div>` +
-        `<div class="ix">${esc(String(f.x))}× ${esc(f.side)}</div></div>`).join('')
-    : '';
-  // Flow echo: back after going quiet
-  const echo = P.echo || [];
-  $('persistEcho').innerHTML = echo.length
-    ? '<div class="persist-label">🔁 Flow echo <span>unusual again after 5+ quiet days</span></div>' +
-      echo.slice(0, 8).map(e => `<div class="ig-card" data-sym="${esc(e.ticker)}">` +
-        `<div class="tk">${esc(e.ticker)}</div>` +
-        `<div class="ix">${esc(String(e.x))}× ${esc(e.side)} · back after ${e.lastSeenDaysAgo}d</div></div>`).join('')
-    : '';
-  // Dead money: persistent flow, flat price = coiled spring
-  const dead = P.deadMoney || [];
-  $('persistDead').innerHTML = dead.length
-    ? '<div class="persist-label">💤 Dead money <span>5+ days of unusual flow, price flat — coiled spring</span></div>' +
-      dead.slice(0, 8).map(x => `<div class="ig-card" data-sym="${esc(x.ticker)}">` +
-        `<div class="tk">${esc(x.ticker)}</div>` +
-        `<div class="ix">${x.streakDays}d · ${esc(String(x.lastX))}× flow · ${esc(String(x.changePct))}% today</div></div>`).join('')
-    : '';
-  // Sector rotation: week-over-week flow share shifts
-  const rot = P.sectorRotation || [];
-  const movers = rot.filter(r => Math.abs(r.deltaPct) >= 1).slice(0, 8);
-  $('persistSectors').innerHTML = movers.length
-    ? '<div class="persist-label">🔄 Sector rotation <span>share of unusual flow, this week vs last</span></div>' +
-      movers.map(r => {
-        const up = r.deltaPct >= 0;
-        return `<div class="ig-card"><div class="tk" style="font-size:12px">${esc(r.sector)}</div>` +
-          `<div class="ix ${up ? 'up' : 'dn'}">${up ? '▲' : '▼'} ${Math.abs(r.deltaPct).toFixed(1)}% <span style="color:var(--muted)">${r.lastWeekPct.toFixed(0)}→${r.thisWeekPct.toFixed(0)}%</span></div></div>`;
-      }).join('')
-    : '';
-  if (P.asOf) $('updPersist').textContent = 'updated ' + ctTime(Date.parse(P.asOf));
-}
 
-/* ================= DATE VERIFICATION ================= */
-// The NYSE market date in America/New_York: the trading day whose data the board
-// should expect. Rolls back to the previous trading day overnight (before the
-// 8 AM ET premarket publish window the feeds run on) and to Friday on weekends,
-// so the board never demands a date whose data can't exist yet.
-function nyMarketDate(){
-  const parts = new Intl.DateTimeFormat('en-CA', {timeZone: 'America/New_York', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', hour12: false}).formatToParts(new Date());
-  const get = t => (parts.find(p => p.type === t) || {}).value;
-  const d = new Date(Date.UTC(+get('year'), +get('month') - 1, +get('day'), 12));
-  if ((parseInt(get('hour'), 10) % 24) < 8) d.setUTCDate(d.getUTCDate() - 1);  // pre-dawn: still last trading day
-  const wd = d.getUTCDay();
-  if (wd === 0) d.setUTCDate(d.getUTCDate() - 2);       // Sunday -> Friday
-  else if (wd === 6) d.setUTCDate(d.getUTCDate() - 1);  // Saturday -> Friday
-  return d.toISOString().slice(0, 10);
-}
-function etDateOfMs(ms){   // epoch ms -> YYYY-MM-DD in America/New_York
-  const fmt = new Intl.DateTimeFormat('en-CA', {timeZone: 'America/New_York', year: 'numeric', month: '2-digit', day: '2-digit'});
-  return fmt.format(new Date(ms));
-}
-function fmtMD(ymd){ const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(ymd || ''); return m ? `${m[2]}/${m[3]}/${m[1]}` : (ymd || ''); }
-
-/* Watchlist 1H/4H history (Yahoo hourly, regular session only, built 2026-09-30; 1H=last 107 hourly closes, 4H=last 27 session-aligned 09:30-13:30/13:30-16:00 closes; premarket/afterhours excluded) */
-let WCHARTS = {"LABU":{"h1":[280.885,279.09,270.464,266.22,266.135,267.24,264.85,265.21,264.8,270.075,266.5,263.84,264.25,267.53,265.155,261.43,262.405,266.5,274.08,273.3,270.0,268.44,268.49,250.17,245.995,250.54,247.0,248.74,246.3601,250.39,253.6499,254.2869,255.85,256.91,256.3,243.52,250.7,276.545,274.44,269.32,268.02,268.775,268.6,270.83,263.465,265.2,259.47,259.3706,262.8,263.0,261.41,274.04,271.68,269.78,266.58,270.29,269.6524,269.935,279.8394,290.17,283.94,285.09,290.59,289.36,288.72,275.05,260.22,253.55,252.255,250.74,257.135,252.8,251.1,243.08,248.826,248.34,253.89,255.885,257.5,247.75,250.09,255.03,251.555,252.355,252.7,252.09,251.99,252.975,259.8109,260.94,261.01,263.1,259.98,253.12,250.465,254.15,255.825,260.55,260.58,260.76,262.835,274.22,271.635,268.94,271.0201,268.61,268.725],"h4":[261.43,273.3,268.49,247.0,250.39,256.91,250.7,268.02,270.83,259.3706,261.41,266.58,269.935,285.09,288.72,252.255,252.8,248.34,257.5,251.555,252.09,260.94,259.98,255.825,260.76,268.94,268.725]},"EDC":{"h1":[83.95,84.7,84.71,84.17,80.13,80.08,79.135,79.18,78.84,78.94,78.68,81.855,81.485,81.67,81.82,81.64,81.25,81.43,74.5201,74.86,75.845,76.23,76.44,75.75,74.95,74.53,73.82,73.69,74.1556,74.25,74.2,74.05,75.68,76.54,76.19,75.67,75.31,72.81,73.925,77.945,77.64,78.17,78.19,78.17,77.8,77.0768,76.8812,77.04,77.5,77.58,78.0,78.27,82.835,83.305,84.05,84.08,84.325,84.4635,84.5,84.79,84.35,83.67,83.82,84.83,84.92,85.3,80.38,81.34,80.72,79.78,80.325,80.27,80.085,78.845,77.76,79.14,78.525,78.445,78.24,78.43,79.34,79.6351,81.06,80.57,80.47,80.72,80.945,77.71,76.42,78.72,78.3,78.24,78.18,78.085,78.65,77.8519,77.75,77.58,78.24,78.73,78.66,77.34,76.9,76.74,76.51,76.235,76.1899],"h4":[81.43,76.23,74.95,74.1556,74.05,75.67,73.925,78.19,77.8,77.5,78.27,84.08,84.5,83.82,85.3,79.78,80.085,78.525,78.43,80.57,80.945,78.3,78.085,77.58,78.66,76.51,76.1899]},"EDZ":{"h1":[13.73,13.699,13.68,13.82,14.5,14.4451,14.64,14.5806,14.6339,14.6977,14.7,14.11,14.06,14.075,14.16,14.24,14.165,15.37,15.3513,15.155,15.08,15.055,15.19,15.325,15.3804,15.495,15.49,15.505,15.43,15.4341,15.47,15.12,14.96,15.0001,15.14,15.295,15.75,15.51,14.6977,14.7292,14.6,14.605,14.66,14.65,14.83,14.8489,14.9,14.7435,14.74,14.6822,14.61,13.755,13.6569,13.54,13.535,13.48,13.4574,13.46,13.1801,13.3,13.355,13.28,13.171,13.1281,13.1,13.8401,13.705,13.81,13.975,13.87,13.9,13.91,14.13,14.31,14.07,14.17,14.185,14.2,14.2,13.9721,13.96,13.7509,13.815,13.78,13.81,13.755,14.34,14.54,14.13,14.2153,14.22,14.265,14.22,14.15,14.251,14.24,14.345,14.25,14.14,14.1299,14.315,14.4661,14.4301,14.5051,14.57,14.5721,14.5701],"h4":[14.165,15.08,15.325,15.505,15.47,15.14,15.51,14.6,14.65,14.7435,14.61,13.535,13.46,13.28,13.1,13.975,13.91,14.17,14.2,13.815,13.755,14.2153,14.22,14.345,14.1299,14.5051,14.5701]},"DRIP":{"h1":[32.5,32.495,32.99,32.25,31.93,31.835,31.94,32.1,32.3529,32.1,32.23,31.9,32.22,32.34,32.32,32.27,31.54,32.1,31.91,32.53,32.565,33.05,33.0,32.06,31.26,31.15,30.85,30.96,31.07,30.95,32.84,33.23,32.76,32.5801,32.7,33.51,33.39,33.66,33.39,33.3,33.136,32.98,33.15,33.13,33.25,33.16,33.54,33.67,33.61,33.71,33.79,35.19,35.5,35.66,35.52,35.12,35.72,35.63,35.6193,35.49,35.265,35.45,35.73,36.28,36.61,35.63,35.47,35.225,36.2099,36.08,36.16,36.17,35.44,34.85,35.75,35.46,35.44,35.53,35.61,36.79,36.51,37.14,37.21,37.0,36.49,36.63,36.47,36.615,37.06,36.77,36.8,37.15,37.17,37.54,37.54,37.53,37.7,37.87,37.855,37.84,37.3,36.755,36.635,36.67,36.71,37.02,36.99],"h4":[32.27,32.53,33.0,30.85,30.95,32.5801,33.39,33.136,33.13,33.67,33.79,35.52,35.63,35.45,36.61,36.2099,36.17,35.46,35.61,37.21,36.63,36.77,37.17,37.7,37.84,36.67,36.99]},"NRGD":{"h1":[13.18,13.15,13.0022,13.09,13.55,13.1,12.8705,12.9199,12.85,12.91,13.0184,12.77,13.05,12.72,12.93,12.94,12.9,12.911,12.24,12.74,12.76,13.05,12.94,13.19,13.09,12.18,12.075,11.925,11.83,11.81,11.86,11.91,12.85,12.947,12.7845,12.6752,12.65,13.135,12.99,13.12,12.9825,12.92,12.8,12.69,12.65,12.65,12.695,12.5001,12.58,12.88,12.82,12.8,12.84,13.61,13.7142,13.8582,13.79,13.62,13.9816,14.0122,14.3614,14.245,13.98,14.15,14.285,14.62,14.74,14.07,14.0811,14.0,14.5313,14.315,14.315,14.3261,13.57,13.34,13.87,13.6699,13.755,13.87,13.95,14.56,14.3306,14.54,14.6999,14.5,14.2864,14.4,14.135,14.05,14.47,14.57,14.4,14.495,14.51,14.74,14.78,14.645,14.69,14.91,14.7534,14.6401,14.33,14.34,14.275,14.25,14.3],"h4":[12.911,13.05,13.09,11.83,11.91,12.6752,12.99,12.8,12.65,12.88,12.84,13.79,14.0122,14.15,14.74,14.5313,14.3261,13.6699,13.95,14.6999,14.4,14.57,14.51,14.645,14.7534,14.275,14.3]},"XLV":{"h1":[166.825,166.58,166.15,165.84,165.76,165.82,165.8503,165.72,165.67,165.79,165.25,165.53,165.525,165.33,165.53,165.37,167.22,167.45,167.9,167.76,167.64,167.73,167.73,166.86,167.55,167.86,167.58,167.73,167.39,167.67,168.025,168.3712,168.56,168.53,168.65,167.595,167.78,168.26,168.2,168.44,168.479,168.82,168.73,168.81,168.27,168.21,167.96,168.1,168.76,168.46,168.38,168.47,168.655,168.59,169.095,169.46,168.985,168.97,168.9,170.55,170.13,170.025,170.19,170.05,169.9,170.45,169.13,168.685,168.4,168.22,168.5891,168.8,170.95,169.84,170.2,169.59,170.25,170.395,169.88,169.28,169.77,169.8299,169.985,170.33,170.42,170.74,170.895,170.83,171.41,171.12,171.1,171.37,171.26,169.38,169.585,169.495,169.89,170.3,170.58,170.73,169.54,170.41,169.82,170.12,169.39,169.03,168.98],"h4":[165.37,167.76,167.73,167.58,167.67,168.53,167.78,168.479,168.81,168.1,168.38,169.095,168.97,170.025,169.9,168.4,168.8,169.59,169.88,169.985,170.74,171.12,171.26,169.89,170.73,170.12,168.98]},"XLY":{"h1":[112.685,112.48,112.4,112.36,112.38,112.27,112.09,111.875,111.96,112.72,112.96,112.91,113.15,112.96,112.97,112.935,112.225,112.475,112.94,113.03,113.065,112.92,112.83,111.46,111.23,111.36,111.175,111.14,110.86,110.86,110.98,111.2,111.245,111.33,111.17,109.78,110.16,112.005,111.665,111.73,111.68,111.62,111.49,111.39,111.07,111.08,111.02,110.965,111.045,111.2,111.03,111.77,111.695,112.14,112.17,112.33,112.5,112.21,112.78,112.29,112.19,112.385,112.41,112.4,112.33,110.68,110.72,110.8696,110.62,110.89,110.7403,110.64,110.09,109.7539,110.565,110.495,110.595,110.425,110.33,109.91,109.98,110.88,110.74,110.525,110.385,110.54,109.655,109.12,109.78,109.38,109.38,109.175,108.99,109.1,108.75,109.02,108.795,109.29,109.2099,109.14,109.4,109.19,109.26,109.04,109.02,109.0,109.01],"h4":[112.935,113.03,112.83,111.175,110.86,111.33,110.16,111.68,111.39,110.965,111.03,112.17,112.21,112.385,112.33,110.62,110.64,110.495,110.33,110.74,110.54,109.38,108.99,108.795,109.14,109.04,109.01]},"XLB":{"h1":[51.53,51.39,50.84,50.76,50.78,50.695,50.65,50.725,50.76,51.03,50.99,50.965,51.13,50.925,50.96,50.94,50.37,50.345,50.655,50.58,50.505,50.525,50.475,50.415,50.38,50.58,50.62,50.745,50.545,50.74,50.83,50.965,50.905,50.955,50.72,50.01,50.38,50.75,50.745,50.795,50.825,50.86,50.8,50.73,49.995,49.985,49.96,50.065,50.035,50.01,49.99,49.91,49.775,49.88,49.93,49.895,49.83,49.73,50.045,50.095,50.16,50.3,50.56,50.54,50.53,50.32,50.445,50.44,50.435,50.41,50.3,50.27,49.93,49.755,49.935,49.745,49.8,49.68,49.69,49.6351,49.64,49.865,49.785,49.755,49.735,49.79,49.68,49.26,49.72,49.49,49.5938,49.585,49.46,49.175,48.9482,49.085,49.015,48.95,49.015,49.08,49.19,49.085,49.15,49.095,49.025,48.975,48.9651],"h4":[50.94,50.58,50.475,50.62,50.74,50.955,50.38,50.825,50.73,50.065,49.99,49.93,49.73,50.3,50.53,50.435,50.27,49.745,49.69,49.785,49.79,49.49,49.46,49.015,49.08,49.095,48.9651]},"XLRE":{"h1":[43.455,43.42,43.52,43.24,43.195,43.13,42.995,43.01,43.03,43.38,43.34,43.445,43.545,43.455,43.405,43.41,43.0,43.175,43.345,43.245,43.205,43.21,43.135,42.96,43.1123,42.95,42.95,43.065,43.0999,43.08,43.165,43.3223,43.375,43.25,43.2,42.635,42.8,42.91,42.97,43.055,43.04,43.045,42.955,42.94,42.7,42.725,42.73,42.695,42.715,42.665,42.52,42.53,42.545,42.555,42.55,42.575,42.585,42.58,42.45,42.5864,42.595,42.53,42.58,42.555,42.5,42.32,42.045,42.085,42.015,41.995,41.925,41.86,41.81,41.72,41.92,41.85,41.775,41.785,41.66,41.605,41.365,41.585,41.51,41.47,41.52,41.555,41.585,41.245,41.42,41.405,41.4102,41.35,41.355,41.385,41.23,41.225,41.195,41.2257,41.29,41.35,41.13,41.13,41.0762,41.09,41.045,41.055,41.065],"h4":[43.41,43.245,43.135,42.95,43.08,43.25,42.8,43.04,42.94,42.695,42.52,42.55,42.58,42.53,42.5,42.015,41.86,41.85,41.66,41.51,41.555,41.405,41.355,41.195,41.35,41.09,41.065]},"XLC":{"h1":[111.06,110.82,111.68,111.53,111.445,111.375,111.315,111.26,111.47,112.57,112.92,112.86,112.875,112.66,112.77,112.59,113.875,114.265,114.835,115.15,115.07,115.035,115.04,114.0,113.99,114.01,114.105,114.3,114.155,113.99,114.235,114.14,113.985,113.99,114.075,112.65,113.0,112.35,112.595,112.48,112.3705,112.42,112.27,112.36,111.26,111.52,111.13,111.19,111.335,111.285,110.82,113.6,113.84,114.57,114.935,115.165,115.205,114.76,115.17,114.73,114.27,113.885,113.58,113.72,113.52,112.6,113.19,113.235,112.92,113.065,112.925,112.56,113.4,113.1999,113.8197,113.77,113.83,113.96,114.0,112.84,112.81,113.03,113.01,112.79,112.83,112.93,111.72,111.22,111.62,111.38,111.405,111.17,111.19,111.15,110.755,110.85,110.985,111.14,111.2,111.46,111.88,112.145,112.5,111.89,111.7,111.86,111.885],"h4":[112.59,115.15,115.04,114.105,113.99,113.99,113.0,112.3705,112.36,111.19,110.82,114.935,114.76,113.885,113.52,112.92,112.56,113.77,114.0,113.01,112.93,111.38,111.19,110.985,111.46,111.89,111.885]},"UNG":{"h1":[10.0802,10.1,9.9682,10.035,10.095,10.135,10.19,10.195,10.19,10.2151,10.145,10.125,10.085,10.19,10.19,10.16,10.345,10.385,10.4128,10.4299,10.41,10.3511,10.32,10.475,10.5,10.465,10.44,10.481,10.51,10.54,10.4801,10.425,10.415,10.3699,10.365,10.36,10.35,10.51,10.445,10.435,10.475,10.44,10.335,10.32,10.4501,10.475,10.425,10.4199,10.45,10.4,10.415,10.3,10.295,10.335,10.3199,10.28,10.2599,10.27,10.56,10.5801,10.6001,10.7099,10.72,10.83,10.86,10.6997,10.865,10.795,10.8101,10.835,10.835,10.86,10.9189,11.4199,11.46,11.575,11.585,11.61,11.54,10.9201,11.0001,11.0,11.05,11.08,11.072,11.13,10.8099,10.7299,10.6799,10.715,10.689,10.85,10.79,10.4755,10.4499,10.4795,10.4662,10.3501,10.375,10.365,10.3245,10.375,10.3799,10.3301,10.4,10.395,10.395],"h4":[10.16,10.4299,10.32,10.44,10.54,10.3699,10.35,10.475,10.32,10.4199,10.415,10.3199,10.27,10.7099,10.86,10.8101,10.86,11.575,11.54,11.05,11.13,10.715,10.79,10.4662,10.365,10.3301,10.395]},"URA":{"h1":[47.115,46.82,45.71,45.65,45.33,45.335,45.08,44.955,44.97,44.4,44.13,43.96,44.1,43.8,43.7395,43.55,42.01,42.13,42.31,42.505,42.305,42.21,42.17,41.89,41.595,41.72,41.64,41.73,41.86,41.8,41.56,41.76,41.675,41.59,41.36,40.82,41.355,42.5375,42.72,42.91,42.835,42.855,42.825,42.675,41.86,41.87,41.88,41.72,41.7701,41.715,41.65,42.7761,42.8,42.92,42.91,42.9486,43.08,42.98,43.04,43.545,43.39,43.52,43.745,43.72,43.735,42.12,42.4305,42.215,42.15,42.21,42.135,41.98,41.08,40.705,41.22,41.1277,41.04,40.8817,40.86,40.705,40.93,41.175,40.95,40.8401,40.875,40.92,40.515,40.12,40.5887,40.37,40.345,40.26,40.12,40.32,39.76,39.95,39.87,39.94,39.99,40.06,40.6401,40.26,40.18,40.0284,39.995,40.0157,39.995],"h4":[43.55,42.505,42.17,41.64,41.8,41.59,41.355,42.835,42.675,41.72,41.65,42.91,42.98,43.52,43.735,42.15,41.98,41.1277,40.86,40.95,40.92,40.37,40.12,39.87,40.06,40.0284,39.995]},"TAN":{"h1":[47.91,47.73,46.58,46.94,46.8,46.94,47.0,46.92,47.06,47.43,47.67,47.415,47.34,47.16,47.15,47.16,46.53,46.21,46.33,46.375,46.385,46.385,46.24,45.32,45.14,45.175,45.1,45.17,45.1,45.12,45.14,45.25,45.035,45.01,44.9,44.35,44.64,45.86,46.2,46.63,46.51,46.47,46.43,46.39,45.5,45.37,45.4,45.58,45.5436,45.72,45.69,46.06,46.34,46.525,46.48,46.42,46.69,46.76,46.5905,46.6,46.365,46.41,46.53,46.49,46.5,45.56,45.775,45.62,45.425,45.32,45.1,45.06,43.33,43.06,43.436,43.495,43.43,43.33,43.48,44.05,44.02,44.3175,44.01,43.97,44.1025,44.09,43.61,43.0901,43.58,43.33,43.3502,43.09,43.0,43.24,42.91,43.06,42.85,43.17,43.43,43.45,44.18,44.12,44.21,44.0062,44.03,44.06,44.075],"h4":[47.16,46.375,46.24,45.1,45.12,45.01,44.64,46.51,46.39,45.58,45.69,46.48,46.76,46.41,46.5,45.425,45.06,43.495,43.48,44.01,44.09,43.33,43.0,42.85,43.45,44.0062,44.075]},"CRM":{"h1":[244.15,244.22,247.13,245.395,244.92,244.18,242.87,242.87,243.09,247.37,248.36,248.86,248.89,247.88,248.42,247.68,253.7,255.805,257.23,258.72,259.047,259.72,259.31,256.26,258.67,262.01,260.21,258.29,256.32,255.9,253.01,252.0,250.76,251.365,252.9001,249.96,250.68,243.99,244.38,243.26,243.185,245.14,244.36,243.01,238.4,240.84,239.105,238.65,239.35,236.59,237.945,239.81,238.115,237.955,238.17,237.3325,237.63,236.66,232.31,230.62,232.41,231.51,232.183,233.65,233.28,236.53,238.0013,239.265,239.81,239.65,238.89,237.49,239.56,241.11,240.32,238.88,239.36,239.79,238.31,237.44,235.755,235.23,234.39,234.54,233.57,234.075,229.245,229.5,228.535,228.75,228.79,228.485,227.31,228.76,227.55,227.24,225.13,224.88,226.115,225.41,232.15,232.85,230.845,229.61,228.645,229.4,229.38],"h4":[247.68,258.72,259.31,260.21,255.9,251.365,250.68,243.185,243.01,238.65,237.945,238.17,236.66,231.51,233.28,239.81,237.49,238.88,238.31,234.39,234.075,228.75,227.31,225.13,225.41,229.61,229.38]},"ARM":{"h1":[263.76,264.13,255.5846,255.29,254.17,255.64,256.1911,255.415,254.08,256.025,256.04,260.55,266.355,265.8716,264.14,265.0,246.865,240.6,240.46,242.47,241.91,242.43,239.0,247.72,246.84,241.83,242.89,243.8,242.855,241.85,248.8025,249.04,247.8323,246.255,246.256,242.29,244.23,260.535,260.045,259.96,263.14,261.13,263.11,264.89,266.55,267.3,266.82,268.05,268.813,269.105,275.75,310.03,315.34,319.06,319.365,319.38,321.095,323.1,326.61,329.06,329.305,332.6,332.965,331.16,333.33,329.06,328.14,325.605,330.2,331.28,333.215,332.56,323.97,309.9039,309.505,313.35,310.74,310.18,306.43,316.88,318.95,319.2,317.1228,314.465,313.5252,310.55,283.17,284.2,286.4823,285.21,284.655,284.885,283.26,298.7145,296.8701,297.75,299.21,298.0,295.88,293.67,288.97,285.475,285.55,285.7976,288.29,287.826,287.7264],"h4":[265.0,242.47,239.0,242.89,241.85,246.255,244.23,263.14,264.89,268.05,275.75,319.365,323.1,332.6,333.33,330.2,332.56,313.35,306.43,317.1228,310.55,285.21,283.26,299.21,293.67,285.7976,287.7264]},"ANET":{"h1":[192.81,192.91,192.455,191.66,189.32,189.4,189.86,189.865,189.01,199.735,198.36,198.635,198.13,199.81,199.44,199.61,189.9135,188.075,188.745,189.58,189.95,189.045,187.85,192.65,194.075,192.46,191.723,192.34,193.0,192.82,197.04,199.215,199.25,198.61,198.57,195.76,197.57,204.0375,203.915,202.32,199.605,197.835,200.055,199.535,198.435,198.235,197.61,198.37,197.615,198.03,199.44,203.47,202.04,202.7499,203.025,205.69,204.6159,205.5,205.24,205.0,204.48,204.22,203.76,205.1,205.175,203.11,202.48,202.295,202.28,203.46,203.365,203.42,202.82,203.32,206.14,205.16,205.235,205.61,205.6,206.65,207.2904,208.73,209.21,207.81,207.18,206.51,205.49,205.055,206.385,206.3,205.35,204.935,204.96,203.89,202.4887,202.4,201.965,204.06,202.945,202.87,204.4,204.44,204.0,203.74,204.3,204.565,204.51],"h4":[199.61,189.58,187.85,191.723,192.82,198.61,197.57,199.605,199.535,198.37,199.44,203.025,205.5,204.22,205.175,202.28,203.42,205.16,205.6,209.21,206.51,206.3,204.96,201.965,202.87,203.74,204.51]},"NET":{"h1":[315.3,314.28,314.28,313.39,313.67,314.025,311.005,312.76,311.03,308.885,305.91,306.21,306.51,303.5209,304.67,306.54,322.8203,325.5,328.54,330.73,333.06,330.68,330.47,324.68,328.145,332.62,330.86,329.71,326.28,327.11,330.3,330.56,328.6,328.22,327.3707,322.02,324.62,334.74,332.375,331.0,330.57,332.7,333.467,334.17,315.3247,317.365,319.29,319.5,321.25,321.03,323.795,342.45,343.94,345.51,346.005,347.13,348.78,351.7564,351.635,351.09,353.01,355.72,354.97,355.27,352.945,354.355,359.3,355.91,354.14,354.7,354.51,352.46,359.58,359.71,362.56,366.95,362.865,362.2,358.92,347.34,348.7,347.735,349.47,349.84,349.05,348.895,346.0,353.535,355.62,354.6,354.65,354.88,354.205,353.115,351.84,351.83,353.41,351.62,352.73,352.39,350.34,351.28,351.785,350.09,350.195,350.345,350.525],"h4":[306.54,330.73,330.47,330.86,327.11,328.22,324.62,330.57,334.17,319.5,323.795,346.005,351.7564,355.72,352.945,354.14,352.46,366.95,358.92,349.47,348.895,354.6,354.205,353.41,352.39,350.09,350.525]},"UPST":{"h1":[26.065,25.9,25.67,25.55,25.575,25.49,25.32,25.255,25.12,25.6,25.78,25.72,25.77,25.68,25.59,25.58,25.73,25.91,26.2901,26.21,26.015,26.17,26.09,25.47,25.28,25.4245,25.33,25.39,25.38,25.3,25.25,25.23,25.35,25.2768,25.34,24.57,24.87,25.035,24.92,25.04,24.97,24.95,24.82,24.775,24.89,24.84,24.87,24.895,25.0,25.055,25.02,25.425,25.61,25.77,25.69,25.65,25.73,25.58,25.685,25.93,25.72,25.745,25.82,25.965,25.99,25.34,25.035,24.935,24.88,24.785,24.675,24.47,24.17,24.24,24.56,24.57,24.665,24.67,24.64,24.455,24.385,24.455,24.195,24.135,24.115,23.81,23.13,22.965,23.2523,23.13,23.105,22.9939,23.035,23.455,23.22,23.1,22.985,23.01,23.15,23.13,23.17,23.03,23.015,22.84,22.85,22.995,22.975],"h4":[25.58,26.21,26.09,25.33,25.3,25.2768,24.87,24.97,24.775,24.895,25.02,25.69,25.58,25.745,25.99,24.88,24.47,24.57,24.64,24.195,23.81,23.13,23.035,22.985,23.13,22.84,22.975]},"CLSK":{"h1":[13.285,13.27,13.05,13.21,12.985,13.015,13.005,12.925,12.7888,13.87,13.9305,13.96,13.865,13.7199,13.535,13.67,13.455,13.4261,13.5,13.41,13.39,13.33,13.28,12.85,12.975,12.785,12.61,12.655,12.64,12.615,12.88,13.02,12.91,12.995,12.87,12.505,12.79,12.925,13.19,13.3896,13.525,13.4901,13.345,13.355,13.535,13.99,13.995,14.135,14.485,14.4238,14.48,14.925,15.095,14.885,14.945,15.135,14.965,14.77,15.17,15.045,14.955,15.0,15.165,15.085,15.13,14.8359,14.91,14.735,14.75,14.815,14.645,14.455,14.67,14.005,14.25,14.275,14.28,14.165,14.25,13.535,13.765,13.708,13.61,13.745,13.905,13.95,13.755,13.51,13.7759,13.73,13.73,13.53,13.34,13.65,13.48,13.455,13.495,13.465,13.395,13.3,12.9375,12.91,12.955,12.96,12.964,13.011,13.0],"h4":[13.67,13.41,13.28,12.61,12.615,12.995,12.79,13.525,13.355,14.135,14.48,14.945,14.77,15.0,15.13,14.75,14.455,14.275,14.25,13.61,13.95,13.73,13.34,13.495,13.3,12.96,13.0]},"SOFI":{"h1":[17.42,17.345,17.335,17.255,17.305,17.3199,17.27,17.24,17.205,17.29,17.365,17.26,17.2902,17.285,17.245,17.3298,17.32,17.3531,17.563,17.6405,17.535,17.69,17.645,17.205,17.075,17.205,17.27,17.3414,17.2294,17.095,16.915,16.885,16.9837,16.985,16.885,16.6227,16.85,16.805,16.825,16.885,16.86,16.805,16.7677,16.74,16.885,16.93,16.935,17.015,16.985,16.955,16.965,16.965,17.035,16.985,16.9101,16.98,16.975,16.97,17.0537,17.215,17.1572,17.235,17.155,17.19,17.165,16.835,16.895,16.815,16.745,16.715,16.665,16.555,16.355,16.255,16.535,16.5899,16.7339,16.8,16.7918,16.69,16.685,16.845,16.71,16.675,16.64,16.5699,16.1301,15.935,16.1704,16.05,15.995,15.925,15.93,16.12,16.0005,15.945,15.93,15.925,15.945,15.915,15.9901,15.9,15.915,15.81,15.8201,15.815,15.8],"h4":[17.3298,17.6405,17.645,17.27,17.095,16.985,16.85,16.86,16.74,17.015,16.965,16.9101,16.97,17.235,17.165,16.745,16.555,16.5899,16.7918,16.71,16.5699,16.05,15.93,15.93,15.915,15.81,15.8]},"NU":{"h1":[15.135,14.99,15.095,15.315,15.195,15.225,15.005,15.035,15.02,14.675,14.725,14.585,14.585,14.51,14.495,14.615,14.305,14.37,14.475,14.45,14.425,14.41,14.425,14.1499,14.175,14.275,14.2306,14.19,14.19,14.19,13.815,13.715,13.8402,13.775,13.81,13.655,13.81,13.855,13.975,13.965,13.965,13.92,13.9,13.84,13.65,13.73,13.725,13.695,13.685,13.71,13.65,13.805,13.87,13.965,14.045,13.985,14.02,14.055,13.78,13.875,13.9493,13.955,14.07,14.095,14.165,14.005,13.95,13.885,13.815,13.735,13.615,13.615,13.57,13.385,13.545,13.515,13.525,13.52,13.555,13.525,13.62,13.65,13.585,13.59,13.535,13.575,12.625,12.38,12.475,12.405,12.365,12.285,12.225,12.475,12.385,12.445,12.345,12.39,12.375,12.3599,12.375,12.35,12.405,12.395,12.495,12.645,12.64],"h4":[14.615,14.45,14.425,14.2306,14.19,13.775,13.81,13.965,13.84,13.695,13.65,14.045,14.055,13.955,14.165,13.815,13.615,13.515,13.555,13.585,13.575,12.405,12.225,12.345,12.3599,12.395,12.64]},"SPOT":{"h1":[526.22,523.19,527.87,529.42,527.075,523.025,521.82,521.495,521.74,526.42,527.64,525.77,525.96,523.765,527.56,525.98,547.515,549.74,553.855,558.28,558.77,558.26,556.61,555.06,556.75,560.34,558.96,558.37,558.51,558.28,558.31,554.537,553.94,552.925,555.05,548.185,546.91,541.2025,536.49,533.305,533.85,536.485,530.235,529.14,521.52,524.34,518.77,514.24,514.535,512.08,509.27,511.99,513.73,518.04,518.81,516.24,518.86,517.09,506.8701,511.89,508.95,504.58,496.045,500.21,501.27,498.625,497.95,501.745,501.74,504.865,509.79,510.45,511.56,509.465,509.9475,507.87,504.415,508.1,511.465,510.595,512.5525,511.6,510.07,507.95,508.16,509.68,502.05,502.54,501.49,501.86,500.68,499.55,497.27,492.815,491.09,494.29,494.135,494.07,491.995,493.52,492.285,494.52,496.44,491.245,488.225,489.28,489.405],"h4":[525.98,558.28,556.61,558.96,558.28,552.925,546.91,533.85,529.14,514.24,509.27,518.81,517.09,504.58,501.27,501.74,510.45,507.87,511.465,510.07,509.68,501.86,497.27,494.135,493.52,491.245,489.405]}};
-const WATCH_TREND_SPEC = Object.freeze({ h1Bars: 107, h4Bars: 27, session: 'regular' });
+/* ================= WATCHLIST (Morning Levels pane) ================= */
 const WLNAMES = {"GUSH":"Direxion Daily S&P Oil & Gas Exp. & Prod. Bull 2X Shares","DRIP":"Direxion Daily S&P Oil & Gas Exp. & Prod. Bear 2X Shares","NRGU":"MicroSectors U.S. Big Oil 3x Leveraged ETNs","NRGD":"MicroSectors U.S. Big Oil -3x Inverse Leveraged ETNs","XLV":"Health Care Select Sector SPDR Fund","XLI":"Industrial Select Sector SPDR Fund","XLY":"Consumer Discretionary Select Sector SPDR Fund","XLB":"Materials Select Sector SPDR Fund","HYG":"iShares iBoxx $ High Yield Corporate Bond ETF","URA":"Global X Uranium ETF","ITA":"iShares U.S. Aerospace & Defense ETF","CRM":"Salesforce, Inc.","TXN":"Texas Instruments Incorporated","MU":"Micron Technology, Inc.","ANET":"Arista Networks, Inc.","WDC":"Western Digital Corporation","STX":"Seagate Technology Holdings plc","MDB":"MongoDB, Inc.","AI":"C3.ai, Inc.","COIN":"Coinbase Global, Inc.","MSTR":"Strategy Incorporated","MARA":"MARA Holdings, Inc.","LABU":"Direxion Daily S&P Biotech Bull 3X Shares","EDC":"Direxion Daily MSCI Emerging Markets Bull 3X Shares","EDZ":"Direxion Daily MSCI Emerging Markets Bear 3X Shares","XLRE":"State Street Real Estate Select Sector SPDR ETF","XLC":"State Street Communication Services Select Sector SPDR ETF","UNG":"United States Natural Gas Fund, LP","TAN":"Invesco Solar ETF","ARM":"Arm Holdings plc","NET":"Cloudflare, Inc.","UPST":"Upstart Holdings, Inc.","CLSK":"CleanSpark, Inc.","SOFI":"SoFi Technologies, Inc.","NU":"Nu Holdings Ltd.","SPOT":"Spotify Technology S.A."};
-
-/* ================= TRADING-MORNING WATCHLIST ================= */
-let watchSort = 'rank';   // 'rank' | 'cap' | 'chg'
-function fmtCapB(v){
-  if (v == null || !isFinite(v)) return '—';
-  const s = v >= 100 ? Math.round(v).toLocaleString('en-US') : String(Math.round(v * 10) / 10);
-  return '$' + s + 'B';
-}
-function fmtMonD(ymd){
-  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(ymd || '');
-  if (!m) return ymd || '';
-  return ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][+m[2] - 1] + ' ' + (+m[3]) + ', ' + m[1];
-}
+let watchSort = 'rank';
 function fmtWatchAsOf(){
   const t = (WL && (WL.builtAt || WL.asOf || WL.generatedAt)) || '';
   const ms = Date.parse(String(t).replace(/(\.\d{3})\d+/, '$1'));
   return isFinite(ms) ? 'as of ' + etFmt.format(new Date(ms)) : '';
 }
-let watchStars = new Set();
-try { watchStars = new Set(JSON.parse(localStorage.getItem('ofb_watch') || '[]')); } catch(e){}
-/* 4H is the primary row direction (ticker color, triangle, session bar all follow it).
-   trend1H = sign(last 1H close − mean(1H)); trend4H = sign(last 4H close − mean(4H)) — independent.
-   Both inputs are rebuilt from regular-session candles only: 107 × 1H and 27 × 4H. */
-function watchTrendSeries(chart, key){
-  const limit = key === 'h1' ? WATCH_TREND_SPEC.h1Bars : WATCH_TREND_SPEC.h4Bars;
-  const series = chart && chart[key];
-  return Array.isArray(series) ? series.slice(-limit) : [];
-}
-function wTrendOf(series){
-  if (!series || series.length < 2) return 'up';
-  let s = 0; for (const v of series) s += v;
-  return series[series.length - 1] >= s / series.length ? 'up' : 'down';
-}
-// Watchlist direction with fallbacks: 4H trend, then 1H trend, then the sign of
-// today's move (live % change, else the row's own changePct). Never defaults
-// blindly to 'up' when data is missing.
 function watchDirOf(w){
   const ch = WCHARTS[w.ticker] || {};
   const s4 = watchTrendSeries(ch, 'h4');
@@ -2558,37 +2212,12 @@ function watchDirOf(w){
   if (c != null && isFinite(c)) return c >= 0 ? 'up' : 'down';
   return 'up';
 }
-function drawWChart(cv, series, up){
-  if (!cv || !series || series.length < 2) return;
-  const dpr = Math.min(2, window.devicePixelRatio || 1);
-  const W = cv.clientWidth || 170, H = cv.clientHeight || 76;
-  if (!W || !H) return;
-  cv.width = W * dpr; cv.height = H * dpr;
-  const ctx = cv.getContext('2d'); ctx.scale(dpr, dpr);
-  const n = series.length;
-  let lo = series[0], hi = series[0], sum = 0;
-  for (const v of series){ if (v < lo) lo = v; if (v > hi) hi = v; sum += v; }
-  const mean = sum / n;
-  const px = i => 2 + (i / (n - 1)) * (W - 4);
-  const py = v => (H - 4) - ((v - lo) / ((hi - lo) || 1)) * (H - 10);
-  ctx.strokeStyle = cssVar('--faint') || '#666'; ctx.lineWidth = 1;
-  ctx.setLineDash([5, 4]); ctx.globalAlpha = .6;
-  ctx.beginPath(); ctx.moveTo(0, py(mean)); ctx.lineTo(W, py(mean)); ctx.stroke();
-  ctx.setLineDash([]); ctx.globalAlpha = 1;
-  ctx.strokeStyle = up ? (cssVar('--gain') || '#22c55e') : (cssVar('--loss') || '#ef4444');
-  ctx.lineWidth = 1.6; ctx.lineJoin = 'round'; ctx.lineCap = 'round';
-  ctx.beginPath();
-  series.forEach((v, i) => { i ? ctx.lineTo(px(i), py(v)) : ctx.moveTo(px(i), py(v)); });
-  ctx.stroke();
-}
 function paintWatchCharts(root){
   (root || document).querySelectorAll('canvas.wchart').forEach(cv => {
     const parts = (cv.dataset.wc || '').split('|');
     const ch = WCHARTS[parts[0]];
     let series = watchTrendSeries(ch, parts[1]);
     if (series.length < 2){
-      // Fallback: derive the series from the live bars this page already has
-      // (same aggregation as the regime strip) before declaring it missing.
       const q = Q.get(parts[0]);
       if (q && q.bars){
         const h1 = hourlyCloses(q.bars);
@@ -2597,7 +2226,6 @@ function paintWatchCharts(root){
       }
     }
     if (series.length < 2){
-      // honest blank state: draw "Chart unavailable" instead of hiding the canvas
       const dpr = Math.min(2, window.devicePixelRatio || 1);
       const W = cv.clientWidth || 170, H = cv.clientHeight || 76;
       if (W && H){
@@ -2667,18 +2295,32 @@ function renderWatchlist(){
   paintWatchCharts($('watchList'));
 }
 
+/* ================= MORNING FUNNEL TABS ================= */
+let mornTabManual = false;
+function selectMornTab(name){
+  document.querySelectorAll('#mornTabs .mtab').forEach(t => t.classList.toggle('on', t.dataset.mtab === name));
+  ['gaps','levels','breaks'].forEach(k => { const p = $('mpane-' + k); if (p) p.classList.toggle('on', k === name); });
+  try { localStorage.setItem('ofb_mtab', name); } catch(e){}
+}
+function autoMornTab(){
+  if (mornTabManual) return;
+  if (BREAKRANK && BREAKRANK.rows && BREAKRANK.rows.length) selectMornTab('breaks');
+  else if (wlLive) selectMornTab('levels');
+  else selectMornTab('gaps');
+}
+document.querySelectorAll('#mornTabs .mtab').forEach(t =>
+  t.addEventListener('click', () => { mornTabManual = true; selectMornTab(t.dataset.mtab); }));
+try { selectMornTab(localStorage.getItem('ofb_mtab') || 'gaps'); } catch(e){ selectMornTab('gaps'); }
+
 /* ================= RENDER ALL ================= */
 function renderAll(){
   renderStatus(); renderRegime(); renderSession(); evalHealth();
-  // Always paint (embedded fallback first, live data when the poll lands).
-  // A hung feed must never leave the board on "Loading..." — the health chips
-  // report staleness honestly instead.
   paintCapChips(); renderSignals();
   renderIgnitions(); renderPersist(); renderFlow(); renderPremarket(); renderSectors(); renderMovers(); renderWatchlist(); renderPins();
   renderUpdated();
 }
 
-/* ================= COLLAPSE / THEME / PINS (persisted) ================= */
+/* ================= COLLAPSE / THEME (persisted) ================= */
 let collapsed = {};
 try { collapsed = JSON.parse(localStorage.getItem('ofb_collapsed') || '{}'); } catch(e){}
 function paintCollapse(){
@@ -2714,8 +2356,6 @@ $('themeSwitch').addEventListener('change', e => {
     if (sym && sym !== '—') openDrawer(sym);
   }
 });
-let pins = new Set();
-try { pins = new Set(JSON.parse(localStorage.getItem('ofb_pins') || '[]')); } catch(e){}
 
 /* ================= PULL TO REFRESH ================= */
 let ptrY = null, ptrOn = false;
@@ -2765,14 +2405,15 @@ $('mvFilters').addEventListener('click', e => {
   mvFilter = b.dataset.mvf; mvPage = {gain:1, loss:1};
   renderMovers();
 });
+$('mvSortSel').addEventListener('change', e => { mvSort = e.target.value; mvPage = {gain:1, loss:1}; renderMovers(); });
 $('capChips').addEventListener('click', e => {
   const b = e.target.closest('.cap-chip'); if (!b) return;
   const v = b.dataset.cap;
   if (v === 'all'){ capSel = new Set(['small','mid','large']); }
-  else if (capSel.size === 3){ capSel = new Set([v]); }   // one tier while All is active -> single-select it
+  else if (capSel.size === 3){ capSel = new Set([v]); }
   else {
     if (capSel.has(v)) capSel.delete(v); else capSel.add(v);
-    if (capSel.size === 0) capSel = new Set(['small','mid','large']);  // never filter down to nothing
+    if (capSel.size === 0) capSel = new Set(['small','mid','large']);
   }
   paintCapChips();
   renderSignals();
@@ -2799,7 +2440,8 @@ $('mpane-breaks').addEventListener('click', e => {
   }
 });
 $('pmPills').addEventListener('click', e => {
-  const b = e.target.closest('[data-pm]'); if (!b) return;  const k = b.dataset.pm;
+  const b = e.target.closest('[data-pm]'); if (!b) return;
+  const k = b.dataset.pm;
   if (k === 'breakout') pmBreakout = !pmBreakout;
   else if (k === 'fav') pmFav = !pmFav;
   else if (k === 'mega') pmMega = !pmMega;
@@ -2811,7 +2453,7 @@ document.querySelectorAll('#watchChips .wchip').forEach(b => b.addEventListener(
 $('pmGrid').addEventListener('click', e => {
   const pin = e.target.closest('.pin');
   if (pin){
-    e.stopPropagation();   // the document-level pin handler would toggle it a second time
+    e.stopPropagation();
     const s = pin.dataset.pin;
     if (pins.has(s)) pins.delete(s); else pins.add(s);
     try { localStorage.setItem('ofb_pins', JSON.stringify([...pins])); } catch(e2){}
@@ -2823,28 +2465,6 @@ $('pmGrid').addEventListener('click', e => {
 });
 $('drawerX').addEventListener('click', closeDrawer);
 $('drawerVeil').addEventListener('click', closeDrawer);
-/* Scroll toggle: ↓ at the top takes you to the bottom, ↑ at the bottom takes you to the top. */
-(function(){
-  const btn = $('toTop');
-  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const onScroll = () => {
-    const y = window.scrollY || document.documentElement.scrollTop;
-    const max = document.documentElement.scrollHeight - innerHeight;
-    const nearBottom = max > 0 && (max - y) < 200;
-    btn.classList.add('show');   // always visible
-    btn.innerHTML = nearBottom ? '&#8593;' : '&#8595;';
-    btn.setAttribute('aria-label', nearBottom ? 'Back to top' : 'Go to bottom');
-    btn.title = nearBottom ? 'Back to top' : 'Go to bottom';
-    btn.dataset.dir = nearBottom ? 'up' : 'down';
-  };
-  addEventListener('scroll', onScroll, {passive:true});
-  addEventListener('resize', onScroll);
-  onScroll();
-  btn.addEventListener('click', () => {
-    const top = btn.dataset.dir !== 'down';
-    window.scrollTo({top: top ? 0 : document.documentElement.scrollHeight, behavior: reduced ? 'auto' : 'smooth'});
-  });
-})();
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
 document.addEventListener('click', e => {
   const mpg = e.target.closest('[data-mvpg]');
@@ -2887,6 +2507,30 @@ document.addEventListener('click', e => {
   const row = e.target.closest('[data-sym]');
   if (row) openDrawer(row.dataset.sym);
 });
+/* Scroll toggle: ↓ at the top takes you to the bottom, ↑ at the bottom back
+   to the top. The button element sits above this script in the document,
+   so it exists before this wiring runs. */
+(function(){
+  const btn = $('toTop');
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const onScroll = () => {
+    const y = window.scrollY || document.documentElement.scrollTop;
+    const max = document.documentElement.scrollHeight - innerHeight;
+    const nearBottom = max > 0 && (max - y) < 200;
+    btn.classList.add('show');
+    btn.innerHTML = nearBottom ? '&#8593;' : '&#8595;';
+    btn.setAttribute('aria-label', nearBottom ? 'Back to top' : 'Go to bottom');
+    btn.title = nearBottom ? 'Back to top' : 'Go to bottom';
+    btn.dataset.dir = nearBottom ? 'up' : 'down';
+  };
+  addEventListener('scroll', onScroll, {passive:true});
+  addEventListener('resize', onScroll);
+  onScroll();
+  btn.addEventListener('click', () => {
+    const top = btn.dataset.dir !== 'down';
+    window.scrollTo({top: top ? 0 : document.documentElement.scrollHeight, behavior: reduced ? 'auto' : 'smooth'});
+  });
+})();
 
 /* ================= INIT ================= */
 paintCollapse();
@@ -2897,6 +2541,7 @@ setInterval(refreshQuotes, 60000);
 setInterval(renderStatus, 5000);
 setInterval(renderSession, 1000);
 setInterval(() => { renderSignals(); renderIgnitions(); renderFlow(); renderPremarket(); renderMovers(); }, 60000);
+
 </script>
 </body>
 </html>
