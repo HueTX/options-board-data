@@ -62,184 +62,120 @@ a{color:var(--orange); text-decoration:none}
 
 <button id="toTop" type="button" aria-label="Go to bottom" title="Go to bottom">&#8595;</button>
 <script>
-const CHARTS_URL = "https://raw.githubusercontent.com/HueTX/options-board-data/main/fifteen_min_charts.json";
-const sym = new URLSearchParams(location.search).get("t") || "";
-document.getElementById("sym").textContent = sym || "—";
-document.title = sym ? sym + " · 15m Chart" : "15m Chart";
-
-function css(v){ return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
-
-function drawChart(entry){
-  const lv = entry.levels;
-  const reg = entry.candles15m || [];
-  const all = reg;
-  if(!all.length){ showErr("No candle data"); return; }
-
-  const cv = document.getElementById("chart");
-  document.getElementById("loading").style.display = "none";
-  cv.style.display = "block";
-  // Force layout so clientWidth/clientHeight are real before measuring
-  void cv.offsetWidth;
-  const dpr = window.devicePixelRatio || 1;
-  const W = cv.clientWidth, H = cv.clientHeight;
-  cv.width = W * dpr; cv.height = H * dpr;
-  const ctx = cv.getContext("2d");
-  ctx.scale(dpr, dpr);
-
-  const padL = 8, padR = 64, padT = 16, padB = 28;
-  const iw = W - padL - padR, ih = H - padT - padB;
-
-  let lo = Infinity, hi = -Infinity;
-  all.forEach(c => { lo = Math.min(lo, c.l); hi = Math.max(hi, c.h); });
-  [lv.pdh, lv.pdl, lv.pmh, lv.pml].forEach(v => { if(v){ lo = Math.min(lo, v); hi = Math.max(hi, v); } });
-  const span = (hi - lo) || 1; lo -= span * 0.06; hi += span * 0.06;
-  const y = p => padT + (1 - (p - lo) / (hi - lo)) * ih;
-  const n = all.length;
-
-  const gain = css("--gain"), loss = css("--loss"), grid = css("--grid"),
-        dim = css("--text-dim"), txt = css("--text");
-
-  // gridlines
-  ctx.strokeStyle = grid; ctx.fillStyle = dim; ctx.font = "10px " + css("--mono");
-  ctx.textAlign = "left"; ctx.lineWidth = 1;
-  for(let i = 0; i <= 4; i++){
-    const p = lo + (hi - lo) * i / 4, yy = Math.round(y(p)) + 0.5;
-    ctx.beginPath(); ctx.moveTo(padL, yy); ctx.lineTo(W - padR, yy); ctx.stroke();
-    ctx.fillText(p.toFixed(2), W - padR + 6, yy + 3);
-  }
-
-  // watchlist-style line chart: 15m close line, dashed session-mean line, final dot
-  const closes = all.map(c => c.c);
-  let mSum = 0; closes.forEach(v => mSum += v);
-  const mean = mSum / closes.length;
-  const trendUp = closes[closes.length - 1] >= mean;
-  const lineCol = trendUp ? gain : loss;
-
-  // x position of point i
-  const x = i => padL + (n === 1 ? iw / 2 : (i / (n - 1)) * iw);
-
-  // series mean — dashed, like the watchlist
-  ctx.strokeStyle = dim; ctx.lineWidth = 1;
-  ctx.setLineDash([5, 4]); ctx.globalAlpha = .7;
-  ctx.beginPath(); ctx.moveTo(padL, Math.round(y(mean)) + 0.5); ctx.lineTo(W - padR, Math.round(y(mean)) + 0.5); ctx.stroke();
-  ctx.setLineDash([]); ctx.globalAlpha = 1;
-
-  // 15m close line, colored by trend (last close vs mean)
-  ctx.strokeStyle = lineCol; ctx.lineWidth = 2.5; ctx.lineJoin = "round"; ctx.lineCap = "round";
-  ctx.beginPath();
-  closes.forEach((v, i) => i ? ctx.lineTo(x(i), y(v)) : ctx.moveTo(x(i), y(v)));
-  ctx.stroke();
-  // final dot
-  ctx.fillStyle = lineCol;
-  ctx.beginPath(); ctx.arc(x(n - 1), y(closes[n - 1]), 4, 0, 7); ctx.fill();
-
-  // level lines
-  const lines = [
-    {v: lv.pdh, label: "PDH", col: gain, dash: []},
-    {v: lv.pmh, label: "PMH", col: gain, dash: [2,3]},
-    {v: lv.pdl, label: "PDL", col: loss, dash: []},
-    {v: lv.pml, label: "PML", col: loss, dash: [2,3]},
-  ];
-  ctx.font = "bold 10px " + css("--mono");
-  lines.forEach(L => {
-    if(!L.v) return;
-    const yy = Math.round(y(L.v)) + 0.5;
-    ctx.strokeStyle = L.col; ctx.setLineDash(L.dash); ctx.lineWidth = 1.5;
-    ctx.beginPath(); ctx.moveTo(padL, yy); ctx.lineTo(W - padR, yy); ctx.stroke();
-    ctx.setLineDash([]);
-    ctx.fillStyle = L.col; ctx.textAlign = "left";
-    ctx.fillText(L.label + " " + L.v.toFixed(2), W - padR + 6, yy - 4);
-  });
-
-  // x labels: session open, then hourly
-  ctx.fillStyle = dim; ctx.font = "10px " + css("--mono");
-  const seen = new Set();
-  all.forEach((c, i) => {
-    if(i === 0){ ctx.textAlign = "left"; ctx.fillText(c.t, padL, H - 8); ctx.textAlign = "center"; return; }
-    const hr = c.t.slice(0, 2) + ":00";
-    if(c.t.endsWith(":00") && !seen.has(hr)){
-      seen.add(hr);
-      ctx.fillText(c.t, x(i), H - 8);
-    }
-  });
-
-  // legend + verdict
-  const lg = document.getElementById("legend");
-  lg.style.display = "flex";
-  lg.innerHTML =
-    `<span><span class="sw solid" style="border-color:${gain}"></span>PDH ${lv.pdh ?? "—"}</span>` +
-    `<span><span class="sw" style="border-color:${gain}"></span>PMH ${lv.pmh ?? "—"}</span>` +
-    `<span><span class="sw solid" style="border-color:${loss}"></span>PDL ${lv.pdl ?? "—"}</span>` +
-    `<span><span class="sw" style="border-color:${loss}"></span>PML ${lv.pml ?? "—"}</span>`;
-  const last = reg[reg.length - 1];
-  const v = document.getElementById("verdict");
-  const abovePDH = lv.pdh && last.c > lv.pdh, abovePMH = lv.pmh && last.c > lv.pmh;
-  const belowPDL = lv.pdl && last.c < lv.pdl, belowPML = lv.pml && last.c < lv.pml;
-  if(abovePDH || abovePMH){
-    const cleared = [abovePDH && `PDH $${lv.pdh.toFixed(2)}`, abovePMH && `PMH $${lv.pmh.toFixed(2)}`].filter(Boolean).join(" and ");
-    v.className = "verdict bull";
-    v.textContent = `Bullish: last 15m close $${last.c.toFixed(2)} above ${cleared}`;
-  } else if(belowPDL && belowPML){
-    v.className = "verdict bear";
-    v.textContent = `Bearish: last 15m close $${last.c.toFixed(2)} below PDL $${lv.pdl.toFixed(2)} and PML $${lv.pml.toFixed(2)}`;
-  } else {
-    v.className = "verdict"; v.style.color = css("--text-dim");
-    v.textContent = `Last 15m close $${last.c.toFixed(2)} — not clearing a level`;
-  }
-}
-function showErr(msg){
-  const l = document.getElementById("loading");
-  l.className = "err"; l.textContent = msg;
-}
-async function load(){
-  if(!sym){ showErr("No ticker specified"); return; }
-  try{
-    const r = await fetch(CHARTS_URL + "?t=" + Date.now(), {cache: "no-store"});
-    if(!r.ok) throw new Error("HTTP " + r.status);
-    const d = await r.json();
-    const entry = (d.charts || {})[sym.toUpperCase()];
-    if(!entry){ showErr(sym.toUpperCase() + " is not on the 15m closes list right now"); return; }
-    drawChart(entry);
-  }catch(e){ showErr("Chart feed unreachable — try again shortly"); }
-}
-function toggleTheme(){
-  const h = document.documentElement;
-  const next = h.getAttribute("data-theme") === "dark" ? "light" : "dark";
-  h.setAttribute("data-theme", next);
-  try{ localStorage.setItem("ofb_theme", next); }catch(e){}
-  document.getElementById("themeBtn").textContent = next === "dark" ? "Light" : "Dark";
-}
-(function init(){
-  try{
-    const t = localStorage.getItem("ofb_theme");
-    if(t){ document.documentElement.setAttribute("data-theme", t);
-      document.getElementById("themeBtn").textContent = t === "dark" ? "Light" : "Dark"; }
-  }catch(e){}
-  load();
-  window.addEventListener("resize", () => { load(); });
-})();
-
-/* Scroll toggle: down arrow at top, up arrow at bottom. */
 (function(){
-  const btn = document.getElementById('toTop');
-  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const onScroll = () => {
-    const y = window.scrollY || document.documentElement.scrollTop;
-    const max = document.documentElement.scrollHeight - innerHeight;
-    const nearBottom = max > 0 && (max - y) < 200;
-    btn.innerHTML = nearBottom ? '&#8593;' : '&#8595;';
-    btn.setAttribute('aria-label', nearBottom ? 'Back to top' : 'Go to bottom');
-    btn.title = nearBottom ? 'Back to top' : 'Go to bottom';
-    btn.dataset.dir = nearBottom ? 'up' : 'down';
-  };
-  addEventListener('scroll', onScroll, {passive:true});
-  addEventListener('resize', onScroll);
-  onScroll();
-  btn.addEventListener('click', () => {
-    const top = btn.dataset.dir !== 'down';
-    window.scrollTo({top: top ? 0 : document.documentElement.scrollHeight, behavior: reduced ? 'auto' : 'smooth'});
+"use strict";
+/* 15m-chart — rebuilt 2026-10-26. Same chart, verdict and level semantics as
+   before; the payload is fetched once (with a timeout and a visible error
+   state instead of a silent blank page) and redrawn from cache on resize. */
+const FEED = 'https://raw.githubusercontent.com/HueTX/options-board-data/main/fifteen_min_charts.json';
+const sym = (new URLSearchParams(location.search).get('t') || 'SPY').toUpperCase();
+document.getElementById('sym').textContent = sym;
+document.title = sym + ' — 15m Chart';
+function setTheme(t){ document.documentElement.setAttribute('data-theme', t); document.getElementById('themeBtn').textContent = t === 'light' ? 'Dark' : 'Light'; try { localStorage.setItem('ofb_theme', t); } catch(e){} }
+window.toggleTheme = function(){ setTheme(document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light'); };
+setTheme(localStorage.getItem('ofb_theme') || 'dark');
+const money = v => (v == null || !isFinite(v)) ? '—' : '$' + Number(v).toFixed(2);
+let PAYLOAD = null;
+
+function draw(){
+  if (!PAYLOAD) return;
+  const entry = (PAYLOAD.charts || {})[sym];
+  const loading = document.getElementById('loading');
+  const canvas = document.getElementById('chart');
+  const legend = document.getElementById('legend');
+  const verdict = document.getElementById('verdict');
+  if (!entry){
+    loading.style.display = 'block';
+    loading.textContent = 'No 15-minute closes recorded for ' + sym + ' on ' + (PAYLOAD.marketDate || 'the latest session') + '.';
+    canvas.style.display = 'none'; legend.style.display = 'none'; verdict.textContent = '';
+    return;
+  }
+  const lv = entry.levels || {};
+  const pre = (entry.premarket || []).map(c => ({t: c.t, c: c.c, pre: true}));
+  const reg = (entry.candles15m || []).map(c => ({t: c.t, c: c.c, pre: false}));
+  const pts = pre.concat(reg);
+  if (!pts.length){ loading.textContent = 'No candles for ' + sym + '.'; return; }
+  loading.style.display = 'none';
+  canvas.style.display = 'block'; legend.style.display = 'flex';
+  const dpr = window.devicePixelRatio || 1;
+  const W = canvas.clientWidth || 320, H = 340;
+  canvas.width = W * dpr; canvas.height = H * dpr;
+  const ctx = canvas.getContext('2d'); ctx.scale(dpr, dpr);
+  const cs = getComputedStyle(document.documentElement);
+  const bull = cs.getPropertyValue('--green').trim() || '#2fbf71';
+  const bear = cs.getPropertyValue('--red').trim() || '#e5484d';
+  let vals = pts.map(p => p.c);
+  [lv.pdh, lv.pdl, lv.pmh, lv.pml].forEach(v => { if (v != null) vals.push(v); });
+  let lo = Math.min.apply(null, vals), hi = Math.max.apply(null, vals);
+  if (hi - lo < 1e-9){ hi += 0.5; lo -= 0.5; }
+  const pad = (hi - lo) * 0.07; hi += pad; lo -= pad;
+  const X = i => 8 + (W - 16) * (pts.length === 1 ? 0.5 : i / (pts.length - 1));
+  const Y = v => 10 + (H - 20) * (1 - (v - lo) / (hi - lo));
+  const lastClose = pts[pts.length - 1].c;
+  function lvl(v, color, dash, label){
+    if (v == null) return;
+    ctx.save(); ctx.strokeStyle = color; ctx.globalAlpha = 0.85; ctx.lineWidth = 1.2; ctx.setLineDash(dash);
+    ctx.beginPath(); ctx.moveTo(4, Y(v)); ctx.lineTo(W - 4, Y(v)); ctx.stroke();
+    ctx.setLineDash([]); ctx.globalAlpha = 1; ctx.fillStyle = color; ctx.font = '600 10px system-ui';
+    ctx.fillText(label + ' ' + money(v), 8, Y(v) - 4); ctx.restore();
+  }
+  lvl(lv.pdh, bull, [7, 5], 'PDH'); lvl(lv.pmh, bull, [2, 3], 'PMH');
+  lvl(lv.pdl, bear, [7, 5], 'PDL'); lvl(lv.pml, bear, [2, 3], 'PML');
+  const closes = reg.map(p => p.c);
+  if (closes.length){
+    const mean = closes.reduce((a, b) => a + b, 0) / closes.length;
+    ctx.save(); ctx.strokeStyle = '#8b93a7'; ctx.globalAlpha = 0.8; ctx.setLineDash([4, 4]);
+    ctx.beginPath(); ctx.moveTo(4, Y(mean)); ctx.lineTo(W - 4, Y(mean)); ctx.stroke(); ctx.restore();
+  }
+  const lineCol = lastClose >= (closes.length ? closes.reduce((a, b) => a + b, 0) / closes.length : lastClose) ? bull : bear;
+  for (let i = 1; i < pts.length; i++){
+    const a = pts[i - 1], b = pts[i];
+    ctx.save();
+    ctx.strokeStyle = b.pre ? '#8b93a7' : lineCol;
+    ctx.globalAlpha = b.pre ? 0.6 : 1; ctx.lineWidth = b.pre ? 1.2 : 2.2;
+    ctx.beginPath(); ctx.moveTo(X(i - 1), Y(a.c)); ctx.lineTo(X(i), Y(b.c)); ctx.stroke(); ctx.restore();
+  }
+  pts.forEach((p, i) => {
+    if (p.pre) return;
+    ctx.save(); ctx.fillStyle = lineCol;
+    ctx.beginPath(); ctx.arc(X(i), Y(p.c), 2.4, 0, 7); ctx.fill(); ctx.restore();
   });
+  legend.innerHTML =
+    '<span><i style="background:' + bull + '"></i>PDH ' + money(lv.pdh) + '</span>' +
+    '<span><i style="background:' + bull + '"></i>PMH ' + money(lv.pmh) + '</span>' +
+    '<span><i style="background:' + bear + '"></i>PDL ' + money(lv.pdl) + '</span>' +
+    '<span><i style="background:' + bear + '"></i>PML ' + money(lv.pml) + '</span>' +
+    '<span>Last close ' + money(lastClose) + '</span>';
+  const above = lv.pdh != null && lastClose > lv.pdh ? 'PDH' : (lv.pmh != null && lastClose > lv.pmh ? 'PMH' : null);
+  if (above) verdict.innerHTML = '<span class="up">Bullish: last 15m close ' + money(lastClose) + ' above ' + above + ' ' + money(above === 'PDH' ? lv.pdh : lv.pmh) + '</span>';
+  else if (lv.pdl != null && lv.pml != null && lastClose < lv.pdl && lastClose < lv.pml)
+    verdict.innerHTML = '<span class="dn">Bearish: last 15m close ' + money(lastClose) + ' below PDL ' + money(lv.pdl) + ' and PML ' + money(lv.pml) + '</span>';
+  else verdict.textContent = 'Neutral: last 15m close ' + money(lastClose) + ' is inside the level range.';
+}
+
+async function load(){
+  const loading = document.getElementById('loading');
+  const ctl = new AbortController();
+  const to = setTimeout(() => ctl.abort(), 15000);
+  try {
+    const r = await fetch(FEED + '?t=' + Date.now(), {signal: ctl.signal, cache: 'no-store'});
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    PAYLOAD = await r.json();
+    draw();
+  } catch(e){
+    loading.style.display = 'block';
+    loading.textContent = 'Chart feed unavailable (' + (e && e.message ? e.message : 'network error') + ') — reload to retry.';
+  } finally { clearTimeout(to); }
+}
+let rzTo = null;
+addEventListener('resize', () => { clearTimeout(rzTo); rzTo = setTimeout(draw, 150); });
+load();
+// back-to-top: the button element is above this script in the document,
+// so it exists before this toggle wiring runs.
+const toTop = document.getElementById('toTop');
+addEventListener('scroll', () => { toTop.style.display = scrollY > 600 ? 'block' : 'none'; }, {passive: true});
+toTop.onclick = () => scrollTo({top: 0, behavior: 'smooth'});
 })();
-</script>>
+</script>
 </body>
 </html>
