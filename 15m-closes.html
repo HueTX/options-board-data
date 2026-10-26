@@ -180,299 +180,247 @@ canvas.wspark{width:100%; height:74px; display:block; min-width:0}
 
 <button id="toTop" type="button" aria-label="Go to bottom" title="Go to bottom">&#8595;</button>
 <script>
-const FEED = "https://raw.githubusercontent.com/HueTX/options-board-data/main/fifteen_min_closes.json";
-const CHARTS = "https://raw.githubusercontent.com/HueTX/options-board-data/main/fifteen_min_charts.json";
-const CAPS_URL = "https://raw.githubusercontent.com/HueTX/options-board-data/main/market_caps.json";
-const NAMES_URL = "https://raw.githubusercontent.com/HueTX/options-board-data/main/names_cache.json";
+(function(){
+"use strict";
+/* 15m-closes — rebuilt 2026-10-26.
+   One fetch layer with per-feed failure isolation; no embedded data.
+   Data resolution:
+     1. fifteen_min_closes.json with rows -> live lists, used as published.
+     2. Otherwise (after-hours marker / empty) -> derive the last session's
+        final closes from fifteen_min_charts.json: a ticker is bullish when
+        its last 15m close is above PDH or PMH, bearish when below PDL or
+        PML (same derivation the hosted artifact serves). */
+const RAW = 'https://raw.githubusercontent.com/HueTX/options-board-data/main/';
+const FEEDS = {
+  closes: RAW + 'fifteen_min_closes.json',
+  charts: RAW + 'fifteen_min_charts.json',
+  caps:   RAW + 'market_caps.json',
+  names:  RAW + 'names_cache.json'
+};
+const PRIORITY = ['SPY','QQQ','IWM'];
 const PAGE = 10;
-const PRIORITY = ["SPY", "QQQ", "IWM"]; // standing rule: qualifying index ETFs always rank first
-let CAPS = {};   // ticker -> marketCapB ($billions); unknown tickers sort last under Market cap
-let NAMES = {"GUSH":"Direxion Daily S&P Oil & Gas Exp. & Prod. Bull 2X Shares","DRIP":"Direxion Daily S&P Oil & Gas Exp. & Prod. Bear 2X Shares","NRGU":"MicroSectors U.S. Big Oil 3x Leveraged ETNs","NRGD":"MicroSectors U.S. Big Oil -3x Inverse Leveraged ETNs","XLV":"Health Care Select Sector SPDR Fund","XLI":"Industrial Select Sector SPDR Fund","XLY":"Consumer Discretionary Select Sector SPDR Fund","XLB":"Materials Select Sector SPDR Fund","HYG":"iShares iBoxx $ High Yield Corporate Bond ETF","URA":"Global X Uranium ETF","ITA":"iShares U.S. Aerospace & Defense ETF","CRM":"Salesforce, Inc.","TXN":"Texas Instruments Incorporated","MU":"Micron Technology, Inc.","ANET":"Arista Networks, Inc.","WDC":"Western Digital Corporation","STX":"Seagate Technology Holdings plc","MDB":"MongoDB, Inc.","AI":"C3.ai, Inc.","COIN":"Coinbase Global, Inc.","MSTR":"Strategy Incorporated","MARA":"MARA Holdings, Inc.","LABU":"Direxion Daily S&P Biotech Bull 3X Shares","EDC":"Direxion Daily MSCI Emerging Markets Bull 3X Shares","EDZ":"Direxion Daily MSCI Emerging Markets Bear 3X Shares","XLRE":"State Street Real Estate Select Sector SPDR ETF","XLC":"State Street Communication Services Select Sector SPDR ETF","UNG":"United States Natural Gas Fund, LP","TAN":"Invesco Solar ETF","ARM":"Arm Holdings plc","NET":"Cloudflare, Inc.","UPST":"Upstart Holdings, Inc.","CLSK":"CleanSpark, Inc.","SOFI":"SoFi Technologies, Inc.","NU":"Nu Holdings Ltd.","SPOT":"Spotify Technology S.A."};
+let DATA = null;                 // {bullish:[], bearish:[], candle, scanned, universe, mode, asOfMs, marketDate}
+let CAPS = {}, NAMES = {};
+let sortMode = 'rank', page = {bull:1, bear:1};
+let pins = new Set(JSON.parse(localStorage.getItem('ofb_pins') || '[]'));
+const $ = id => document.getElementById(id);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const money = v => (v == null || !isFinite(v)) ? '—' : '$' + Number(v).toFixed(2);
+const capOf = t => CAPS[t];
+function capLbl(b){ if (b == null) return ''; if (b >= 1000) return '$' + (b/1000).toFixed(2) + 'T'; if (b >= 1) return '$' + b.toFixed(1) + 'B'; return '$' + Math.round(b*1000) + 'M'; }
+function setTheme(t){ document.documentElement.setAttribute('data-theme', t); $('themeLabel').textContent = t === 'light' ? 'Light' : 'Dark'; try { localStorage.setItem('ofb_theme', t); } catch(e){} }
+window.toggleTheme = function(){ setTheme(document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light'); };
+setTheme(localStorage.getItem('ofb_theme') || 'dark');
 
-let charts = {};
-let DATA = {bull: [], bear: []};
-let page = {bull: 1, bear: 1};
-let sortMode = "rank";   // 'rank' | 'cap' | 'chg' | 'dir' | 'fav'
-// favorites — shared with the front page via the same localStorage key
-let pins = new Set();
-try { pins = new Set(JSON.parse(localStorage.getItem("ofb_pins") || "[]")); } catch(e){}
-function savePins(){ try { localStorage.setItem("ofb_pins", JSON.stringify([...pins])); } catch(e2){} }
-function setSort(mode){
-  sortMode = mode;
-  document.querySelectorAll("#sortChips .wchip").forEach(x => x.classList.toggle("on", x.dataset.sort === mode));
-  applySort();
+async function fetchFeed(url, ms){
+  const ctl = new AbortController();
+  const to = setTimeout(() => ctl.abort(), ms || 15000);
+  try {
+    const r = await fetch(url + (url.includes('?') ? '&' : '?') + 't=' + Date.now(), {signal: ctl.signal, cache: 'no-store'});
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    return await r.json();
+  } finally { clearTimeout(to); }
 }
-function togglePin(ev, t){
-  ev.stopPropagation();
-  if(pins.has(t)) pins.delete(t); else pins.add(t);
-  savePins();
-  // starring a ticker jumps the sort line to Favorites so the pick is visible
-  if(pins.has(t)) setSort("fav"); else { renderSide("bull"); renderSide("bear"); }
+
+/* Derive final-session rows from the charts payload (last candle of the day). */
+function deriveFromCharts(ch){
+  const bull = [], bear = [];
+  for (const [t, c] of Object.entries(ch.charts || {})){
+    const cds = c.candles15m || [];
+    if (!cds.length || !c.levels) continue;
+    const last = cds[cds.length - 1], lv = c.levels, close = last.c;
+    const row = {ticker: t, close, candle: ch.candle || '', status: null};
+    if (close > lv.pdh || close > lv.pmh){ row.pdh = lv.pdh; row.pmh = lv.pmh; bull.push(row); }
+    else if (close < lv.pdl || close < lv.pml){ row.pdl = lv.pdl; row.pml = lv.pml; bear.push(row); }
+  }
+  const n = Object.keys(ch.charts || {}).length;
+  return {bullish: bull, bearish: bear, candle: ch.candle || '—', scanned: n, universe: n,
+          mode: 'derived', asOfMs: Date.parse(ch.asOf || '') || null, marketDate: ch.marketDate || ''};
 }
-function cssVar(v){ return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
-function esc(s){ return String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
-function prioRank(t){ const i = PRIORITY.indexOf(t); return i === -1 ? 99 : i; }
-function capOf(t){ const c = CAPS[t]; return (c != null && isFinite(c)) ? c : null; }
-// last 15m close (for the price line under the ticker)
-function lastClose(t){
-  const ch = charts[t];
-  if(!ch || !ch.candles15m || !ch.candles15m.length) return null;
-  return ch.candles15m[ch.candles15m.length - 1].c;
+
+function resolveData(closes, charts){
+  if (closes && ((closes.bullish || []).length || (closes.bearish || []).length)){
+    return {bullish: closes.bullish, bearish: closes.bearish,
+            candle: closes.candle || (charts && charts.candle) || '—',
+            scanned: closes.scanned != null ? closes.scanned : 0,
+            universe: closes.universe != null ? closes.universe : (closes.scanned != null ? closes.scanned : 0),
+            mode: 'live', asOfMs: Date.parse(closes.asOf || '') || null, marketDate: closes.marketDate || ''};
+  }
+  if (charts && charts.charts && Object.keys(charts.charts).length) return deriveFromCharts(charts);
+  if (closes){
+    return {bullish: [], bearish: [], candle: '—', scanned: closes.scanned || 0,
+            universe: closes.universe || closes.scanned || 0, mode: 'empty',
+            asOfMs: Date.parse(closes.asOf || '') || null, marketDate: closes.marketDate || ''};
+  }
+  return null;
 }
-// day % move from the first 15m open to the last 15m close
-function dayMove(t){
-  const ch = charts[t];
-  if(!ch || !ch.candles15m || ch.candles15m.length < 2) return null;
-  const first = ch.candles15m[0].o, last = ch.candles15m[ch.candles15m.length - 1].c;
-  if(!first) return null;
-  return (last - first) / first * 100;
+
+function spark(canvas, chart, side){
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  ctx.clearRect(0, 0, W, H);
+  if (!chart) return;
+  const lv = chart.levels || {};
+  const pts = [];
+  (chart.premarket || []).forEach(c => pts.push({c: c.c, pre: true}));
+  (chart.candles15m || []).forEach(c => pts.push({c: c.c, pre: false}));
+  if (pts.length < 2) return;
+  let vals = pts.map(p => p.c);
+  [lv.pdh, lv.pdl, lv.pmh, lv.pml].forEach(v => { if (v != null) vals.push(v); });
+  let lo = Math.min.apply(null, vals), hi = Math.max.apply(null, vals);
+  if (hi - lo < 1e-9){ hi += 0.5; lo -= 0.5; }
+  const pad = (hi - lo) * 0.08; hi += pad; lo -= pad;
+  const X = i => 6 + (W - 12) * i / (pts.length - 1);
+  const Y = v => 4 + (H - 8) * (1 - (v - lo) / (hi - lo));
+  function lvl(v, color, dash){
+    if (v == null) return;
+    ctx.save(); ctx.strokeStyle = color; ctx.globalAlpha = 0.55; ctx.lineWidth = 1; ctx.setLineDash(dash);
+    ctx.beginPath(); ctx.moveTo(4, Y(v)); ctx.lineTo(W - 4, Y(v)); ctx.stroke(); ctx.restore();
+  }
+  lvl(lv.pdh, '#2fbf71', []); lvl(lv.pmh, '#2fbf71', [3, 3]);
+  lvl(lv.pdl, '#e5484d', []); lvl(lv.pml, '#e5484d', [3, 3]);
+  let sum = 0; pts.forEach(p => sum += p.c);
+  const mean = sum / pts.length;
+  ctx.save(); ctx.strokeStyle = '#8b93a7'; ctx.globalAlpha = 0.7; ctx.setLineDash([2, 3]);
+  ctx.beginPath(); ctx.moveTo(4, Y(mean)); ctx.lineTo(W - 4, Y(mean)); ctx.stroke(); ctx.restore();
+  for (let i = 1; i < pts.length; i++){
+    const a = pts[i - 1], b = pts[i];
+    ctx.save();
+    ctx.strokeStyle = b.pre ? '#8b93a7' : (side === 'bull' ? '#2fbf71' : '#e5484d');
+    ctx.globalAlpha = b.pre ? 0.65 : 1; ctx.lineWidth = b.pre ? 1 : 1.8;
+    ctx.beginPath(); ctx.moveTo(X(i - 1), Y(a.c)); ctx.lineTo(X(i), Y(b.c)); ctx.stroke(); ctx.restore();
+  }
+  const last = pts[pts.length - 1];
+  ctx.save(); ctx.fillStyle = side === 'bull' ? '#2fbf71' : '#e5484d';
+  ctx.beginPath(); ctx.arc(X(pts.length - 1), Y(last.c), 2.6, 0, 7); ctx.fill(); ctx.restore();
 }
-// 15m trend for the Direction sort: last close vs the mean of today's 15m closes
-function dir15(t){
-  const ch = charts[t];
-  if(!ch || !ch.candles15m || ch.candles15m.length < 2) return null;
-  const closes = ch.candles15m.map(c => c.c);
-  let sum = 0; for(const v of closes) sum += v;
-  return closes[closes.length - 1] >= sum / closes.length ? "up" : "down";
-}
-// the trading-morning watchlist sorts, applied per side; SPY/QQQ/IWM priority always leads
+
 function sortRows(rows, side){
-  const bull = side === "bull";
-  const alpha = (a, b) => a.ticker.localeCompare(b.ticker);
-  const prio = (a, b) => prioRank(a.ticker) - prioRank(b.ticker);
-  const mvOf = r => dayMove(r.ticker);
-  let pool = rows;
-  if(sortMode === "fav") pool = rows.filter(r => pins.has(r.ticker));
-  if(sortMode === "cap")
-    return pool.slice().sort((a, b) => prio(a, b) ||
-      ((capOf(b.ticker) != null ? capOf(b.ticker) : -1) - (capOf(a.ticker) != null ? capOf(a.ticker) : -1)) || alpha(a, b));
-  if(sortMode === "chg")
-    return pool.slice().sort((a, b) => prio(a, b) || (bull
-      ? ((mvOf(b) != null ? mvOf(b) : -Infinity) - (mvOf(a) != null ? mvOf(a) : -Infinity))
-      : ((mvOf(a) != null ? mvOf(a) : Infinity) - (mvOf(b) != null ? mvOf(b) : Infinity))) || alpha(a, b));
-  if(sortMode === "dir"){
-    const drank = r => { const d = dir15(r.ticker); return d == null ? 2 : (bull ? (d === "up" ? 0 : 1) : (d === "down" ? 0 : 1)); };
-    return pool.slice().sort((a, b) => prio(a, b) || (drank(a) - drank(b)) ||
-      (Math.abs(mvOf(b) || 0) - Math.abs(mvOf(a) || 0)) || alpha(a, b));
-  }
-  return pool.slice().sort((a, b) => prio(a, b) || alpha(a, b));
+  const fav = r => pins.has(r.ticker) ? 0 : 1;
+  const pri = r => { const i = PRIORITY.indexOf(r.ticker); return i < 0 ? 99 : i; };
+  const chgOf = r => { const lv = side === 'bull' ? Math.max(r.pdh || -1e18, r.pmh || -1e18) : Math.min(r.pdl || 1e18, r.pml || 1e18); return isFinite(lv) && lv > 0 ? (r.close - lv) / lv * 100 : 0; };
+  const arr = rows.slice();
+  if (sortMode === 'fav') arr.sort((a, b) => fav(a) - fav(b) || pri(a) - pri(b) || a.ticker.localeCompare(b.ticker));
+  else if (sortMode === 'cap') arr.sort((a, b) => (capOf(b.ticker) || 0) - (capOf(a.ticker) || 0));
+  else if (sortMode === 'chg') arr.sort((a, b) => Math.abs(chgOf(b)) - Math.abs(chgOf(a)));
+  else if (sortMode === 'dir') arr.sort((a, b) => chgOf(b) - chgOf(a));
+  else arr.sort((a, b) => pri(a) - pri(b) || a.ticker.localeCompare(b.ticker));
+  return arr;
 }
-/* 15m mini chart: candlesticks colored by bullish/bearish SIDE (green = bullish
-   panel, red = bearish panel), dashed series-mean line, plus the four breakout
-   levels (PDH solid green, PMH dotted green, PDL solid red, PML dotted red —
-   same convention as the detail chart), labeled at the right edge. The y-domain
-   spans the candle highs/lows so wicks never clip; level lines outside today's
-   range are clipped off-chart. */
-function drawSpark(cv, candles, levels, side){
-  const dpr = Math.min(2, window.devicePixelRatio || 1);
-  const W = cv.clientWidth || 200, H = cv.clientHeight || 74;
-  if(!W || !H) return;
-  cv.width = W * dpr; cv.height = H * dpr;
-  const ctx = cv.getContext("2d"); ctx.scale(dpr, dpr);
-  if(!candles || candles.length < 2){
-    ctx.fillStyle = cssVar("--muted") || "#888"; ctx.font = "10.5px system-ui, sans-serif";
-    ctx.textAlign = "center"; ctx.textBaseline = "middle";
-    ctx.fillText("Chart unavailable", W / 2, H / 2);
-    return;
-  }
-  const lv = levels || {};
-  const lo = Math.min(...candles.map(c => c.l)), hi = Math.max(...candles.map(c => c.h));
-  const rng = (hi - lo) || 1;
-  const plotLeft = 2, plotRight = Math.max(42, W - 30);
-  const py = v => H - 3 - ((v - lo) / rng) * (H - 6);
-  const gain = cssVar("--gain"), loss = cssVar("--loss");
-  // Breakout levels are drawn first and labeled at the right edge. Highs are
-  // green, lows are red; prior-day levels are solid and premarket levels dash.
-  const levelLine = (v, color, dashed, label) => {
-    if(v == null || !isFinite(v)) return;
-    const y = py(v);
-    ctx.strokeStyle = color; ctx.lineWidth = 1; ctx.globalAlpha = .62;
-    ctx.setLineDash(dashed ? [3, 3] : []);
-    ctx.beginPath(); ctx.moveTo(plotLeft, y); ctx.lineTo(plotRight, y); ctx.stroke();
-    ctx.setLineDash([]); ctx.globalAlpha = 1;
-    ctx.fillStyle = color; ctx.font = "800 8px ui-monospace, SFMono-Regular, Menlo, monospace";
-    ctx.textAlign = "right"; ctx.textBaseline = "middle";
-    ctx.fillText(label, W - 1, y);
-  };
-  levelLine(lv.pdh, gain, false, "PDH");
-  levelLine(lv.pmh, gain, true, "PMH");
-  levelLine(lv.pdl, loss, false, "PDL");
-  levelLine(lv.pml, loss, true, "PML");
-  // series mean of closes — dashed
-  let sum = 0; for(const c of candles) sum += c.c;
-  const mean = sum / candles.length;
-  ctx.strokeStyle = cssVar("--text-dim") || "#98989f"; ctx.lineWidth = 1;
-  ctx.setLineDash([5, 4]); ctx.globalAlpha = .7;
-  ctx.beginPath(); ctx.moveTo(plotLeft, py(mean)); ctx.lineTo(plotRight, py(mean)); ctx.stroke();
-  ctx.setLineDash([]); ctx.globalAlpha = 1;
-  // 15m candlesticks, colored by bullish/bearish side (never by candle direction)
-  const sideCol = side === "bear" ? loss : gain;
-  const n = candles.length;
-  const slotW = (plotRight - plotLeft) / n;
-  const bodyW = Math.max(2, Math.min(7, slotW * 0.62));
-  candles.forEach((c, i) => {
-    const x = plotLeft + slotW * (i + 0.5);
-    const col = sideCol;
-    ctx.strokeStyle = col; ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.moveTo(x, py(c.h)); ctx.lineTo(x, py(c.l)); ctx.stroke();
-    const yO = py(c.o), yC = py(c.c);
-    const top = Math.min(yO, yC), hgt = Math.max(1.6, Math.abs(yC - yO));
-    ctx.fillStyle = col;
-    ctx.fillRect(x - bodyW / 2, top, bodyW, hgt);
-  });
+function rowHTML(r, side, chart){
+  const t = r.ticker;
+  const up = side === 'bull';
+  const lv = up ? [['PDH', r.pdh], ['PMH', r.pmh]] : [['PDL', r.pdl], ['PML', r.pml]];
+  const base = up ? Math.max(r.pdh || -1e18, r.pmh || -1e18) : Math.min(r.pdl || 1e18, r.pml || 1e18);
+  const chg = isFinite(base) && base > 0 ? (r.close - base) / base * 100 : null;
+  const capB = capOf(t);
+  const pinned = pins.has(t);
+  return '<div class="row"><div class="r-main">' +
+    '<button class="pin' + (pinned ? ' on' : '') + '" data-pin="' + esc(t) + '" aria-label="Pin ' + esc(t) + '">' + (pinned ? '★' : '☆') + '</button>' +
+    '<a class="tk" href="15m-chart.html?t=' + encodeURIComponent(t) + '">' + esc(t) + '</a>' +
+    (NAMES[t] ? '<span class="nm">' + esc(NAMES[t]) + '</span>' : '') +
+    (capB != null ? '<span class="cap">' + esc(capLbl(capB)) + '</span>' : '') +
+    (r.status ? '<span class="status ' + esc(r.status) + '">' + esc(r.status) + '</span>' : '') +
+    '</div><canvas class="spark" width="118" height="44"></canvas>' +
+    '<div class="r-vals"><span class="close">' + money(r.close) + '</span>' +
+    (chg != null ? '<span class="chg ' + (chg >= 0 ? 'up' : 'dn') + '">' + (chg >= 0 ? '+' : '') + chg.toFixed(2) + '%</span>' : '') +
+    '<span class="lvls">' + lv.map(x => x[0] + ' ' + money(x[1])).join(' · ') + '</span></div></div>';
 }
-function rowHTML(r, side, rank){
-  const bull = side === "bull";
-  const mv = dayMove(r.ticker);
-  const chCls = mv == null ? "flat" : (mv >= 0 ? "up" : "dn");
-  const chg = mv == null ? '<span class="wchg flat">&mdash;</span>'
-    : `<span class="wchg ${chCls}">${mv >= 0 ? "+" : ""}${mv.toFixed(2)}%</span>`;
-  const st = r.status === "new" ? '<span class="st-pill">NEW</span>'
-    : r.status === "flipped" ? '<span class="st-pill">FLIPPED</span>' : "";
-  const nm = NAMES[r.ticker] || "Security name unavailable";
-  const lc = lastClose(r.ticker);
-  const price = lc != null ? `<span class="wprice">$${lc.toFixed(2)}</span><span class="wdot">&middot;</span>` : "";
-  const url = "15m-chart.html?t=" + encodeURIComponent(r.ticker);
-  const isPinned = pins.has(r.ticker);
-  return `<div class="wrow ${bull ? "bull" : "bear"}${isPinned ? " pinned" : ""}" onclick="location.href='${url}'">`
-    + `<div class="wrank">#${rank}</div>`
-    + `<div class="wtick"><div class="line1">`
-    + `<span class="tri ${bull ? "up" : "dn"}">${bull ? "&#9650;" : "&#9660;"}</span>`
-    + `<span class="tk">${esc(r.ticker)}</span>${st}`
-    + `</div>`
-    + `<div class="wname">${esc(nm)}</div>`
-    + `<div class="wmeta">${price}${chg}<span class="wdot">&middot;</span><span class="wdash">&ndash;</span></div>`
-    + `</div>`
-    + `<canvas class="wspark" data-sym="${esc(r.ticker)}"></canvas>`
-    + `<button class="pin" aria-label="Favorite ${esc(r.ticker)}" onclick="togglePin(event,'${esc(r.ticker)}')">&#9733;</button>`
-    + `</div>`;
-}
-function paintSparks(root, side){
-  root.querySelectorAll("canvas.wspark").forEach(cv => {
-    const ch = charts[cv.dataset.sym];
-    drawSpark(cv, ch ? ch.candles15m : [], ch ? ch.levels : null, side);
-  });
-}
-function applySort(){
-  page.bull = 1; page.bear = 1;
-  renderSide("bull"); renderSide("bear");
-}
-document.querySelectorAll("#sortChips .wchip").forEach(b => b.addEventListener("click", () => setSort(b.dataset.sort)));
 function renderSide(side){
-  const rows = sortRows(DATA[side], side);
-  const pages = Math.max(1, Math.ceil(rows.length / PAGE));
-  if(page[side] > pages) page[side] = pages;
-  const start = (page[side] - 1) * PAGE;
-  const slice = rows.slice(start, start + PAGE);
-  const list = document.getElementById(side === "bull" ? "bullList" : "bearList");
-  if(!slice.length){
-    list.innerHTML = sortMode === "fav"
-      ? `<div class="empty">No favorites yet &mdash; tap &#9733; on any ticker.</div>`
-      : `<div class="empty">No ${side === "bull" ? "bullish" : "bearish"} confirmed closes.</div>`;
-  } else {
-    list.innerHTML = slice.map((r, i) => rowHTML(r, side, start + i + 1)).join("");
-    paintSparks(list, side);
+  const listEl = $(side === 'bull' ? 'bullList' : 'bearList');
+  const rows = sortRows(side === 'bull' ? DATA.bullish : DATA.bearish, side);
+  $(side === 'bull' ? 'bullCount' : 'bearCount').textContent = rows.length;
+  const pgEl = $(side === 'bull' ? 'bullPager' : 'bearPager');
+  if (!rows.length){
+    listEl.innerHTML = '<div class="empty">' + (side === 'bull' ? 'No bullish confirmed closes.' : 'No bearish confirmed closes.') + '</div>';
+    pgEl.innerHTML = ''; return;
   }
-  const pg = document.getElementById(side === "bull" ? "bullPager" : "bearPager");
-  pg.innerHTML = pages <= 1 ? "" :
-    `<button ${page[side] <= 1 ? "disabled" : ""} onclick="goPage('${side}',-1)" aria-label="Previous page">&lsaquo;</button>`
-    + `<span>${page[side]} / ${pages}</span>`
-    + `<button ${page[side] >= pages ? "disabled" : ""} onclick="goPage('${side}',1)" aria-label="Next page">&rsaquo;</button>`;
+  const pages = Math.ceil(rows.length / PAGE);
+  if (page[side] > pages) page[side] = pages;
+  const slice = rows.slice((page[side] - 1) * PAGE, page[side] * PAGE);
+  listEl.innerHTML = slice.map(r => rowHTML(r, side, CHARTS[r.ticker])).join('');
+  const canvases = listEl.querySelectorAll('canvas.spark');
+  slice.forEach((r, i) => { if (canvases[i]) spark(canvases[i], CHARTS[r.ticker], side); });
+  pgEl.innerHTML = pages <= 1 ? '' :
+    '<button data-pg="' + side + ':-1" ' + (page[side] <= 1 ? 'disabled' : '') + '>‹ Prev</button>' +
+    '<span>' + page[side] + ' / ' + pages + '</span>' +
+    '<button data-pg="' + side + ':1" ' + (page[side] >= pages ? 'disabled' : '') + '>Next ›</button>';
 }
-function goPage(side, d){ page[side] += d; renderSide(side); }
-let rszT = null;
-window.addEventListener("resize", () => {
-  clearTimeout(rszT);
-  rszT = setTimeout(() => {
-    paintSparks(document.getElementById("bullList"), "bull");
-    paintSparks(document.getElementById("bearList"), "bear");
-  }, 150);
-});
-function setHB(state, text, cls){
-  const d = document.getElementById("hbDot");
-  d.className = "dot" + (state === "ok" ? " green" : state === "wait" ? " amber" : "");
-  const t = document.getElementById("hbText");
-  t.className = cls || "";
-  t.innerHTML = text;
+let CHARTS = {};
+function fmtDate(iso){
+  if (!iso) return '';
+  const d = new Date(iso + 'T12:00:00');
+  return isNaN(d) ? iso : d.toLocaleDateString('en-US', {month: 'short', day: 'numeric', year: 'numeric'});
 }
-function ctFmt(d){
-  return d.toLocaleString("en-US", {timeZone: "America/Chicago", month: "short", day: "numeric", year: "numeric",
-    hour: "numeric", minute: "2-digit", second: "2-digit", hour12: true, timeZoneName: "short"});
+function heartbeat(){
+  const dot = $('hbDot'), txt = $('hbText'), tm = $('hbTime');
+  if (!DATA){ txt.textContent = 'Feed unavailable — retrying'; dot.className = 'dot red'; return; }
+  tm.textContent = 'fetched ' + new Date().toLocaleTimeString('en-US', {hour: 'numeric', minute: '2-digit', second: '2-digit'});
+  const stale = $('staleBanner');
+  if (DATA.mode === 'derived'){
+    dot.className = 'dot amber'; txt.className = '';
+    txt.textContent = 'Session closed — final data · ' + fmtDate(DATA.marketDate);
+    stale.hidden = true; return;
+  }
+  if (DATA.mode === 'empty'){
+    dot.className = 'dot amber'; txt.className = '';
+    txt.textContent = 'No confirmed closes yet · ' + fmtDate(DATA.marketDate);
+    stale.hidden = true; return;
+  }
+  const age = DATA.asOfMs ? Date.now() - DATA.asOfMs : Infinity;
+  if (age < 12 * 60 * 1000){ dot.className = 'dot green'; txt.className = ''; txt.textContent = 'Live — updated ' + Math.max(1, Math.round(age / 60000)) + 'm ago'; stale.hidden = true; }
+  else { dot.className = 'dot amber'; txt.className = ''; txt.textContent = 'Stale — last update ' + Math.round(age / 60000) + 'm ago'; stale.hidden = false; }
+}
+function render(){
+  if (!DATA) return;
+  $('candleLbl').textContent = DATA.candle || '—';
+  $('scanLbl').textContent = DATA.scanned + ' of ' + DATA.universe + ' tickers';
+  renderSide('bull'); renderSide('bear');
+  heartbeat();
 }
 async function load(){
-  setHB("wait", "Connecting&hellip;", "wait");
-  try{
-    const [fr, cr, mr, nr] = await Promise.all([
-      fetch(FEED + "?t=" + Date.now(), {cache: "no-store"}),
-      fetch(CHARTS + "?t=" + Date.now(), {cache: "no-store"}).catch(() => null),
-      fetch(CAPS_URL + "?t=" + Date.now(), {cache: "no-store"}).then(r => r.ok ? r.json() : null).catch(() => null),
-      fetch(NAMES_URL + "?t=" + Date.now(), {cache: "no-store"}).then(r => r.ok ? r.json() : null).catch(() => null)
-    ]);
-    if(!fr.ok) throw new Error("HTTP " + fr.status);
-    const d = await fr.json();
-    if(cr && cr.ok){ const cd = await cr.json(); charts = cd.charts || {}; }
-    if(mr && mr.caps) CAPS = mr.caps;
-    if(nr) NAMES = Object.assign({}, NAMES, nr);
-    const nb = new Set(d.newBullish || []), nbe = new Set(d.newBearish || []), fl = new Set(d.flipped || []);
-    const tag = r => ({...r, status: fl.has(r.ticker) ? "flipped" : (nb.has(r.ticker) || nbe.has(r.ticker)) ? "new" : ""});
-    DATA.bull = (d.bullish || []).map(tag);
-    DATA.bear = (d.bearish || []).map(tag);
-    document.getElementById("bullCount").textContent = DATA.bull.length;
-    document.getElementById("bearCount").textContent = DATA.bear.length;
-    const asofMs = d.asOf ? new Date(d.asOf).getTime() : 0;
-    const ageMin = asofMs ? (Date.now() - asofMs) / 60000 : 999;
-    const stale = ageMin > 8;
-    document.getElementById("staleBanner").hidden = !stale;
-    setHB(stale ? "err" : "ok", stale ? "Stale" : "Live", stale ? "stale" : "live");
-    document.getElementById("hbTime").textContent =
-      asofMs ? "Last refreshed: " + ctFmt(new Date(asofMs)) : "";
-    document.getElementById("candleLbl").textContent = d.candle || "\u2013";
-    document.getElementById("scanLbl").textContent = (d.scanned || 0) + " of " + (d.scanned || 0) + " tickers";
-    renderSide("bull");
-    renderSide("bear");
-  }catch(e){
-    setHB("err", "Feed unreachable \u2014 retrying\u2026", "stale");
+  const [closes, charts, caps, names] = await Promise.allSettled ? await Promise.all([
+    fetchFeed(FEEDS.closes).catch(() => null),
+    fetchFeed(FEEDS.charts).catch(() => null),
+    fetchFeed(FEEDS.caps).catch(() => null),
+    fetchFeed(FEEDS.names).catch(() => null)
+  ]) : [];
+  if (caps){ CAPS = caps.caps || {}; }
+  if (names){ NAMES = names.names || names || {}; }
+  if (charts){ CHARTS = charts.charts || {}; }
+  const resolved = resolveData(closes, charts);
+  if (resolved) DATA = resolved;
+  render();
+}
+document.addEventListener('click', e => {
+  const pin = e.target.closest('[data-pin]');
+  if (pin){
+    const t = pin.getAttribute('data-pin');
+    if (pins.has(t)) pins.delete(t); else pins.add(t);
+    try { localStorage.setItem('ofb_pins', JSON.stringify(Array.from(pins))); } catch(err){}
+    render(); return;
   }
-}
-function toggleTheme(){
-  const h = document.documentElement;
-  const next = h.getAttribute("data-theme") === "dark" ? "light" : "dark";
-  h.setAttribute("data-theme", next);
-  try{ localStorage.setItem("ofb_theme", next); }catch(e){}
-  document.getElementById("themeLabel").textContent = next === "dark" ? "Dark" : "Light";
-  renderSide("bull"); renderSide("bear");
-}
-(function init(){
-  try{
-    const t = localStorage.getItem("ofb_theme");
-    if(t){ document.documentElement.setAttribute("data-theme", t);
-      document.getElementById("themeLabel").textContent = t === "dark" ? "Dark" : "Light"; }
-  }catch(e){}
-  load();
-  setInterval(load, 60000);
+  const pg = e.target.closest('[data-pg]');
+  if (pg){
+    const parts = pg.getAttribute('data-pg').split(':');
+    page[parts[0]] = Math.max(1, page[parts[0]] + Number(parts[1]));
+    renderSide(parts[0]); return;
+  }
+  const chip = e.target.closest('#sortChips .chip');
+  if (chip){
+    sortMode = chip.getAttribute('data-s');
+    document.querySelectorAll('#sortChips .chip').forEach(c => c.classList.toggle('on', c === chip));
+    page = {bull: 1, bear: 1}; render();
+  }
+});
+load();
+setInterval(load, 60000);
+// back-to-top: the button element is above this script in the document,
+// so it exists before this toggle wiring runs.
+const toTop = $('toTop');
+addEventListener('scroll', () => { toTop.style.display = scrollY > 600 ? 'block' : 'none'; }, {passive: true});
+toTop.onclick = () => scrollTo({top: 0, behavior: 'smooth'});
 })();
-
-/* Scroll toggle: down arrow at top, up arrow at bottom. */
-(function(){
-  const btn = document.getElementById('toTop');
-  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const onScroll = () => {
-    const y = window.scrollY || document.documentElement.scrollTop;
-    const max = document.documentElement.scrollHeight - innerHeight;
-    const nearBottom = max > 0 && (max - y) < 200;
-    btn.innerHTML = nearBottom ? '&#8593;' : '&#8595;';
-    btn.setAttribute('aria-label', nearBottom ? 'Back to top' : 'Go to bottom');
-    btn.title = nearBottom ? 'Back to top' : 'Go to bottom';
-    btn.dataset.dir = nearBottom ? 'up' : 'down';
-  };
-  addEventListener('scroll', onScroll, {passive:true});
-  addEventListener('resize', onScroll);
-  onScroll();
-  btn.addEventListener('click', () => {
-    const top = btn.dataset.dir !== 'down';
-    window.scrollTo({top: top ? 0 : document.documentElement.scrollHeight, behavior: reduced ? 'auto' : 'smooth'});
-  });
-})();
-</script>>
+</script>
 </body>
 </html>
