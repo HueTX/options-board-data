@@ -1,82 +1,98 @@
 {
-  "asOf": "2026-10-30T00:00:00Z",
-  "date": "2026-10-29",
+  "asOf": "2026-11-02T00:00:00Z",
+  "date": "2026-10-30",
   "ignitions": [
     {
       "ticker": "FDN",
-      "x": 22.4
+      "x": 22.6
     },
     {
-      "ticker": "FAZ",
-      "x": 9.0
+      "ticker": "EW",
+      "x": 12.0
     },
     {
       "ticker": "LIT",
-      "x": 9.0
+      "x": 9.7
     },
     {
-      "ticker": "SYK",
+      "ticker": "FAZ",
       "x": 8.9
     },
     {
       "ticker": "JDST",
-      "x": 8.7
-    },
-    {
-      "ticker": "CROX",
-      "x": 7.0
+      "x": 8.8
     },
     {
       "ticker": "TECS",
-      "x": 6.1
-    },
-    {
-      "ticker": "RL",
-      "x": 5.4
-    },
-    {
-      "ticker": "YANG",
-      "x": 5.2
-    },
-    {
-      "ticker": "FTNT",
-      "x": 4.6
+      "x": 6.7
     },
     {
       "ticker": "TAN",
+      "x": 5.9
+    },
+    {
+      "ticker": "YANG",
+      "x": 5.3
+    },
+    {
+      "ticker": "ETN",
+      "x": 4.8
+    },
+    {
+      "ticker": "UVXY",
       "x": 4.6
     },
     {
-      "ticker": "DUST",
+      "ticker": "RL",
+      "x": 4.6
+    },
+    {
+      "ticker": "AI",
       "x": 4.5
     },
     {
-      "ticker": "GE",
-      "x": 3.9
+      "ticker": "PS",
+      "x": 4.4
     },
     {
-      "ticker": "PH",
-      "x": 3.7
+      "ticker": "DUST",
+      "x": 4.3
     },
     {
-      "ticker": "ITA",
-      "x": 3.4
-    },
-    {
-      "ticker": "NOC",
-      "x": 3.3
-    },
-    {
-      "ticker": "JNUG",
-      "x": 3.3
-    },
-    {
-      "ticker": "EW",
-      "x": 3.2
+      "ticker": "ROK",
+      "x": 4.1
     },
     {
       "ticker": "EDC",
-      "x": 3.2
+      "x": 3.8
+    },
+    {
+      "ticker": "TECL",
+      "x": 3.6
+    },
+    {
+      "ticker": "ITA",
+      "x": 3.5
+    },
+    {
+      "ticker": "PH",
+      "x": 3.5
+    },
+    {
+      "ticker": "SOXX",
+      "x": 3.3
+    },
+    {
+      "ticker": "GE",
+      "x": 3.3
+    },
+    {
+      "ticker": "SYK",
+      "x": 3.0
+    },
+    {
+      "ticker": "NOC",
+      "x": 3.0
     }
   ]
 }
