@@ -1,118 +1,90 @@
 {
-  "asOf": "2026-11-09T00:00:00Z",
-  "date": "2026-11-06",
+  "asOf": "2026-11-10T00:00:00Z",
+  "date": "2026-11-09",
   "ignitions": [
     {
       "ticker": "FDN",
-      "x": 21.9
+      "x": 22.0
     },
     {
       "ticker": "LIT",
-      "x": 18.2
-    },
-    {
-      "ticker": "TAN",
-      "x": 10.2
-    },
-    {
-      "ticker": "JDST",
-      "x": 9.6
-    },
-    {
-      "ticker": "FAZ",
-      "x": 9.1
+      "x": 18.3
     },
     {
       "ticker": "ZBH",
-      "x": 8.5
+      "x": 11.6
+    },
+    {
+      "ticker": "JDST",
+      "x": 10.3
+    },
+    {
+      "ticker": "TAN",
+      "x": 9.0
+    },
+    {
+      "ticker": "FAZ",
+      "x": 8.9
     },
     {
       "ticker": "PS",
-      "x": 6.7
-    },
-    {
-      "ticker": "YANG",
       "x": 6.5
     },
     {
+      "ticker": "NSC",
+      "x": 6.4
+    },
+    {
       "ticker": "TECS",
-      "x": 6.2
-    },
-    {
-      "ticker": "RL",
-      "x": 5.9
-    },
-    {
-      "ticker": "DUK",
-      "x": 5.8
-    },
-    {
-      "ticker": "ROK",
-      "x": 5.6
-    },
-    {
-      "ticker": "RIOT",
-      "x": 4.9
-    },
-    {
-      "ticker": "DUST",
-      "x": 4.8
-    },
-    {
-      "ticker": "EDC",
-      "x": 4.8
-    },
-    {
-      "ticker": "TSEM",
-      "x": 4.5
-    },
-    {
-      "ticker": "TECL",
-      "x": 4.4
-    },
-    {
-      "ticker": "PH",
-      "x": 4.4
+      "x": 6.3
     },
     {
       "ticker": "ITA",
-      "x": 4.3
+      "x": 6.2
     },
     {
-      "ticker": "JCI",
-      "x": 4.2
+      "ticker": "YANG",
+      "x": 5.4
     },
     {
-      "ticker": "VXX",
-      "x": 4.1
+      "ticker": "SOXX",
+      "x": 5.3
     },
     {
-      "ticker": "APP",
-      "x": 4.0
+      "ticker": "DUST",
+      "x": 4.9
     },
     {
-      "ticker": "MNST",
-      "x": 3.7
-    },
-    {
-      "ticker": "UVXY",
-      "x": 3.6
-    },
-    {
-      "ticker": "CROX",
-      "x": 3.6
+      "ticker": "EDC",
+      "x": 4.9
     },
     {
       "ticker": "JNUG",
+      "x": 4.4
+    },
+    {
+      "ticker": "XLK",
+      "x": 4.1
+    },
+    {
+      "ticker": "PH",
+      "x": 3.9
+    },
+    {
+      "ticker": "RL",
+      "x": 3.9
+    },
+    {
+      "ticker": "XLP",
+      "x": 3.6
+    },
+    {
+      "ticker": "TECL",
+      "x": 3.6
+    },
+    {
+      "ticker": "KLAC",
       "x": 3.5
-    },
-    {
-      "ticker": "EW",
-      "x": 3.3
-    },
-    {
-      "ticker": "U",
-      "x": 3.2
     }
   ]
 }
