@@ -1,426 +1,369 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>15-Minute Confirmed Closes</title>
+<title>15m Confirmed Closes</title>
 <style>
 :root{
   --font: "SF Pro Display", -apple-system, BlinkMacSystemFont, ui-sans-serif, system-ui, "Segoe UI", Inter, Roboto, "Helvetica Neue", Arial, sans-serif;
   --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
-}
-html[data-theme="dark"]{
-  --bg:#0b0b0d; --card:#141416; --panel:#101013; --surface-2:#1c1c20;
-  --orange:#f5a524; --gold:#e0aa3e; --gain:#4ade80; --loss:#f87171;
-  --text:#f5f5f7; --text-dim:#a1a1aa; --border:#26262b; --faint:#71717a;
-  --pill-bg:rgba(255,255,255,.05);
-  --stale-bg:rgba(248,113,113,.07); --stale-brd:rgba(248,113,113,.35);
-  --bull-tint:rgba(74,222,128,.045); --bear-tint:rgba(248,113,113,.045);
-}
-html[data-theme="light"]{
-  --bg:#f6f4ee; --card:#fffdf8; --panel:#fffdf8; --surface-2:#efe9da;
-  --orange:#c46a00; --gold:#b8860b; --gain:#15803d; --loss:#dc2626;
-  --text:#1c1c1e; --text-dim:#6b6b70; --border:#e2ddd0; --faint:#a8a29e;
-  --pill-bg:rgba(0,0,0,.045);
-  --stale-bg:rgba(220,38,38,.06); --stale-brd:rgba(220,38,38,.3);
-  --bull-tint:rgba(21,128,61,.05); --bear-tint:rgba(220,38,38,.05);
+  --bg:#f6f2e7; --row:#fffdf8; --text:#1c1c1e; --dim:#6b6b70; --faint:#a8a29e;
+  --hair:#e3ddcd; --green:#15803d; --red:#dc2626; --purple:#7c3aed;
+  --tan-track:#e9dec6; --burnt:#c05621; --badge-tan-bg:#f3e5c3; --badge-tan-tx:#8a6d1a;
+  --pill-bg:#fffdf8; --pill-on:#1c1c1e; --gold:#b8860b;
 }
 *{box-sizing:border-box; margin:0; padding:0}
-body{background:var(--bg); color:var(--text); font-family:var(--font); padding:16px 18px 40px; max-width:1240px; margin:0 auto; min-height:100vh}
-a{color:var(--orange); text-decoration:none}
-/* top bar */
-.topbar{display:flex; align-items:center; justify-content:space-between; margin-bottom:14px}
-.back{font-size:15px; font-weight:700; color:var(--orange)}
-.theme-switch{display:flex; align-items:center; gap:8px; background:transparent; border:1.5px solid var(--orange);
-  border-radius:999px; padding:6px 14px 6px 8px; cursor:pointer; color:var(--orange); font-family:var(--font);
-  font-size:14px; font-weight:700}
-.theme-switch .knob{width:22px; height:22px; border-radius:50%; background:var(--orange); flex:none}
-/* title */
-.title{font-size:31px; font-weight:800; letter-spacing:-.01em; margin-bottom:14px}
-.divider{border:none; border-top:1px solid var(--border); margin:14px 0}
-/* status card */
-.status-card{display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
-  background:var(--card); border:1px solid var(--border); border-radius:14px; padding:14px 18px; margin-bottom:12px}
-.st-left{display:flex; align-items:center; gap:9px; font-size:15px; font-weight:700}
-.dot{width:11px; height:11px; border-radius:50%; background:var(--loss); flex:none}
-.dot.amber{background:var(--orange)} .dot.green{background:var(--gain)}
-#hbText.live{color:var(--gain)} #hbText.stale{color:var(--loss)} #hbText.wait{color:var(--orange)}
-.st-right{font-family:var(--mono); font-size:12.5px; color:var(--text-dim)}
-/* stale banner */
-.stale-banner{display:flex; align-items:center; gap:12px; background:var(--stale-bg); border:1px solid var(--stale-brd);
-  border-radius:14px; padding:13px 18px; margin-bottom:12px; font-size:14px}
-.stale-banner strong{color:var(--loss); font-weight:800; letter-spacing:.04em}
-.stale-banner span{color:var(--text-dim)}
-/* meta + definitions */
-.meta-row{display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
-  font-size:14.5px; color:var(--text-dim); margin:2px 0}
-.meta-row strong{color:var(--text); font-weight:700}
-.defs{font-size:14.5px; color:var(--text-dim); line-height:1.55}
-.defs .bull-t{color:var(--gain); font-weight:800}
-.defs .bear-t{color:var(--loss); font-weight:800}
-/* sort + legend cards */
-.sort-card{display:flex; align-items:center; gap:14px; flex-wrap:wrap; background:var(--card);
-  border:1px solid var(--border); border-radius:14px; padding:13px 18px; margin-bottom:12px}
-.wsort-label{font-size:12px; font-weight:800; letter-spacing:1.4px; color:var(--text-dim)}
-#sortChips{display:flex; gap:10px; flex-wrap:wrap}
-.wchip{font-family:var(--font); font-size:13.5px; font-weight:700; padding:8px 20px; border-radius:999px;
-  border:1px solid var(--border); background:var(--pill-bg); color:var(--text); cursor:pointer; white-space:nowrap}
-.wchip.on{background:var(--orange); border-color:var(--orange); color:#1a1206}
-.wchip.fav.on{background:var(--gold); border-color:var(--gold); color:#1a1206}
-.legend-card{background:var(--card); border:1px solid var(--border); border-radius:14px; padding:12px 18px;
-  font-size:13px; color:var(--text-dim); margin-bottom:18px}
-/* two panels */
-.panels{display:grid; grid-template-columns:1fr 1fr; gap:18px; align-items:start}
-@media (max-width:900px){ .panels{grid-template-columns:1fr} }
-.panel{background:var(--panel); border:1px solid var(--border); border-radius:16px; overflow:hidden; min-width:0}
-.phead{display:flex; align-items:flex-start; justify-content:space-between; gap:10px; padding:16px 18px 12px}
-.ptitle{font-size:19px; font-weight:800; display:flex; align-items:center; gap:8px}
-.ptitle.bull{color:var(--gain)} .ptitle.bear{color:var(--loss)}
-.psub{font-size:13px; color:var(--text-dim); margin-top:3px}
-.pcount{font-size:15px; font-weight:800; background:var(--pill-bg); border-radius:10px; padding:5px 13px; flex:none}
-.pcount.bull{color:var(--gain)} .pcount.bear{color:var(--loss)}
-.colhdr{display:grid; grid-template-columns:46px minmax(0,1.35fr) minmax(0,1fr) 40px; gap:10px; padding:10px 18px 8px;
-  font-size:11px; font-weight:800; letter-spacing:.1em; color:var(--faint); border-top:1px solid var(--border); border-bottom:1px solid var(--border)}
-.wlist{display:flex; flex-direction:column; min-width:0}
-.wrow{display:grid; grid-template-columns:46px minmax(0,1.35fr) minmax(0,1fr) 40px; gap:10px; align-items:center;
-  padding:12px 18px; min-width:0; cursor:pointer; border-bottom:1px solid var(--border)}
-.wrow:last-child{border-bottom:none}
-.wrow.bull{background:var(--bull-tint)}
-.wrow.bear{background:var(--bear-tint)}
-.wrank{font-size:14px; font-weight:700; color:var(--text); font-variant-numeric:tabular-nums}
-.wtick{min-width:0}
-.wtick .line1{display:flex; align-items:center; gap:7px; min-width:0}
-.wtick .tri{font-size:13px; flex:none}
-.wtick .tri.up{color:var(--gain)} .wtick .tri.dn{color:var(--loss)}
-.wtick .tk{font-weight:800; font-size:20px; letter-spacing:.01em; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
-.st-pill{font-size:10px; font-weight:800; letter-spacing:.05em; border-radius:6px; padding:3px 8px; white-space:nowrap;
-  color:var(--orange); border:1px solid rgba(245,165,36,.5); background:rgba(245,165,36,.12)}
-.wtick .wname{font-size:13px; color:var(--text-dim); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:3px}
-.wtick .wmeta{display:flex; align-items:center; gap:7px; font-size:13.5px; margin-top:3px; font-variant-numeric:tabular-nums}
-.wtick .wprice{color:var(--text-dim)}
-.wtick .wdot{color:var(--faint)}
-.wtick .wchg.up{color:var(--gain); font-weight:700}
-.wtick .wchg.dn{color:var(--loss); font-weight:700}
-.wtick .wchg.flat{color:var(--text-dim)}
-.wtick .wdash{color:var(--faint)}
-canvas.wspark{width:100%; height:74px; display:block; min-width:0}
-.pin{font-family:var(--font); cursor:pointer; font-size:21px; color:var(--faint); background:transparent; border:none;
-  width:36px; height:36px; display:flex; align-items:center; justify-content:center; padding:0; line-height:1}
-.wrow.pinned .pin{color:var(--gold)}
-.empty{color:var(--text-dim); font-size:13px; padding:20px; text-align:center}
-.pager{display:flex; align-items:center; justify-content:center; gap:10px; padding:12px; font-size:13px; color:var(--text-dim); border-top:1px solid var(--border)}
-.pager:empty{display:none}
-.pager button{font:inherit; font-weight:700; color:var(--text); background:var(--pill-bg); border:1px solid var(--border);
-  border-radius:8px; padding:4px 14px; cursor:pointer}
-.pager button:disabled{opacity:.35; cursor:default}
-.note{font-size:12px; color:var(--text-dim); text-align:center; line-height:1.5; margin-top:16px}
-@media (max-width:560px){
-  .colhdr, .wrow{grid-template-columns:36px minmax(0,1.2fr) minmax(0,1fr) 36px; padding-left:12px; padding-right:12px}
-  .wtick .tk{font-size:17px}
-  .title{font-size:24px}
+body{background:var(--bg); color:var(--text); font-family:var(--font); padding:20px 18px 48px; max-width:1240px; margin:0 auto; min-height:100vh}
+a{color:var(--burnt); text-decoration:none}
+.back{font-size:14px; font-weight:700; display:inline-block; margin-bottom:10px}
+/* header */
+.hdr{display:flex; align-items:center; gap:12px; flex-wrap:wrap}
+h1{font-size:29px; font-weight:800; letter-spacing:-.01em}
+.badge{font-size:11px; font-weight:800; letter-spacing:.12em; border-radius:999px; padding:5px 12px}
+.badge.live{background:var(--green); color:#fff}
+.badge.final{background:#57534e; color:#fff}
+.sub{font-size:14.5px; color:var(--dim); margin-top:7px}
+.sub strong{color:var(--text)}
+.updated{font-size:12.5px; color:var(--faint); font-family:var(--mono); margin-top:3px}
+.legend{font-size:12.5px; color:var(--dim); margin-top:8px}
+.legend .sw{display:inline-block; width:18px; border-top:3px solid; vertical-align:middle; margin:0 4px 0 10px}
+.legend .sw:first-child{margin-left:0}
+.legend .dash{border-top-style:dashed; border-color:#9ca3af}
+.legend .pur{border-color:var(--purple)} .legend .red{border-color:var(--red)}
+/* controls */
+.controls{display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin:16px 0 6px}
+.controls .sep{width:1px; height:22px; background:var(--hair); margin:0 4px}
+.pill{font-family:var(--font); font-size:13.5px; font-weight:700; padding:7px 18px; border-radius:999px;
+  border:1px solid var(--hair); background:var(--pill-bg); color:var(--text); cursor:pointer; white-space:nowrap}
+.pill.on{background:var(--pill-on); border-color:var(--pill-on); color:#fff}
+.pill.fav.on{background:var(--gold); border-color:var(--gold); color:#fff}
+.clabel{font-size:11px; font-weight:800; letter-spacing:1.2px; color:var(--faint)}
+/* the ranked row list */
+.list{background:var(--row); border:1px solid var(--hair); border-radius:14px; overflow:hidden; margin-top:10px}
+.row{display:grid; grid-template-columns:46px 218px minmax(0,1fr) 262px 38px; gap:14px; align-items:center;
+  padding:13px 16px; border-bottom:1px solid var(--hair)}
+.row:last-child{border-bottom:none}
+.rank{font-size:14px; font-weight:600; color:var(--faint); font-variant-numeric:tabular-nums}
+.ident{min-width:0}
+.ident .l1{display:flex; align-items:center; gap:7px; min-width:0}
+.ident .arr{font-size:13px; flex:none}
+.ident .arr.up{color:var(--green)} .ident .arr.dn{color:var(--red)}
+.ident .tk{font-weight:800; font-size:19px; white-space:nowrap}
+.stbadge{font-size:9.5px; font-weight:800; letter-spacing:.06em; border-radius:5px; padding:2.5px 7px; white-space:nowrap; flex:none}
+.stbadge.new{color:var(--green); border:1px solid rgba(21,128,61,.45); background:rgba(21,128,61,.08)}
+.stbadge.flipped{color:var(--burnt); border:1px solid rgba(192,86,33,.45); background:rgba(192,86,33,.08)}
+.stbadge.fading{color:var(--badge-tan-tx); background:var(--badge-tan-bg); border:1px solid #e3d29b}
+.ident .nm{font-size:13px; color:var(--dim); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:2px}
+.ident .meta{font-size:13.5px; color:var(--dim); margin-top:3px; font-variant-numeric:tabular-nums; white-space:nowrap}
+.ident .meta .pct.up{color:var(--green); font-weight:700}
+.ident .meta .pct.dn{color:var(--red); font-weight:700}
+canvas.chart{width:100%; height:92px; display:block; min-width:0}
+.stats{min-width:0; font-variant-numeric:tabular-nums}
+.stats .verdict{font-size:13.5px; font-weight:800; letter-spacing:.02em; white-space:nowrap}
+.stats .verdict.up{color:var(--green)} .stats .verdict.dn{color:var(--red)}
+.stats .levels{font-size:13px; margin-top:4px; white-space:nowrap}
+.stats .levels .pur{color:var(--purple); font-weight:700}
+.stats .levels .red{color:var(--red); font-weight:700}
+.stats .levels .dot{color:var(--faint); margin:0 5px}
+.stats .cndl{font-size:12.5px; color:var(--dim); margin-top:4px; white-space:nowrap}
+.stats .thru{display:flex; align-items:center; gap:9px; margin-top:7px}
+.stats .track{flex:1; height:5px; border-radius:99px; background:var(--tan-track); overflow:hidden; min-width:60px}
+.stats .fill{height:100%; background:var(--burnt); border-radius:99px}
+.stats .thrulbl{font-size:11px; font-weight:800; letter-spacing:.06em; color:var(--dim); white-space:nowrap}
+.star{font-family:var(--font); cursor:pointer; font-size:21px; color:#c9c2ae; background:transparent; border:none;
+  width:34px; height:34px; display:flex; align-items:center; justify-content:center; padding:0; line-height:1}
+.star.on{color:var(--gold)}
+.empty{padding:38px 20px; text-align:center; color:var(--dim); font-size:14.5px; line-height:1.55}
+.empty strong{color:var(--text)}
+.note{font-size:12px; color:var(--faint); text-align:center; margin-top:14px; line-height:1.5}
+@media (max-width:900px){
+  .row{grid-template-columns:34px minmax(0,1fr) 34px; grid-template-areas:"rank ident star" "chart chart chart" "stats stats stats"; row-gap:8px}
+  .rank{grid-area:rank} .ident{grid-area:ident} canvas.chart{grid-area:chart} .stats{grid-area:stats} .star{grid-area:star}
 }
-
-#toTop{position:fixed;right:18px;bottom:calc(18px + env(safe-area-inset-bottom,0px));width:44px;height:44px;border-radius:50%;border:1px solid #3a3a40;background:var(--card,#141416);color:#e8e6e1;font-size:20px;cursor:pointer;opacity:1;z-index:50;display:flex;align-items:center;justify-content:center}
-#toTop:hover{border-color:#f59e0b;color:#f59e0b}
-@media(max-width:640px){#toTop{right:14px;width:42px;height:42px}}
 </style>
 </head>
 <body>
-<div class="topbar">
-  <a class="back" href="index.html">&larr; Back to board</a>
-  <button class="theme-switch" id="themeBtn" onclick="toggleTheme()"><span class="knob"></span><span id="themeLabel">Dark</span></button>
-</div>
-<h1 class="title">15-Minute Confirmed Closes</h1>
-<hr class="divider">
-<div class="status-card">
-  <span class="st-left"><span class="dot amber" id="hbDot"></span><span id="hbText" class="wait">Connecting&hellip;</span></span>
-  <span class="st-right" id="hbTime"></span>
-</div>
-<div class="stale-banner" id="staleBanner" hidden><strong>STALE</strong><span>These lists are older than the expected five-minute poller cadence.</span></div>
-<div class="meta-row">
-  <span>Latest completed candle: <strong id="candleLbl">&ndash;</strong></span>
-  <span>Scanned: <strong id="scanLbl">&ndash;</strong></span>
-</div>
-<hr class="divider">
-<div class="defs"><span class="bull-t">BULLISH</span> = 15m close above either PDH (previous day high) or PMH (premarket high). <span class="bear-t">BEARISH</span> = 15m close below both PDL (previous day low) and PML (premarket low).</div>
-<hr class="divider">
-<div class="sort-card"><span class="wsort-label">SORT BY</span>
-  <div id="sortChips">
-    <button class="wchip on" data-sort="rank">Rank</button>
-    <button class="wchip" data-sort="cap">Market cap</button>
-    <button class="wchip" data-sort="chg">% change</button>
-    <button class="wchip" data-sort="dir">Direction</button>
-    <button class="wchip fav" data-sort="fav">&#9733; Favorites</button>
-  </div>
-</div>
-<div class="legend-card">Candles: green bullish / red bearish &middot; PDH &amp; PMH: labeled green horizontals &middot; PDL &amp; PML: labeled red horizontals &middot; dashed gray: series mean</div>
+<a class="back" href="index.html">&larr; Back to board</a>
 
-<div class="panels">
-  <section class="panel">
-    <div class="phead">
-      <div><div class="ptitle bull"><span>&#9650;</span> 15m PDH/PMH</div><div class="psub">Close above either PDH or PMH</div></div>
-      <div class="pcount bull" id="bullCount">0</div>
-    </div>
-    <div class="colhdr"><span>RANK</span><span>TICKER</span><span>15MIN</span><span>WATCH</span></div>
-    <div class="wlist" id="bullList"><div class="empty">Loading&hellip;</div></div>
-    <div class="pager" id="bullPager"></div>
-  </section>
-  <section class="panel">
-    <div class="phead">
-      <div><div class="ptitle bear"><span>&#9660;</span> BEARISH</div><div class="psub">Below PDL and PML</div></div>
-      <div class="pcount bear" id="bearCount">0</div>
-    </div>
-    <div class="colhdr"><span>RANK</span><span>TICKER</span><span>15MIN</span><span>WATCH</span></div>
-    <div class="wlist" id="bearList"><div class="empty">Loading&hellip;</div></div>
-    <div class="pager" id="bearPager"></div>
-  </section>
+<div class="hdr">
+  <h1>15m confirmed closes</h1>
+  <span class="badge final" id="liveBadge">FINAL</span>
+</div>
+<div class="sub" id="subLine">&ndash;</div>
+<div class="updated" id="updatedLine"></div>
+<div class="legend">
+  <span class="sw pur"></span>PDH / PDL&ensp;<span class="sw red"></span>PMH / PML&ensp;<span class="sw dash"></span>dashed line = series mean
 </div>
 
-<div class="note">Tap a ticker for its 15-minute chart with PDH / PMH / PDL / PML levels.</div>
+<div class="controls">
+  <span class="clabel">MARKET CAP</span>
+  <button class="pill cap on" data-cap="all">All</button>
+  <button class="pill cap" data-cap="small">Small</button>
+  <button class="pill cap" data-cap="mid">Mid</button>
+  <button class="pill cap" data-cap="large">Large</button>
+  <span class="sep"></span>
+  <span class="clabel">SORT</span>
+  <button class="pill sort on" data-sort="chg">% Change</button>
+  <button class="pill sort" data-sort="cap">Market cap</button>
+  <button class="pill sort fav" data-sort="fav">&#9733; Favorites</button>
+</div>
 
-<button id="toTop" type="button" aria-label="Go to bottom" title="Go to bottom">&#8595;</button>
+<div class="list" id="list"><div class="empty">Loading&hellip;</div></div>
+
+<div class="note">Only completed 15-minute candles are evaluated &mdash; a candle still forming is never shown. The page re-reads the poller output every 5 minutes.</div>
+
 <script>
-(function(){
-"use strict";
-/* 15m-closes — rebuilt 2026-10-26.
-   One fetch layer with per-feed failure isolation; no embedded data.
-   Data resolution:
-     1. fifteen_min_closes.json with rows -> live lists, used as published.
-     2. Otherwise (after-hours marker / empty) -> derive the last session's
-        final closes from fifteen_min_charts.json: a ticker is bullish when
-        its last 15m close is above PDH or PMH, bearish when below PDL or
-        PML (same derivation the hosted artifact serves). */
-const RAW = 'https://raw.githubusercontent.com/HueTX/options-board-data/main/';
-const FEEDS = {
-  closes: RAW + 'fifteen_min_closes.json',
-  charts: RAW + 'fifteen_min_charts.json',
-  caps:   RAW + 'market_caps.json',
-  names:  RAW + 'names_cache.json'
-};
-const PRIORITY = ['SPY','QQQ','IWM'];
-const PAGE = 10;
-let DATA = null;                 // {bullish:[], bearish:[], candle, scanned, universe, mode, asOfMs, marketDate}
-let CAPS = {}, NAMES = {};
-let sortMode = 'rank', page = {bull:1, bear:1};
-let pins = new Set(JSON.parse(localStorage.getItem('ofb_pins') || '[]'));
-const $ = id => document.getElementById(id);
-const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const money = v => (v == null || !isFinite(v)) ? '—' : '$' + Number(v).toFixed(2);
-const capOf = t => CAPS[t];
-function capLbl(b){ if (b == null) return ''; if (b >= 1000) return '$' + (b/1000).toFixed(2) + 'T'; if (b >= 1) return '$' + b.toFixed(1) + 'B'; return '$' + Math.round(b*1000) + 'M'; }
-function setTheme(t){ document.documentElement.setAttribute('data-theme', t); $('themeLabel').textContent = t === 'light' ? 'Light' : 'Dark'; try { localStorage.setItem('ofb_theme', t); } catch(e){} }
-window.toggleTheme = function(){ setTheme(document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light'); };
-setTheme(localStorage.getItem('ofb_theme') || 'dark');
+const RAW = "https://raw.githubusercontent.com/HueTX/options-board-data/main/";
+const CDN = "https://cdn.jsdelivr.net/gh/HueTX/options-board-data@main/";
+let DATA = null, CHARTS = {};
+let capFilter = "all";       // all | small (<$2B) | mid ($2-10B) | large (>$10B)
+let sortMode = "chg";        // chg | cap | fav
+let favs = new Set();
+try { favs = new Set(JSON.parse(localStorage.getItem("ofb_pins") || "[]")); } catch(e){}
+function saveFavs(){ try { localStorage.setItem("ofb_pins", JSON.stringify([...favs])); } catch(e){} }
+function esc(s){ return String(s == null ? "" : s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+function fmt2(x){ return x == null || !isFinite(x) ? "\u2014" : Number(x).toFixed(2); }
+function fmtPct(x){ return x == null || !isFinite(x) ? "\u2014" : (x >= 0 ? "+" : "") + Number(x).toFixed(2) + "%"; }
 
-async function fetchFeed(url, ms){
-  const ctl = new AbortController();
-  const to = setTimeout(() => ctl.abort(), ms || 15000);
-  try {
-    const r = await fetch(url + (url.includes('?') ? '&' : '?') + 't=' + Date.now(), {signal: ctl.signal, cache: 'no-store'});
-    if (!r.ok) throw new Error('HTTP ' + r.status);
-    return await r.json();
-  } finally { clearTimeout(to); }
-}
-
-/* Derive final-session rows from the charts payload (last candle of the day). */
-function deriveFromCharts(ch){
-  const bull = [], bear = [];
-  for (const [t, c] of Object.entries(ch.charts || {})){
-    const cds = c.candles15m || [];
-    if (!cds.length || !c.levels) continue;
-    const last = cds[cds.length - 1], lv = c.levels, close = last.c;
-    const row = {ticker: t, close, candle: ch.candle || '', status: null};
-    if (close > lv.pdh || close > lv.pmh){ row.pdh = lv.pdh; row.pmh = lv.pmh; bull.push(row); }
-    else if (close < lv.pdl || close < lv.pml){ row.pdl = lv.pdl; row.pml = lv.pml; bear.push(row); }
-  }
-  const n = Object.keys(ch.charts || {}).length;
-  return {bullish: bull, bearish: bear, candle: ch.candle || '—', scanned: n, universe: n,
-          mode: 'derived', asOfMs: Date.parse(ch.asOf || '') || null, marketDate: ch.marketDate || ''};
-}
-
-function resolveData(closes, charts){
-  if (closes && ((closes.bullish || []).length || (closes.bearish || []).length)){
-    return {bullish: closes.bullish, bearish: closes.bearish,
-            candle: closes.candle || (charts && charts.candle) || '—',
-            scanned: closes.scanned != null ? closes.scanned : 0,
-            universe: closes.universe != null ? closes.universe : (closes.scanned != null ? closes.scanned : 0),
-            mode: 'live', asOfMs: Date.parse(closes.asOf || '') || null, marketDate: closes.marketDate || ''};
-  }
-  if (charts && charts.charts && Object.keys(charts.charts).length) return deriveFromCharts(charts);
-  if (closes){
-    return {bullish: [], bearish: [], candle: '—', scanned: closes.scanned || 0,
-            universe: closes.universe || closes.scanned || 0, mode: 'empty',
-            asOfMs: Date.parse(closes.asOf || '') || null, marketDate: closes.marketDate || ''};
+async function fetchJSON(name){
+  for(const base of [RAW, CDN]){
+    try{
+      const r = await fetch(base + name + "?t=" + Date.now(), {cache:"no-store"});
+      if(r.ok) return await r.json();
+    }catch(e){ /* try the mirror */ }
   }
   return null;
 }
 
-function spark(canvas, chart, side){
-  const ctx = canvas.getContext('2d');
-  const W = canvas.width, H = canvas.height;
-  ctx.clearRect(0, 0, W, H);
-  if (!chart) return;
-  const lv = chart.levels || {};
-  const pts = [];
-  (chart.premarket || []).forEach(c => pts.push({c: c.c, pre: true}));
-  (chart.candles15m || []).forEach(c => pts.push({c: c.c, pre: false}));
-  if (pts.length < 2) return;
-  let vals = pts.map(p => p.c);
-  [lv.pdh, lv.pdl, lv.pmh, lv.pml].forEach(v => { if (v != null) vals.push(v); });
-  let lo = Math.min.apply(null, vals), hi = Math.max.apply(null, vals);
-  if (hi - lo < 1e-9){ hi += 0.5; lo -= 0.5; }
-  const pad = (hi - lo) * 0.08; hi += pad; lo -= pad;
-  const X = i => 6 + (W - 12) * i / (pts.length - 1);
-  const Y = v => 4 + (H - 8) * (1 - (v - lo) / (hi - lo));
-  function lvl(v, color, dash){
-    if (v == null) return;
-    ctx.save(); ctx.strokeStyle = color; ctx.globalAlpha = 0.55; ctx.lineWidth = 1; ctx.setLineDash(dash);
-    ctx.beginPath(); ctx.moveTo(4, Y(v)); ctx.lineTo(W - 4, Y(v)); ctx.stroke(); ctx.restore();
-  }
-  lvl(lv.pdh, '#2fbf71', []); lvl(lv.pmh, '#2fbf71', [3, 3]);
-  lvl(lv.pdl, '#e5484d', []); lvl(lv.pml, '#e5484d', [3, 3]);
-  let sum = 0; pts.forEach(p => sum += p.c);
-  const mean = sum / pts.length;
-  ctx.save(); ctx.strokeStyle = '#8b93a7'; ctx.globalAlpha = 0.7; ctx.setLineDash([2, 3]);
-  ctx.beginPath(); ctx.moveTo(4, Y(mean)); ctx.lineTo(W - 4, Y(mean)); ctx.stroke(); ctx.restore();
-  for (let i = 1; i < pts.length; i++){
-    const a = pts[i - 1], b = pts[i];
-    ctx.save();
-    ctx.strokeStyle = b.pre ? '#8b93a7' : (side === 'bull' ? '#2fbf71' : '#e5484d');
-    ctx.globalAlpha = b.pre ? 0.65 : 1; ctx.lineWidth = b.pre ? 1 : 1.8;
-    ctx.beginPath(); ctx.moveTo(X(i - 1), Y(a.c)); ctx.lineTo(X(i), Y(b.c)); ctx.stroke(); ctx.restore();
-  }
-  const last = pts[pts.length - 1];
-  ctx.save(); ctx.fillStyle = side === 'bull' ? '#2fbf71' : '#e5484d';
-  ctx.beginPath(); ctx.arc(X(pts.length - 1), Y(last.c), 2.6, 0, 7); ctx.fill(); ctx.restore();
+/* session state: live only while the file says the market is open, it is
+   today's file, it is fresh, and Chicago time is inside the gate. */
+function sessionState(d){
+  if(!d) return {live:false, label:"FINAL"};
+  const now = new Date();
+  const ct = new Date(now.toLocaleString("en-US", {timeZone:"America/Chicago"}));
+  const todayCT = ct.getFullYear() + "-" + String(ct.getMonth()+1).padStart(2,"0") + "-" + String(ct.getDate()).padStart(2,"0");
+  const mins = ct.getHours()*60 + ct.getMinutes();
+  const ageMin = d.asOf ? (Date.now() - new Date(d.asOf).getTime())/60000 : 999;
+  const weekday = ct.getDay() >= 1 && ct.getDay() <= 5;
+  const live = !!d.marketOpen && d.marketDate === todayCT && weekday && mins >= 510 && mins <= 905 && ageMin <= 10;
+  return {live, label: live ? "LIVE" : "FINAL"};
+}
+function dateLong(iso){
+  if(!iso) return "\u2014";
+  const d = new Date(iso + "T12:00:00");
+  return d.toLocaleDateString("en-US", {month:"short", day:"numeric", year:"numeric"});
+}
+function ctClock(iso){
+  if(!iso) return "";
+  const d = new Date(iso);
+  return new Intl.DateTimeFormat("en-GB", {timeZone:"America/Chicago", hour:"2-digit", minute:"2-digit", second:"2-digit", hour12:false}).format(d);
+}
+function candle12h(lbl){ // "15:45 ET" -> "3:45 PM ET"
+  if(!lbl) return "\u2014";
+  const m = lbl.match(/(\d{1,2}):(\d{2})/);
+  if(!m) return lbl;
+  let h = parseInt(m[1], 10);
+  const ap = h >= 12 ? "PM" : "AM";
+  h = h % 12 === 0 ? 12 : h % 12;
+  return h + ":" + m[2] + " " + ap + " ET";
 }
 
-function sortRows(rows, side){
-  const fav = r => pins.has(r.ticker) ? 0 : 1;
-  const pri = r => { const i = PRIORITY.indexOf(r.ticker); return i < 0 ? 99 : i; };
-  const chgOf = r => { const lv = side === 'bull' ? Math.max(r.pdh || -1e18, r.pmh || -1e18) : Math.min(r.pdl || 1e18, r.pml || 1e18); return isFinite(lv) && lv > 0 ? (r.close - lv) / lv * 100 : 0; };
-  const arr = rows.slice();
-  if (sortMode === 'fav') arr.sort((a, b) => fav(a) - fav(b) || pri(a) - pri(b) || a.ticker.localeCompare(b.ticker));
-  else if (sortMode === 'cap') arr.sort((a, b) => (capOf(b.ticker) || 0) - (capOf(a.ticker) || 0));
-  else if (sortMode === 'chg') arr.sort((a, b) => Math.abs(chgOf(b)) - Math.abs(chgOf(a)));
-  else if (sortMode === 'dir') arr.sort((a, b) => chgOf(b) - chgOf(a));
-  else arr.sort((a, b) => pri(a) - pri(b) || a.ticker.localeCompare(b.ticker));
-  return arr;
-}
-function rowHTML(r, side, chart){
-  const t = r.ticker;
-  const up = side === 'bull';
-  const lv = up ? [['PDH', r.pdh], ['PMH', r.pmh]] : [['PDL', r.pdl], ['PML', r.pml]];
-  const base = up ? Math.max(r.pdh || -1e18, r.pmh || -1e18) : Math.min(r.pdl || 1e18, r.pml || 1e18);
-  const chg = isFinite(base) && base > 0 ? (r.close - base) / base * 100 : null;
-  const capB = capOf(t);
-  const pinned = pins.has(t);
-  return '<div class="row"><div class="r-main">' +
-    '<button class="pin' + (pinned ? ' on' : '') + '" data-pin="' + esc(t) + '" aria-label="Pin ' + esc(t) + '">' + (pinned ? '★' : '☆') + '</button>' +
-    '<a class="tk" href="15m-chart.html?t=' + encodeURIComponent(t) + '">' + esc(t) + '</a>' +
-    (NAMES[t] ? '<span class="nm">' + esc(NAMES[t]) + '</span>' : '') +
-    (capB != null ? '<span class="cap">' + esc(capLbl(capB)) + '</span>' : '') +
-    (r.status ? '<span class="status ' + esc(r.status) + '">' + esc(r.status) + '</span>' : '') +
-    '</div><canvas class="spark" width="118" height="44"></canvas>' +
-    '<div class="r-vals"><span class="close">' + money(r.close) + '</span>' +
-    (chg != null ? '<span class="chg ' + (chg >= 0 ? 'up' : 'dn') + '">' + (chg >= 0 ? '+' : '') + chg.toFixed(2) + '%</span>' : '') +
-    '<span class="lvls">' + lv.map(x => x[0] + ' ' + money(x[1])).join(' · ') + '</span></div></div>';
-}
-function renderSide(side){
-  const listEl = $(side === 'bull' ? 'bullList' : 'bearList');
-  const rows = sortRows(side === 'bull' ? DATA.bullish : DATA.bearish, side);
-  $(side === 'bull' ? 'bullCount' : 'bearCount').textContent = rows.length;
-  const pgEl = $(side === 'bull' ? 'bullPager' : 'bearPager');
-  if (!rows.length){
-    listEl.innerHTML = '<div class="empty">' + (side === 'bull' ? 'No bullish confirmed closes.' : 'No bearish confirmed closes.') + '</div>';
-    pgEl.innerHTML = ''; return;
+/* ---- the line chart: completed 15m closes + the four levels + mean ---- */
+function drawChart(cv, chart, side){
+  const dpr = Math.min(2, window.devicePixelRatio || 1);
+  const W = cv.clientWidth || 300, H = cv.clientHeight || 92;
+  if(!W || !H) return;
+  cv.width = W * dpr; cv.height = H * dpr;
+  const ctx = cv.getContext("2d"); ctx.scale(dpr, dpr);
+  const PURPLE = "#7c3aed", RED = "#dc2626", GREY = "#9ca3af";
+  const lineCol = side === "bear" ? "#dc2626" : "#15803d";
+  const pts = (chart && chart.closes15m || []).filter(p => p && isFinite(p.c));
+  const lv = (chart && chart.levels) || {};
+  const vals = pts.map(p => p.c);
+  for(const k of ["pdh","pdl","pmh","pml"]) if(isFinite(lv[k])) vals.push(lv[k]);
+  if(chart && isFinite(chart.mean)) vals.push(chart.mean);
+  if(!vals.length){
+    ctx.fillStyle = "#a8a29e"; ctx.font = "11px system-ui, sans-serif";
+    ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    ctx.fillText("Chart unavailable", W/2, H/2);
+    return;
   }
-  const pages = Math.ceil(rows.length / PAGE);
-  if (page[side] > pages) page[side] = pages;
-  const slice = rows.slice((page[side] - 1) * PAGE, page[side] * PAGE);
-  listEl.innerHTML = slice.map(r => rowHTML(r, side, CHARTS[r.ticker])).join('');
-  const canvases = listEl.querySelectorAll('canvas.spark');
-  slice.forEach((r, i) => { if (canvases[i]) spark(canvases[i], CHARTS[r.ticker], side); });
-  pgEl.innerHTML = pages <= 1 ? '' :
-    '<button data-pg="' + side + ':-1" ' + (page[side] <= 1 ? 'disabled' : '') + '>‹ Prev</button>' +
-    '<span>' + page[side] + ' / ' + pages + '</span>' +
-    '<button data-pg="' + side + ':1" ' + (page[side] >= pages ? 'disabled' : '') + '>Next ›</button>';
-}
-let CHARTS = {};
-function fmtDate(iso){
-  if (!iso) return '';
-  const d = new Date(iso + 'T12:00:00');
-  return isNaN(d) ? iso : d.toLocaleDateString('en-US', {month: 'short', day: 'numeric', year: 'numeric'});
-}
-function heartbeat(){
-  const dot = $('hbDot'), txt = $('hbText'), tm = $('hbTime');
-  if (!DATA){ txt.textContent = 'Feed unavailable — retrying'; dot.className = 'dot red'; return; }
-  tm.textContent = 'fetched ' + new Date().toLocaleTimeString('en-US', {hour: 'numeric', minute: '2-digit', second: '2-digit'});
-  const stale = $('staleBanner');
-  if (DATA.mode === 'derived'){
-    dot.className = 'dot amber'; txt.className = '';
-    txt.textContent = 'Session closed — final data · ' + fmtDate(DATA.marketDate);
-    stale.hidden = true; return;
+  let lo = Math.min(...vals), hi = Math.max(...vals);
+  const pad = (hi - lo) * 0.08 || Math.max(hi * 0.002, 0.05);
+  lo -= pad; hi += pad;
+  const labelW = 30, x0 = 2, x1 = W - labelW;
+  const py = v => H - 4 - ((v - lo) / (hi - lo)) * (H - 8);
+  const px = i => pts.length <= 1 ? (x0 + x1) / 2 : x0 + (i / (pts.length - 1)) * (x1 - x0);
+  // level lines span the full chart width, labeled at the right edge
+  const level = (v, color, label) => {
+    if(v == null || !isFinite(v)) return;
+    const y = py(v);
+    ctx.strokeStyle = color; ctx.lineWidth = 1.4;
+    ctx.setLineDash([]);
+    ctx.beginPath(); ctx.moveTo(x0, y); ctx.lineTo(x1, y); ctx.stroke();
+    ctx.fillStyle = color; ctx.font = "800 8.5px ui-monospace, Menlo, monospace";
+    ctx.textAlign = "left"; ctx.textBaseline = "middle";
+    ctx.fillText(label, x1 + 3, y);
+  };
+  level(lv.pdh, PURPLE, "PDH");
+  level(lv.pdl, PURPLE, "PDL");
+  level(lv.pmh, RED, "PMH");
+  level(lv.pml, RED, "PML");
+  // session mean — dashed grey
+  if(chart && isFinite(chart.mean)){
+    const y = py(chart.mean);
+    ctx.strokeStyle = GREY; ctx.lineWidth = 1; ctx.setLineDash([5,4]);
+    ctx.beginPath(); ctx.moveTo(x0, y); ctx.lineTo(x1, y); ctx.stroke();
+    ctx.setLineDash([]);
   }
-  if (DATA.mode === 'empty'){
-    dot.className = 'dot amber'; txt.className = '';
-    txt.textContent = 'No confirmed closes yet · ' + fmtDate(DATA.marketDate);
-    stale.hidden = true; return;
+  // the closes line, in the side's color, with a dot on the final point
+  if(pts.length){
+    ctx.strokeStyle = lineCol; ctx.lineWidth = 2; ctx.lineJoin = "round"; ctx.lineCap = "round";
+    ctx.beginPath();
+    pts.forEach((p, i) => { const x = px(i), y = py(p.c); if(i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y); });
+    ctx.stroke();
+    const lx = px(pts.length - 1), ly = py(pts[pts.length - 1].c);
+    ctx.fillStyle = lineCol;
+    ctx.beginPath(); ctx.arc(lx, ly, 3.2, 0, Math.PI * 2); ctx.fill();
   }
-  const age = DATA.asOfMs ? Date.now() - DATA.asOfMs : Infinity;
-  if (age < 12 * 60 * 1000){ dot.className = 'dot green'; txt.className = ''; txt.textContent = 'Live — updated ' + Math.max(1, Math.round(age / 60000)) + 'm ago'; stale.hidden = true; }
-  else { dot.className = 'dot amber'; txt.className = ''; txt.textContent = 'Stale — last update ' + Math.round(age / 60000) + 'm ago'; stale.hidden = false; }
+}
+
+/* ---- rows ---- */
+function mergedRows(){
+  if(!DATA) return [];
+  const bull = (DATA.bullish || []).map(e => ({...e, side:"bull"}));
+  const bear = (DATA.bearish || []).map(e => ({...e, side:"bear"}));
+  return bull.concat(bear);
+}
+function capBucket(e){
+  const c = e.marketCapB;
+  if(c == null || !isFinite(c)) return null;
+  return c < 2 ? "small" : (c <= 10 ? "mid" : "large");
+}
+function visibleRows(){
+  let rows = mergedRows();
+  if(sortMode === "fav") rows = rows.filter(e => favs.has(e.ticker));
+  if(capFilter !== "all") rows = rows.filter(e => capBucket(e) === capFilter);
+  const alpha = (a,b) => a.ticker.localeCompare(b.ticker);
+  if(sortMode === "cap")
+    rows.sort((a,b) => ((b.marketCapB != null ? b.marketCapB : -1) - (a.marketCapB != null ? a.marketCapB : -1)) || alpha(a,b));
+  else // % Change (and Favorites): strongest absolute day move first
+    rows.sort((a,b) => (Math.abs(b.dayPct != null ? b.dayPct : -1) - Math.abs(a.dayPct != null ? a.dayPct : -1)) || alpha(a,b));
+  return rows;
+}
+function verdictOf(e){
+  if(e.side === "bull"){
+    const w = e.above === "both" ? "PDH + PMH" : e.above === "pdh" ? "PDH" : "PMH";
+    return "CLOSED ABOVE " + w;
+  }
+  const w = e.below === "both" ? "PDL + PML" : e.below === "pdl" ? "PDL" : "PML";
+  return "CLOSED BELOW " + w;
+}
+function levelsLine(e){
+  if(e.side === "bull")
+    return '<span class="pur">PDH $' + fmt2(e.pdh) + '</span><span class="dot">\u00B7</span><span class="red">PMH $' + fmt2(e.pmh) + '</span>';
+  return '<span class="pur">PDL $' + fmt2(e.pdl) + '</span><span class="dot">\u00B7</span><span class="red">PML $' + fmt2(e.pml) + '</span>';
+}
+function badgeOf(e){
+  if(e.status === "fading") return '<span class="stbadge fading">FADING</span>';
+  if(e.status === "new") return '<span class="stbadge new">NEW</span>';
+  if(e.status === "flipped") return '<span class="stbadge flipped">FLIPPED</span>';
+  return "";
+}
+function rowHTML(e, rank){
+  const bull = e.side === "bull";
+  const thru = e.thruPct != null && isFinite(e.thruPct) ? e.thruPct : 0;
+  const fill = Math.max(0, Math.min(thru / 3 * 100, 100));
+  const capTxt = e.marketCapB != null && isFinite(e.marketCapB) ? "$" + fmt2(e.marketCapB) + "B" : "\u2014";
+  return '<div class="row">'
+    + '<div class="rank">#' + rank + '</div>'
+    + '<div class="ident"><div class="l1">'
+    + '<span class="arr ' + (bull ? "up" : "dn") + '">' + (bull ? "\u25B2" : "\u25BC") + '</span>'
+    + '<span class="tk">' + esc(e.ticker) + '</span>' + badgeOf(e)
+    + '</div>'
+    + '<div class="nm">' + esc(e.name || "") + '</div>'
+    + '<div class="meta">$' + fmt2(e.close) + ' \u00B7 <span class="pct ' + (bull ? "up" : "dn") + '">' + fmtPct(e.dayPct) + '</span> \u00B7 ' + capTxt + '</div>'
+    + '</div>'
+    + '<canvas class="chart" data-sym="' + esc(e.ticker) + '" title="dashed line = series mean"></canvas>'
+    + '<div class="stats">'
+    + '<div class="verdict ' + (bull ? "up" : "dn") + '">' + verdictOf(e) + '</div>'
+    + '<div class="levels">' + levelsLine(e) + '</div>'
+    + '<div class="cndl">candle ' + candle12h(e.candle) + ' \u00B7 candle ' + fmtPct(e.candlePct) + '</div>'
+    + '<div class="thru"><div class="track"><div class="fill" style="width:' + fill.toFixed(1) + '%"></div></div>'
+    + '<span class="thrulbl">THRU ' + fmt2(e.thruPct) + '%</span></div>'
+    + '</div>'
+    + '<button class="star' + (favs.has(e.ticker) ? " on" : "") + '" data-sym="' + esc(e.ticker) + '" aria-label="Favorite ' + esc(e.ticker) + '">' + (favs.has(e.ticker) ? "\u2605" : "\u2606") + '</button>'
+    + '</div>';
+}
+function closedMessage(d){
+  const r = d && d.reason;
+  if(r === "weekend") return "Market closed \u2014 weekend.";
+  if(r === "holiday") return "Market closed \u2014 NYSE holiday.";
+  return "Market closed \u2014 outside market hours.";
 }
 function render(){
-  if (!DATA) return;
-  $('candleLbl').textContent = DATA.candle || '—';
-  $('scanLbl').textContent = DATA.scanned + ' of ' + DATA.universe + ' tickers';
-  renderSide('bull'); renderSide('bear');
-  heartbeat();
+  const list = document.getElementById("list");
+  const st = sessionState(DATA);
+  const badge = document.getElementById("liveBadge");
+  badge.textContent = st.label;
+  badge.className = "badge " + (st.live ? "live" : "final");
+  const active = mergedRows().length;
+  const checked = DATA ? (DATA.scanned || 0) : 0;
+  document.getElementById("subLine").innerHTML =
+    "<strong>" + active + "</strong> active \u00B7 <strong>" + checked + "</strong> checked \u00B7 "
+    + esc(dateLong(DATA && DATA.marketDate)) + (st.live ? " \u00B7 live" : " \u00B7 session closed");
+  document.getElementById("updatedLine").textContent =
+    DATA && DATA.asOf ? "updated " + ctClock(DATA.asOf) + " CT" : "";
+
+  if(!DATA){ list.innerHTML = '<div class="empty">Feed unreachable \u2014 retrying on the next 5-minute cycle.</div>'; return; }
+  if(DATA.marketOpen === false){
+    list.innerHTML = '<div class="empty"><strong>' + esc(closedMessage(DATA)) + '</strong><br>No rows are shown outside the session \u2014 the list returns with the first completed candle of the next session.</div>';
+    return;
+  }
+  if(!DATA.candle){
+    list.innerHTML = '<div class="empty"><strong>No completed candle yet</strong><br>The first 15-minute candle completes at 9:46 AM ET.</div>';
+    return;
+  }
+  const rows = visibleRows();
+  if(!rows.length){
+    list.innerHTML = '<div class="empty">' + (sortMode === "fav"
+      ? "No favorites yet \u2014 tap \u2606 on any row to star it."
+      : "No confirmed closes match the current filter on the latest completed candle.") + '</div>';
+    return;
+  }
+  list.innerHTML = rows.map((e, i) => rowHTML(e, i + 1)).join("");
+  list.querySelectorAll("canvas.chart").forEach(cv => {
+    const e = rows.find(r => r.ticker === cv.dataset.sym);
+    drawChart(cv, CHARTS[cv.dataset.sym], e ? e.side : "bull");
+  });
+  list.querySelectorAll("button.star").forEach(b => b.addEventListener("click", () => {
+    const t = b.dataset.sym;
+    if(favs.has(t)) favs.delete(t); else favs.add(t);
+    saveFavs(); render();
+  }));
 }
+document.querySelectorAll(".pill.cap").forEach(b => b.addEventListener("click", () => {
+  capFilter = b.dataset.cap;
+  document.querySelectorAll(".pill.cap").forEach(x => x.classList.toggle("on", x === b));
+  render();
+}));
+document.querySelectorAll(".pill.sort").forEach(b => b.addEventListener("click", () => {
+  sortMode = b.dataset.sort;
+  document.querySelectorAll(".pill.sort").forEach(x => x.classList.toggle("on", x === b));
+  render();
+}));
+let rszT = null;
+window.addEventListener("resize", () => { clearTimeout(rszT); rszT = setTimeout(render, 150); });
+
 async function load(){
-  const [closes, charts, caps, names] = await Promise.allSettled ? await Promise.all([
-    fetchFeed(FEEDS.closes).catch(() => null),
-    fetchFeed(FEEDS.charts).catch(() => null),
-    fetchFeed(FEEDS.caps).catch(() => null),
-    fetchFeed(FEEDS.names).catch(() => null)
-  ]) : [];
-  if (caps){ CAPS = caps.caps || {}; }
-  if (names){ NAMES = names.names || names || {}; }
-  if (charts){ CHARTS = charts.charts || {}; }
-  const resolved = resolveData(closes, charts);
-  if (resolved) DATA = resolved;
+  const [d, c] = await Promise.all([fetchJSON("fifteen_min_closes.json"), fetchJSON("fifteen_min_charts.json")]);
+  if(d) DATA = d;
+  if(c && c.charts) CHARTS = c.charts;
   render();
 }
-document.addEventListener('click', e => {
-  const pin = e.target.closest('[data-pin]');
-  if (pin){
-    const t = pin.getAttribute('data-pin');
-    if (pins.has(t)) pins.delete(t); else pins.add(t);
-    try { localStorage.setItem('ofb_pins', JSON.stringify(Array.from(pins))); } catch(err){}
-    render(); return;
-  }
-  const pg = e.target.closest('[data-pg]');
-  if (pg){
-    const parts = pg.getAttribute('data-pg').split(':');
-    page[parts[0]] = Math.max(1, page[parts[0]] + Number(parts[1]));
-    renderSide(parts[0]); return;
-  }
-  const chip = e.target.closest('#sortChips .chip');
-  if (chip){
-    sortMode = chip.getAttribute('data-s');
-    document.querySelectorAll('#sortChips .chip').forEach(c => c.classList.toggle('on', c === chip));
-    page = {bull: 1, bear: 1}; render();
-  }
-});
 load();
-setInterval(load, 60000);
-// back-to-top: the button element is above this script in the document,
-// so it exists before this toggle wiring runs.
-const toTop = $('toTop');
-addEventListener('scroll', () => { toTop.style.display = scrollY > 600 ? 'block' : 'none'; }, {passive: true});
-toTop.onclick = () => scrollTo({top: 0, behavior: 'smooth'});
-})();
+setInterval(load, 5 * 60 * 1000);
 </script>
 </body>
 </html>
