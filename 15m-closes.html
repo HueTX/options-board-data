@@ -178,11 +178,14 @@ function drawChart(cv, chart, side){
   const ctx = cv.getContext("2d"); ctx.scale(dpr, dpr);
   const PURPLE = "#7c3aed", RED = "#dc2626", GREY = "#9ca3af";
   const lineCol = side === "bear" ? "#dc2626" : "#15803d";
-  const pts = (chart && chart.closes15m || []).filter(p => p && isFinite(p.c));
+  let rawPts = (chart && chart.closes15m) || [];
+  if(!rawPts.length && chart && chart.candles15m) rawPts = chart.candles15m.map(c => ({t: c.t, c: c.c})); // legacy chart shape
+  const pts = rawPts.filter(p => p && isFinite(p.c));
   const lv = (chart && chart.levels) || {};
   const vals = pts.map(p => p.c);
   for(const k of ["pdh","pdl","pmh","pml"]) if(isFinite(lv[k])) vals.push(lv[k]);
-  if(chart && isFinite(chart.mean)) vals.push(chart.mean);
+  const meanV = chart ? (isFinite(chart.mean) ? chart.mean : (pts.length ? pts.reduce((s,p) => s + p.c, 0) / pts.length : null)) : null;
+  if(isFinite(meanV)) vals.push(meanV);
   if(!vals.length){
     ctx.fillStyle = "#a8a29e"; ctx.font = "11px system-ui, sans-serif";
     ctx.textAlign = "center"; ctx.textBaseline = "middle";
@@ -211,8 +214,8 @@ function drawChart(cv, chart, side){
   level(lv.pmh, RED, "PMH");
   level(lv.pml, RED, "PML");
   // session mean — dashed grey
-  if(chart && isFinite(chart.mean)){
-    const y = py(chart.mean);
+  if(isFinite(meanV)){
+    const y = py(meanV);
     ctx.strokeStyle = GREY; ctx.lineWidth = 1; ctx.setLineDash([5,4]);
     ctx.beginPath(); ctx.moveTo(x0, y); ctx.lineTo(x1, y); ctx.stroke();
     ctx.setLineDash([]);
@@ -252,12 +255,35 @@ function visibleRows(){
     rows.sort((a,b) => (Math.abs(b.dayPct != null ? b.dayPct : -1) - Math.abs(a.dayPct != null ? a.dayPct : -1)) || alpha(a,b));
   return rows;
 }
-function verdictOf(e){
+/* Legacy files (pre-spec) lack above/below/thruPct: derive them from the
+   close vs the levels so a transitional file still reads correctly. */
+function effCleared(e){
   if(e.side === "bull"){
-    const w = e.above === "both" ? "PDH + PMH" : e.above === "pdh" ? "PDH" : "PMH";
+    if(e.above) return e.above;
+    const a = isFinite(e.pdh) && e.close > e.pdh, b = isFinite(e.pmh) && e.close > e.pmh;
+    return a && b ? "both" : a ? "pdh" : "pmh";
+  }
+  if(e.below) return e.below;
+  const a = isFinite(e.pdl) && e.close < e.pdl, b = isFinite(e.pml) && e.close < e.pml;
+  return a && b ? "both" : a ? "pdl" : "pml";
+}
+function effThru(e){
+  if(e.thruPct != null && isFinite(e.thruPct)) return e.thruPct;
+  const cl = effCleared(e);
+  if(e.side === "bull"){
+    const far = cl === "both" ? Math.max(e.pdh, e.pmh) : cl === "pdh" ? e.pdh : e.pmh;
+    return isFinite(far) && far ? (e.close - far) / far * 100 : null;
+  }
+  const far = cl === "both" ? Math.min(e.pdl, e.pml) : cl === "pdl" ? e.pdl : e.pml;
+  return isFinite(far) && far ? (far - e.close) / far * 100 : null;
+}
+function verdictOf(e){
+  const cl = effCleared(e);
+  if(e.side === "bull"){
+    const w = cl === "both" ? "PDH + PMH" : cl === "pdh" ? "PDH" : "PMH";
     return "CLOSED ABOVE " + w;
   }
-  const w = e.below === "both" ? "PDL + PML" : e.below === "pdl" ? "PDL" : "PML";
+  const w = cl === "both" ? "PDL + PML" : cl === "pdl" ? "PDL" : "PML";
   return "CLOSED BELOW " + w;
 }
 function levelsLine(e){
@@ -273,7 +299,8 @@ function badgeOf(e){
 }
 function rowHTML(e, rank){
   const bull = e.side === "bull";
-  const thru = e.thruPct != null && isFinite(e.thruPct) ? e.thruPct : 0;
+  const thruV = effThru(e);
+  const thru = thruV != null && isFinite(thruV) ? thruV : 0;
   const fill = Math.max(0, Math.min(thru / 3 * 100, 100));
   const capTxt = e.marketCapB != null && isFinite(e.marketCapB) ? "$" + fmt2(e.marketCapB) + "B" : "\u2014";
   return '<div class="row">'
@@ -291,7 +318,7 @@ function rowHTML(e, rank){
     + '<div class="levels">' + levelsLine(e) + '</div>'
     + '<div class="cndl">candle ' + candle12h(e.candle) + ' \u00B7 candle ' + fmtPct(e.candlePct) + '</div>'
     + '<div class="thru"><div class="track"><div class="fill" style="width:' + fill.toFixed(1) + '%"></div></div>'
-    + '<span class="thrulbl">THRU ' + fmt2(e.thruPct) + '%</span></div>'
+    + '<span class="thrulbl">THRU ' + fmt2(thruV) + '%</span></div>'
     + '</div>'
     + '<button class="star' + (favs.has(e.ticker) ? " on" : "") + '" data-sym="' + esc(e.ticker) + '" aria-label="Favorite ' + esc(e.ticker) + '">' + (favs.has(e.ticker) ? "\u2605" : "\u2606") + '</button>'
     + '</div>';
