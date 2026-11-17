@@ -1,10 +1,18 @@
 {
-  "asOf": "2026-11-16T00:00:00Z",
-  "date": "2026-11-13",
+  "asOf": "2026-11-17T00:00:00Z",
+  "date": "2026-11-16",
   "ignitions": [
     {
       "ticker": "FDN",
       "x": 22.0
+    },
+    {
+      "ticker": "UPS",
+      "x": 11.1
+    },
+    {
+      "ticker": "FAZ",
+      "x": 10.6
     },
     {
       "ticker": "JDST",
@@ -12,111 +20,75 @@
     },
     {
       "ticker": "OTIS",
-      "x": 10.3
+      "x": 10.0
     },
     {
       "ticker": "LIT",
-      "x": 10.1
-    },
-    {
-      "ticker": "FAZ",
-      "x": 9.6
-    },
-    {
-      "ticker": "DUK",
-      "x": 9.2
-    },
-    {
-      "ticker": "DAL",
-      "x": 8.8
-    },
-    {
-      "ticker": "UAL",
-      "x": 8.8
-    },
-    {
-      "ticker": "ITA",
-      "x": 7.1
-    },
-    {
-      "ticker": "PS",
-      "x": 7.0
-    },
-    {
-      "ticker": "SBUX",
-      "x": 6.7
-    },
-    {
-      "ticker": "TECS",
-      "x": 6.6
-    },
-    {
-      "ticker": "YANG",
-      "x": 5.8
-    },
-    {
-      "ticker": "ZBH",
-      "x": 5.8
+      "x": 8.5
     },
     {
       "ticker": "TAN",
-      "x": 5.1
+      "x": 7.5
     },
     {
-      "ticker": "DUST",
-      "x": 4.8
+      "ticker": "COP",
+      "x": 7.0
     },
     {
-      "ticker": "RL",
-      "x": 4.8
+      "ticker": "ITA",
+      "x": 6.8
+    },
+    {
+      "ticker": "TECS",
+      "x": 6.7
+    },
+    {
+      "ticker": "ROK",
+      "x": 6.6
+    },
+    {
+      "ticker": "ZBH",
+      "x": 6.0
+    },
+    {
+      "ticker": "YANG",
+      "x": 5.6
     },
     {
       "ticker": "EDC",
       "x": 4.8
     },
     {
+      "ticker": "DUST",
+      "x": 4.7
+    },
+    {
+      "ticker": "PS",
+      "x": 4.6
+    },
+    {
       "ticker": "PH",
+      "x": 4.6
+    },
+    {
+      "ticker": "SOXX",
       "x": 4.5
     },
     {
-      "ticker": "BILI",
+      "ticker": "RL",
       "x": 4.0
     },
     {
-      "ticker": "RIOT",
-      "x": 3.9
-    },
-    {
-      "ticker": "SYK",
-      "x": 3.7
-    },
-    {
-      "ticker": "MMM",
-      "x": 3.6
-    },
-    {
-      "ticker": "JNUG",
-      "x": 3.6
-    },
-    {
-      "ticker": "CROX",
-      "x": 3.5
-    },
-    {
-      "ticker": "GE",
-      "x": 3.1
+      "ticker": "XOM",
+      "x": 3.8
     },
     {
       "ticker": "TECL",
-      "x": 3.1
+      "x": 3.3
     },
     {
-      "ticker": "ROK",
+      "ticker": "JNUG",
       "x": 3.1
-    },
-    {
-      "ticker": "ARES",
-      "x": 3.0
     }
   ]
 }
