@@ -1,86 +1,94 @@
 {
-  "asOf": "2026-11-17T00:00:00Z",
-  "date": "2026-11-16",
+  "asOf": "2026-11-18T00:00:00Z",
+  "date": "2026-11-17",
   "ignitions": [
     {
+      "ticker": "NXPI",
+      "x": 24.0
+    },
+    {
       "ticker": "FDN",
-      "x": 22.0
-    },
-    {
-      "ticker": "UPS",
-      "x": 11.1
-    },
-    {
-      "ticker": "FAZ",
-      "x": 10.6
+      "x": 21.6
     },
     {
       "ticker": "JDST",
-      "x": 10.5
+      "x": 10.7
     },
     {
-      "ticker": "OTIS",
+      "ticker": "FAZ",
       "x": 10.0
     },
     {
+      "ticker": "OTIS",
+      "x": 9.6
+    },
+    {
       "ticker": "LIT",
-      "x": 8.5
-    },
-    {
-      "ticker": "TAN",
-      "x": 7.5
-    },
-    {
-      "ticker": "COP",
-      "x": 7.0
+      "x": 8.4
     },
     {
       "ticker": "ITA",
-      "x": 6.8
-    },
-    {
-      "ticker": "TECS",
-      "x": 6.7
+      "x": 8.1
     },
     {
       "ticker": "ROK",
+      "x": 7.2
+    },
+    {
+      "ticker": "TECS",
       "x": 6.6
     },
     {
-      "ticker": "ZBH",
-      "x": 6.0
+      "ticker": "PSX",
+      "x": 5.7
     },
     {
       "ticker": "YANG",
-      "x": 5.6
+      "x": 5.7
     },
     {
-      "ticker": "EDC",
-      "x": 4.8
+      "ticker": "TAN",
+      "x": 5.3
     },
     {
       "ticker": "DUST",
-      "x": 4.7
+      "x": 5.1
+    },
+    {
+      "ticker": "ZBH",
+      "x": 5.0
+    },
+    {
+      "ticker": "RL",
+      "x": 4.9
     },
     {
       "ticker": "PS",
-      "x": 4.6
+      "x": 4.7
+    },
+    {
+      "ticker": "EDC",
+      "x": 4.7
     },
     {
       "ticker": "PH",
       "x": 4.6
     },
     {
-      "ticker": "SOXX",
-      "x": 4.5
+      "ticker": "GE",
+      "x": 4.4
     },
     {
-      "ticker": "RL",
-      "x": 4.0
+      "ticker": "COP",
+      "x": 3.6
     },
     {
-      "ticker": "XOM",
-      "x": 3.8
+      "ticker": "DUK",
+      "x": 3.6
+    },
+    {
+      "ticker": "UAL",
+      "x": 3.4
     },
     {
       "ticker": "TECL",
@@ -88,7 +96,15 @@
     },
     {
       "ticker": "JNUG",
+      "x": 3.2
+    },
+    {
+      "ticker": "BILI",
       "x": 3.1
+    },
+    {
+      "ticker": "DAL",
+      "x": 3.0
     }
   ]
 }
