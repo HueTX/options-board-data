@@ -1,110 +1,94 @@
 {
-  "asOf": "2026-11-18T00:00:00Z",
-  "date": "2026-11-17",
+  "asOf": "2026-11-19T00:00:00Z",
+  "date": "2026-11-18",
   "ignitions": [
-    {
-      "ticker": "NXPI",
-      "x": 24.0
-    },
     {
       "ticker": "FDN",
       "x": 21.6
     },
     {
-      "ticker": "JDST",
-      "x": 10.7
-    },
-    {
       "ticker": "FAZ",
-      "x": 10.0
+      "x": 10.9
     },
     {
-      "ticker": "OTIS",
-      "x": 9.6
-    },
-    {
-      "ticker": "LIT",
-      "x": 8.4
-    },
-    {
-      "ticker": "ITA",
-      "x": 8.1
-    },
-    {
-      "ticker": "ROK",
-      "x": 7.2
-    },
-    {
-      "ticker": "TECS",
-      "x": 6.6
-    },
-    {
-      "ticker": "PSX",
-      "x": 5.7
-    },
-    {
-      "ticker": "YANG",
-      "x": 5.7
+      "ticker": "JDST",
+      "x": 10.6
     },
     {
       "ticker": "TAN",
-      "x": 5.3
+      "x": 8.9
     },
     {
-      "ticker": "DUST",
-      "x": 5.1
+      "ticker": "OTIS",
+      "x": 8.9
     },
     {
-      "ticker": "ZBH",
-      "x": 5.0
+      "ticker": "LIT",
+      "x": 8.5
+    },
+    {
+      "ticker": "NXPI",
+      "x": 7.6
+    },
+    {
+      "ticker": "ITA",
+      "x": 7.3
+    },
+    {
+      "ticker": "ROK",
+      "x": 6.7
+    },
+    {
+      "ticker": "TECS",
+      "x": 6.7
+    },
+    {
+      "ticker": "YANG",
+      "x": 6.3
     },
     {
       "ticker": "RL",
+      "x": 5.0
+    },
+    {
+      "ticker": "PSX",
       "x": 4.9
     },
     {
-      "ticker": "PS",
-      "x": 4.7
-    },
-    {
       "ticker": "EDC",
-      "x": 4.7
+      "x": 4.8
     },
     {
-      "ticker": "PH",
+      "ticker": "DUST",
       "x": 4.6
     },
     {
-      "ticker": "GE",
+      "ticker": "PS",
+      "x": 4.5
+    },
+    {
+      "ticker": "BIIB",
       "x": 4.4
     },
     {
-      "ticker": "COP",
-      "x": 3.6
+      "ticker": "PH",
+      "x": 4.4
     },
     {
-      "ticker": "DUK",
-      "x": 3.6
-    },
-    {
-      "ticker": "UAL",
-      "x": 3.4
-    },
-    {
-      "ticker": "TECL",
-      "x": 3.3
+      "ticker": "ZBH",
+      "x": 3.8
     },
     {
       "ticker": "JNUG",
-      "x": 3.2
+      "x": 3.6
     },
     {
-      "ticker": "BILI",
-      "x": 3.1
+      "ticker": "XLRE",
+      "x": 3.6
     },
     {
-      "ticker": "DAL",
-      "x": 3.0
+      "ticker": "TECL",
+      "x": 3.4
     }
   ]
 }
