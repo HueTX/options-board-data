@@ -1,94 +1,102 @@
 {
-  "asOf": "2026-11-19T00:00:00Z",
-  "date": "2026-11-18",
+  "asOf": "2026-11-20T00:00:00Z",
+  "date": "2026-11-19",
   "ignitions": [
     {
       "ticker": "FDN",
-      "x": 21.6
+      "x": 21.7
     },
     {
       "ticker": "FAZ",
-      "x": 10.9
+      "x": 10.2
     },
     {
       "ticker": "JDST",
-      "x": 10.6
+      "x": 10.1
     },
     {
-      "ticker": "TAN",
-      "x": 8.9
-    },
-    {
-      "ticker": "OTIS",
-      "x": 8.9
+      "ticker": "RL",
+      "x": 9.5
     },
     {
       "ticker": "LIT",
-      "x": 8.5
+      "x": 8.9
+    },
+    {
+      "ticker": "ITA",
+      "x": 7.9
     },
     {
       "ticker": "NXPI",
       "x": 7.6
     },
     {
-      "ticker": "ITA",
-      "x": 7.3
+      "ticker": "ROK",
+      "x": 6.9
     },
     {
-      "ticker": "ROK",
-      "x": 6.7
+      "ticker": "OTIS",
+      "x": 6.5
     },
     {
       "ticker": "TECS",
-      "x": 6.7
-    },
-    {
-      "ticker": "YANG",
-      "x": 6.3
-    },
-    {
-      "ticker": "RL",
-      "x": 5.0
-    },
-    {
-      "ticker": "PSX",
-      "x": 4.9
-    },
-    {
-      "ticker": "EDC",
-      "x": 4.8
-    },
-    {
-      "ticker": "DUST",
-      "x": 4.6
+      "x": 6.4
     },
     {
       "ticker": "PS",
-      "x": 4.5
+      "x": 5.7
     },
     {
-      "ticker": "BIIB",
-      "x": 4.4
+      "ticker": "YANG",
+      "x": 5.7
     },
     {
-      "ticker": "PH",
-      "x": 4.4
+      "ticker": "EDC",
+      "x": 5.3
     },
     {
-      "ticker": "ZBH",
-      "x": 3.8
-    },
-    {
-      "ticker": "JNUG",
-      "x": 3.6
+      "ticker": "DUST",
+      "x": 5.1
     },
     {
       "ticker": "XLRE",
+      "x": 4.6
+    },
+    {
+      "ticker": "PH",
+      "x": 4.6
+    },
+    {
+      "ticker": "MAR",
+      "x": 4.1
+    },
+    {
+      "ticker": "TAN",
+      "x": 4.0
+    },
+    {
+      "ticker": "PSX",
       "x": 3.6
     },
     {
-      "ticker": "TECL",
+      "ticker": "RIOT",
       "x": 3.4
+    },
+    {
+      "ticker": "JNUG",
+      "x": 3.2
+    },
+    {
+      "ticker": "TECL",
+      "x": 3.1
+    },
+    {
+      "ticker": "NOC",
+      "x": 3.1
+    },
+    {
+      "ticker": "ZBH",
+      "x": 3.1
     }
   ]
 }
