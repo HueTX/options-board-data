@@ -1,6 +1,6 @@
 {
-  "asOf": "2026-11-20T00:00:00Z",
-  "date": "2026-11-19",
+  "asOf": "2026-11-23T00:00:00Z",
+  "date": "2026-11-20",
   "ignitions": [
     {
       "ticker": "FDN",
@@ -12,87 +12,107 @@
     },
     {
       "ticker": "JDST",
-      "x": 10.1
-    },
-    {
-      "ticker": "RL",
       "x": 9.5
     },
     {
       "ticker": "LIT",
-      "x": 8.9
-    },
-    {
-      "ticker": "ITA",
-      "x": 7.9
+      "x": 9.5
     },
     {
       "ticker": "NXPI",
-      "x": 7.6
+      "x": 7.8
+    },
+    {
+      "ticker": "ITA",
+      "x": 7.5
     },
     {
       "ticker": "ROK",
-      "x": 6.9
-    },
-    {
-      "ticker": "OTIS",
-      "x": 6.5
-    },
-    {
-      "ticker": "TECS",
       "x": 6.4
     },
     {
-      "ticker": "PS",
-      "x": 5.7
+      "ticker": "TECS",
+      "x": 6.3
     },
     {
       "ticker": "YANG",
+      "x": 5.8
+    },
+    {
+      "ticker": "RL",
       "x": 5.7
     },
     {
-      "ticker": "EDC",
-      "x": 5.3
+      "ticker": "OTIS",
+      "x": 5.6
+    },
+    {
+      "ticker": "TAN",
+      "x": 5.5
+    },
+    {
+      "ticker": "PS",
+      "x": 5.5
     },
     {
       "ticker": "DUST",
       "x": 5.1
     },
     {
-      "ticker": "XLRE",
-      "x": 4.6
-    },
-    {
       "ticker": "PH",
+      "x": 5.0
+    },
+    {
+      "ticker": "XLP",
       "x": 4.6
     },
     {
-      "ticker": "MAR",
-      "x": 4.1
+      "ticker": "XLRE",
+      "x": 4.5
     },
     {
-      "ticker": "TAN",
+      "ticker": "AMGN",
       "x": 4.0
     },
     {
-      "ticker": "PSX",
-      "x": 3.6
+      "ticker": "EDC",
+      "x": 4.0
     },
     {
-      "ticker": "RIOT",
-      "x": 3.4
+      "ticker": "SPXU",
+      "x": 3.9
     },
     {
-      "ticker": "JNUG",
-      "x": 3.2
+      "ticker": "MAR",
+      "x": 3.9
     },
     {
       "ticker": "TECL",
-      "x": 3.1
+      "x": 3.8
+    },
+    {
+      "ticker": "GME",
+      "x": 3.6
+    },
+    {
+      "ticker": "JNUG",
+      "x": 3.5
+    },
+    {
+      "ticker": "PSX",
+      "x": 3.4
+    },
+    {
+      "ticker": "BIIB",
+      "x": 3.4
+    },
+    {
+      "ticker": "PANW",
+      "x": 3.2
     },
     {
       "ticker": "NOC",
-      "x": 3.1
+      "x": 3.2
     },
     {
       "ticker": "ZBH",
