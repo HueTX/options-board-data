@@ -1,81 +1,77 @@
 {
-  "asOf": "2026-11-24T00:00:00Z",
-  "date": "2026-11-23",
+  "asOf": "2026-11-25T00:00:00Z",
+  "date": "2026-11-24",
   "ignitions": [
     {
       "ticker": "FDN",
-      "x": 19.1
-    },
-    {
-      "ticker": "PS",
-      "x": 13.1
+      "x": 18.8
     },
     {
       "ticker": "LIT",
-      "x": 9.5
+      "x": 12.8
     },
     {
       "ticker": "FAZ",
-      "x": 9.1
+      "x": 9.0
     },
     {
       "ticker": "JDST",
-      "x": 8.7
-    },
-    {
-      "ticker": "NXPI",
-      "x": 8.4
-    },
-    {
-      "ticker": "TAN",
-      "x": 8.4
-    },
-    {
-      "ticker": "TECS",
-      "x": 7.3
+      "x": 8.5
     },
     {
       "ticker": "ITA",
-      "x": 6.8
+      "x": 8.3
     },
     {
-      "ticker": "XLP",
-      "x": 6.4
+      "ticker": "PS",
+      "x": 8.3
+    },
+    {
+      "ticker": "NXPI",
+      "x": 7.7
+    },
+    {
+      "ticker": "TECS",
+      "x": 7.4
+    },
+    {
+      "ticker": "APO",
+      "x": 7.0
+    },
+    {
+      "ticker": "TAN",
+      "x": 4.9
     },
     {
       "ticker": "DUST",
-      "x": 5.3
+      "x": 4.8
     },
     {
-      "ticker": "YANG",
-      "x": 5.1
-    },
-    {
-      "ticker": "RL",
-      "x": 5.0
-    },
-    {
-      "ticker": "EW",
+      "ticker": "RIOT",
       "x": 4.7
     },
     {
-      "ticker": "EDZ",
-      "x": 4.5
+      "ticker": "YANG",
+      "x": 4.7
     },
     {
-      "ticker": "GE",
-      "x": 4.3
+      "ticker": "RL",
+      "x": 4.6
     },
     {
-      "ticker": "TECL",
-      "x": 3.7
+      "ticker": "JNUG",
+      "x": 4.4
     },
     {
-      "ticker": "BEAM",
-      "x": 3.5
+      "ticker": "OTIS",
+      "x": 3.9
     },
     {
       "ticker": "ZBH",
+      "x": 3.6
+    },
+    {
+      "ticker": "TECL",
       "x": 3.4
     },
     {
@@ -83,12 +79,12 @@
       "x": 3.3
     },
     {
-      "ticker": "JNUG",
+      "ticker": "EDC",
       "x": 3.3
     },
     {
-      "ticker": "EDC",
-      "x": 3.2
+      "ticker": "BEAM",
+      "x": 3.1
     }
   ]
 }
