@@ -1,89 +1,77 @@
 {
-  "asOf": "2026-11-25T00:00:00Z",
-  "date": "2026-11-24",
+  "asOf": "2026-11-27T00:00:00Z",
+  "date": "2026-11-25",
   "ignitions": [
     {
       "ticker": "FDN",
-      "x": 18.8
+      "x": 20.1
     },
     {
       "ticker": "LIT",
-      "x": 12.8
-    },
-    {
-      "ticker": "FAZ",
-      "x": 9.0
-    },
-    {
-      "ticker": "JDST",
-      "x": 8.5
+      "x": 13.8
     },
     {
       "ticker": "ITA",
-      "x": 8.3
+      "x": 13.1
+    },
+    {
+      "ticker": "FAZ",
+      "x": 9.3
+    },
+    {
+      "ticker": "JDST",
+      "x": 9.1
     },
     {
       "ticker": "PS",
-      "x": 8.3
-    },
-    {
-      "ticker": "NXPI",
-      "x": 7.7
+      "x": 8.0
     },
     {
       "ticker": "TECS",
-      "x": 7.4
-    },
-    {
-      "ticker": "APO",
-      "x": 7.0
-    },
-    {
-      "ticker": "TAN",
-      "x": 4.9
-    },
-    {
-      "ticker": "DUST",
-      "x": 4.8
+      "x": 7.8
     },
     {
       "ticker": "RIOT",
-      "x": 4.7
+      "x": 5.7
+    },
+    {
+      "ticker": "TAN",
+      "x": 5.1
+    },
+    {
+      "ticker": "DUST",
+      "x": 4.5
     },
     {
       "ticker": "YANG",
-      "x": 4.7
-    },
-    {
-      "ticker": "RL",
-      "x": 4.6
-    },
-    {
-      "ticker": "JNUG",
-      "x": 4.4
-    },
-    {
-      "ticker": "OTIS",
-      "x": 3.9
+      "x": 4.3
     },
     {
       "ticker": "ZBH",
-      "x": 3.6
+      "x": 4.2
     },
     {
-      "ticker": "TECL",
-      "x": 3.4
+      "ticker": "XLP",
+      "x": 3.8
     },
     {
-      "ticker": "SOXX",
-      "x": 3.3
+      "ticker": "RL",
+      "x": 3.8
+    },
+    {
+      "ticker": "JNUG",
+      "x": 3.7
     },
     {
       "ticker": "EDC",
-      "x": 3.3
+      "x": 3.5
     },
     {
-      "ticker": "BEAM",
+      "ticker": "PINS",
+      "x": 3.1
+    },
+    {
+      "ticker": "TECL",
       "x": 3.1
     }
   ]
